@@ -1953,3 +1953,16 @@ img {
   }
 
 }
+
+/*image responsive pour téléphone */
+img {
+  max-width: 100%
+  height: auto;
+  display: block;
+  }
+
+.slide img {
+  width: 100%;
+  height: auto;
+  }
+  
