@@ -1965,4 +1965,9 @@ img {
   width: 100%;
   height: auto;
   }
-  
+
+.slide img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+   }
