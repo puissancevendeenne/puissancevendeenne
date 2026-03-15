@@ -1904,3 +1904,52 @@ img {
   text-align: justify;
   text-justify: inter-word;
 }
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+
+  .header-inner {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .main-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .main-nav a {
+    font-size: 0.95rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .slider-arrow {
+    font-size: 2rem;
+  }
+
+  .video-player {
+    width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .section,
+  .content,
+  .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+}
