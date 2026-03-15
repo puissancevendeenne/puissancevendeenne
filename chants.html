@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chants - Puissance Vendéenne</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #efefef;
+      color: #000;
+      line-height: 1.6;
+      border: none;
+      outline: none;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      border: none;
+    }
+
+    .site-header,
+    .site-footer {
+      border-top: none !important;
+      border-bottom: none !important;
+      box-shadow: none !important;
+    }
+
+    .chants-page {
+      background: #efefef;
+      color: #000;
+    }
+
+    .chants-section {
+      position: relative;
+      padding: 95px 24px 110px;
+      overflow: hidden;
+      background: #efefef;
+    }
+
+    .chants-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-repeat: repeat;
+      background-position: center top;
+    }
+
+    .chants-section.theme-royal::before {
+      background-image:
+        linear-gradient(rgba(239,239,239,0.92), rgba(239,239,239,0.92)),
+        url("images/armeecathoroy.jpg");
+      background-size: 950px auto;
+    }
+
+    .chants-section.theme-fleurs::before {
+      background-image:
+        linear-gradient(rgba(245,245,245,0.91), rgba(245,245,245,0.91)),
+        url("images/fleurslys.jpg");
+      background-size: 320px auto;
+    }
+
+    .chants-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .chants-intro-title {
+      margin: 0 0 48px;
+      text-align: center;
+      font-size: 3.5rem;
+      line-height: 1.18;
+      font-weight: 800;
+      color: #000;
+    }
+
+    .chants-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 72px;
+    }
+
+    .chant-row {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 56px;
+      align-items: start;
+    }
+
+    .chant-left h2,
+    .chant-left h3 {
+      margin: 0;
+      font-size: 3rem;
+      line-height: 1.22;
+      font-weight: 400;
+      color: #000;
+    }
+
+    .chant-right p {
+      margin: 0 0 22px;
+      font-size: 1.16rem;
+      line-height: 1.72;
+      color: #000;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+
+    .chant-right p.italic {
+      font-style: italic;
+    }
+
+    .chant-links {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 10px;
+    }
+
+    .chant-links a {
+      font-size: 1.16rem;
+      font-style: italic;
+      text-decoration: underline;
+      color: #000;
+      width: fit-content;
+    }
+
+    .chants-spacer-title {
+      margin: 0 0 44px;
+      text-align: center;
+      font-size: 3.4rem;
+      line-height: 1.2;
+      font-weight: 800;
+      color: #000;
+    }
+
+    .esprit-block {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .esprit-text {
+      max-width: 1020px;
+      margin: 0 auto 70px;
+      font-size: 1.22rem;
+      line-height: 1.72;
+      color: #000;
+      text-align: left;
+    }
+
+    .esprit-links {
+      max-width: 1020px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .esprit-links a {
+      font-size: 1.34rem;
+      line-height: 1.4;
+      text-decoration: underline;
+      color: #000;
+      width: fit-content;
+    }
+
+    .esprit-note {
+      max-width: 1020px;
+      margin: 48px auto 0;
+      font-size: 1.18rem;
+      line-height: 1.6;
+      font-style: italic;
+      color: #000;
+    }
+
+    @media (max-width: 1050px) {
+      .chants-intro-title,
+      .chants-spacer-title {
+        font-size: 2.8rem;
+      }
+
+      .chant-row {
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 38px;
+      }
+
+      .chant-left h2,
+      .chant-left h3 {
+        font-size: 2.4rem;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .chants-section {
+        padding: 65px 18px 80px;
+      }
+
+      .chants-intro-title,
+      .chants-spacer-title {
+        font-size: 2.1rem;
+      }
+
+      .chant-row {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .chant-left h2,
+      .chant-left h3 {
+        font-size: 1.95rem;
+      }
+
+      .chant-right p,
+      .chant-links a,
+      .esprit-text,
+      .esprit-links a,
+      .esprit-note {
+        font-size: 1rem;
+        line-height: 1.65;
+      }
+
+      .chants-grid {
+        gap: 48px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .chants-intro-title,
+      .chants-spacer-title {
+        font-size: 1.7rem;
+      }
+
+      .chant-left h2,
+      .chant-left h3 {
+        font-size: 1.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chants-page">
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo-vendee.png" alt="Logo Puissance Vendéenne" class="site-logo" />
+        </a>
+
+        <nav class="main-nav" aria-label="Navigation principale">
+          <a href="index.html">Accueil</a>
+          <a href="contact.html">Contact</a>
+          <a href="donation.html">Donation</a>
+          <a
+            href="https://www.instagram.com/puissance_vendeenne?igsh=MTg5d29rczM3bHd3eA%3D%3D"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="instagram-link"
+            aria-label="Instagram"
+            title="Instagram"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+            </svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="chants-section theme-royal">
+      <div class="chants-inner">
+        <h1 class="chants-intro-title">Ci-dessous des chansons et des chants historiques liés aux "guerres de Vendée"</h1>
+
+        <div class="chants-grid">
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>La Marseillaise des Blancs (aussi appelée la <em>Contre Marseillaise</em>)</h2>
+            </div>
+            <div class="chant-right">
+              <p>La Marseillaise des Blancs, aussi appelée Contre Marseillaise, est un chant royaliste apparu pendant la Révolution française vers 1793. Écrite sur l’air de La Marseillaise, elle en détourne les paroles pour défendre la cause monarchique, la religion et lutter contre les révolutionnaires. Le chant fut repris par les Vendéens et les royalistes durant les guerres de Vendée et plus largement dans les insurrections contre-révolutionnaires. La chanson est restée dans la mémoire des milieux royalistes et vendéens comme un symbole de résistance à la Révolution.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/qPhdt0D87tg?si=ip0AKDc-OQtmEHDc" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://chantsdefrance.fr/repertoire/chants/la-marseillaise-des-blancs" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Chanson de Monsieur Henri (de la Rochejaquelein)</h2>
+            </div>
+            <div class="chant-right">
+              <p>La Chanson de Monsieur Henri est un chant vendéen lié à la figure du chef royaliste Henri de La Rochejaquelein. Elle apparaît pendant les guerres de Vendée, vers 1793, lorsque le jeune chef devient l’un des principaux commandants de l’armée catholique et royale. La chanson célèbre son courage et son illustre appel à ses soldats : « Si j’avance, suivez-moi ; si je recule, tuez-moi ; si je meurs, vengez-moi ». Les paroles exaltent la fidélité à Dieu et au roi, ainsi que l’esprit de sacrifice des combattants vendéens. L’auteur exact du chant reste inconnu, comme c’est souvent le cas pour les chants populaires nés au cœur des combats.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/JvOw2UjZObc?si=3fBFGYUs1smrsrg_" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://www.nd-chretiente.com/dotclear/index.php?post/2019/02/22/Chanson-de-Monsieur-Henri" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Chanson de Cathelineau</h2>
+            </div>
+            <div class="chant-right">
+              <p>La Chanson de Cathelineau est un chant vendéen consacré au chef insurgé Jacques Cathelineau, l’un des principaux meneurs du soulèvement de 1793. Né dans le bocage vendéen, Cathelineau, simple colporteur devenu chef militaire, fut proclamé généralissime de l’armée catholique et royale lors des premières victoires des insurgés. La chanson, dont l’auteur reste inconnu, apparaît probablement à la fin du XVIIIᵉ siècle ou au début du XIXᵉ siècle, dans la tradition populaire royaliste. Les paroles glorifient son courage et appellent les Vendéens à combattre les armées révolutionnaires, parfois désignées comme les « patauds » dans le langage populaire de l’époque. Ce chant fait partie des nombreuses compositions mémorielles qui ont entretenu le souvenir des chefs vendéens dans la tradition orale et les milieux royalistes.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/0X1z1XuISQA?si=1PNlapxwpYJ_eTtt" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://www.traditioninactiondobrasil.org/Cultural/115-Cat.htm" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>La Catholique</h2>
+            </div>
+            <div class="chant-right">
+              <p>La Catholique est un chant royaliste inspiré de l’air populaire de La Carmagnole, célèbre chanson révolutionnaire de la Révolution française. Les paroles en détournent le sens pour défendre la cause des insurgés vendéens, leur foi catholique et leur fidélité au Roy. Ce type de réécriture de chants révolutionnaires était fréquent durant les guerres de Vendée (à partir de 1793), chaque camp adaptant des airs connus pour diffuser ses idées. L’auteur exact de La Catholique demeure également inconnu. La chanson illustre la dimension religieuse et politique du soulèvement vendéen, opposé à la Révolution et attaché à la défense de la religion catholique.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/wgGzSe_r4mU?si=ggsDK_cR9UUv_2YJ" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://chantsdefrance.fr/repertoire/chants/chantons-la-catholique" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Debout les gâs</h2>
+            </div>
+            <div class="chant-right">
+              <p>Debout les gâs est un chant royaliste populaire lié aux insurrections contre-révolutionnaires de "Vendée" et plus largement de l’Ouest de la France à la fin du XVIIIᵉ siècle. Les paroles appellent les hommes du pays (souvent présentés comme des « gars de Bretagne » ou du bocage vendéen) à se lever pour défendre leur foi et leur fidélité au Roy. Comme beaucoup de chants de cette période, il s’est transmis par tradition orale, et son auteur exact demeure inconnu. Le chant apparaît probablement à l’époque des guerres de Vendée (vers 1793) ou peu après, dans les milieux royalistes de l’Ouest. Il illustre l’esprit de mobilisation et l’attachement à la monarchie qui animaient de nombreux insurgés vendéens et chouans.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/Slc-fmp3bRY?si=AL5FRpAMEVDSWawQ" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://www.traditioninaction.org/Cultural/Music_P_files/P081_De.htm" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Chanson de l'armée de Charette</h2>
+            </div>
+            <div class="chant-right">
+              <p>La Chanson de l'armée de Charette est un chant populaire consacré au chef vendéen François Athanase de Charette de La Contrie, l’un des principaux commandants de l’insurrection royaliste dans le Bas-Poitou. Ancien officier de marine devenu chef de guerre, Charette mena la résistance vendéenne contre les armées révolutionnaires à partir de 1793. La chanson célèbre son courage, son attachement à la monarchie et la fidélité des combattants vendéens à Dieu et au roi. Comme beaucoup de chants liés aux guerres de Vendée, elle s’est transmise par tradition orale, et son auteur exact reste inconnu. Elle contribue à entretenir la mémoire de Charette, devenu l’une des figures emblématiques de la résistance vendéenne.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/TR8zy313yww?si=wFNP2k72-yC9lvZE" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://www.nd-chretiente.com/chanson-de-larmee-de-charrette/" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>La Vendéenne</h2>
+            </div>
+            <div class="chant-right">
+              <p>La Vendéenne est un chant royaliste inspiré par les guerres de Vendée et la mémoire des insurgés qui combattirent pour la foi catholique et la monarchie à partir de 1793. La chanson célèbre le courage des combattants vendéens et leur attachement à la devise souvent associée au soulèvement : « Dieu et le Roi ». Comme de nombreux chants liés à cette période, elle s’inscrit dans la tradition populaire et mémorielle transmise dans l’Ouest de la France au XIXᵉ siècle. L’auteur exact du chant reste là aussi incertain. La Vendéenne participe ainsi à entretenir le souvenir des guerres de Vendée et de leurs chefs dans la culture historique et populaire.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/U6eQmlm3RXY?si=170nX_k9C60-01n7" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="la-vendeenne-paroles.html">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Chouans&nbsp;!</h2>
+            </div>
+            <div class="chant-right">
+              <p>"Chouans !" est une chanson écrite par Jean Pax Méfret, inspirée des insurrections royalistes de l’Ouest de la France pendant la Révolution française. Elle évoque les chouans (combattants contre-révolutionnaires actifs principalement en Bretagne et dans le Maine à partir de 1793), qui menèrent une insurrection contre les armées républicaines. La chanson célèbre leur fidélité au Roy et à la religion catholique, ainsi que leur attachement aux traditions de leur province. Composée bien après les événements, elle s’inscrit dans la tradition mémorielle royaliste contemporaine. Elle contribue à entretenir le souvenir des combats et des figures de la chouannerie dans la culture historique de l’Ouest.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/gORakkGSdOY?si=ZXMfrGXvNHKHIsGP" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://lyricstranslate.com/fr/jean-pax-mefret-chouans-lyrics" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Guerres de Vendée</h2>
+            </div>
+            <div class="chant-right">
+              <p>Guerres de Vendée est une chanson écrite par Jean Pax Méfret, consacrée à l’insurrection vendéenne contre la Révolution française à partir de 1793. Le texte évoque le soulèvement des paysans du bocage, attachés à leur foi catholique et à la monarchie, face aux bouleversements révolutionnaires. La chanson raconte l’entrée en guerre des insurgés et l’atmosphère des villages de l’Ouest, souvent symbolisée par l’image du presbytère et de la paroisse, au cœur de la vie locale. Composée au XXᵉ siècle, elle s’inscrit dans la tradition des chants historiques destinés à entretenir la mémoire des événements vendéens. Elle rend hommage aux combattants et aux populations qui prirent part à cette guerre civile marquante de l’histoire de France.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/bpC-29koGtE?si=UBiu-vqae6BfUIZW" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://lyricstranslate.com/fr/jean-pax-mefret-guerre-de-vendee-lyrics" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Les bleus sont là&nbsp;!</h2>
+            </div>
+            <div class="chant-right">
+              <p>Les Bleus sont là est un chant militaire inspiré des combats entre les armées républicaines surnommées les « Bleus » et les insurgés royalistes les « Blancs » durant les guerres de Vendée à partir de 1793. La chanson évoque l’arrivée des troupes républicaines et le fracas de l’artillerie, symbolisé par la célèbre phrase « le canon gronde ». Bien que son auteur exact reste inconnu, elle s’inscrit dans la tradition des chants militaires et populaires liés aux guerres de la Révolution française. Reprise par différentes unités de l’armée française au fil du temps, elle est devenue un chant militaire transmis par tradition. Elle témoigne du souvenir des combats qui opposèrent les armées républicaines aux insurgés de l’Ouest. Ce chant est souvent présenté aujourd’hui comme un chant militaire général, alors que son origine est liée aux campagnes de l’Ouest et à la Vendée.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/Umu2hewbSiU?si=8YDD2uk01Qu_gJgD" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://www.nd-chretiente.com/dotclear/index.php?post/2019/02/06/Les-Bleus-sont-la---Choeur-Montjoie-Saint-Denis" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Le chant de fidélité</h2>
+            </div>
+            <div class="chant-right">
+              <p>Le Chant de fidélité est un chant royaliste inspiré par la mémoire des guerres de Vendée et des insurrections contre-révolutionnaires de l’Ouest de la France. Les paroles exaltent la fidélité à Dieu, au Roy et aux traditions, thèmes centraux du soulèvement vendéen déclenché en 1793. Comme de nombreux chants liés à cette mémoire, il s’inscrit dans une tradition commémorative apparue après les événements, souvent transmise dans les milieux royalistes et catholiques. L’auteur exact de la chanson reste incertain, ce qui est fréquent pour les chants populaires issus de cette tradition. Le Chant de fidélité participe ainsi à entretenir le souvenir des combattants vendéens et de leur attachement à leur foi et à la monarchie.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/P7DhJiLutlg?si=mBqQyjkNL5Vef1Gr" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://www.nd-chretiente.com/dotclear/index.php?post/2019/02/07/Le-chant-de-fidelite-Choeur-Montjoie-Saint-Denis" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chant-row">
+            <div class="chant-left">
+              <h2>Chanson de Monsieur de Charette "prends ton fusil Grégoire"</h2>
+            </div>
+            <div class="chant-right">
+              <p><em>Chanson de Monsieur de Charette - prends ton fusil, Grégoire</em> est une chanson consacrée au chef vendéen François Athanase de Charette de La Contrie, figure majeure de l’insurrection royaliste dans l’Ouest de la France à partir de 1793. Les paroles évoquent l’appel aux armes lancé aux insurgés pour défendre leur foi catholique et leur fidélité au Roy face aux armées révolutionnaires. La chanson rend hommage au courage de Charette et à la résistance paysanne vendéenne dans le Bas-Poitou. Grégoire illustre un paysan vendéen contraint de prendre les armes "prends ton fusil..." contre les dérives révolutionnaires, sans renoncer à sa foi. Les paroles ont été écrites par Catherine Garret, qui s’est inspirée de la mémoire historique des guerres de Vendée.</p>
+              <div class="chant-links">
+                <a href="https://youtu.be/6svgoQb4D9Q?si=VadSXtwffqoNxUD_" target="_blank" rel="noopener noreferrer">Écouter en cliquant ici.</a>
+                <a href="https://www.nd-chretiente.com/chanson-de-monsieur-de-charette/" target="_blank" rel="noopener noreferrer">Lire les paroles ici.</a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="chants-section theme-fleurs">
+      <div class="chants-inner">
+        <h2 class="chants-spacer-title">Ci-dessous des chants royalistes et catholiques dans l’esprit vendéen</h2>
+
+        <div class="esprit-block">
+          <p class="esprit-text">
+            Vous pouvez également découvrir des chants et chansons royalistes dans l’esprit vendéen, bien qu’ils ne soient pas directement liés aux guerres et au génocide vendéens.
+          </p>
+
+          <div class="esprit-links">
+            <a href="https://youtu.be/FTveHIDZmMM?si=ebKQSJb5rvgddNSE" target="_blank" rel="noopener noreferrer">1 - Les Terres Saintes</a>
+            <a href="https://youtu.be/5nDkem8NDZI?si=m_otKYw9nwRezgeC" target="_blank" rel="noopener noreferrer">2 - Saint Georges</a>
+            <a href="https://youtu.be/rVoWh7faBvg?si=siui7dsdBZZF5H5R" target="_blank" rel="noopener noreferrer">3 - Chant à Sainte Jeanne d'Arc</a>
+            <a href="https://youtu.be/sLr1GZ5oI2Y?si=CQeuqiFgPAUqzyvl" target="_blank" rel="noopener noreferrer">4 - Le Roi Louis</a>
+            <a href="https://youtu.be/vqSwrSIEu_4?si=DV4Do3wa2dqVo563" target="_blank" rel="noopener noreferrer">5 - Guerre, guerre, vente, vent</a>
+          </div>
+
+          <p class="esprit-note">La liste n'est pas exhaustive.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <img src="images/logo-vendee.png" alt="Logo Puissance Vendéenne" class="footer-logo" />
+          <p class="copyright">© 2026</p>
+        </div>
+
+        <div class="footer-right">
+          <a
+            href="https://www.instagram.com/puissance_vendeenne?igsh=MTg5d29rczM3bHd3eA%3D%3D"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-instagram"
+            aria-label="Instagram"
+            title="Instagram"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+            </svg>
+          </a>
+
+          <a href="mentions-legales.html" class="legal-link">Mentions légales</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

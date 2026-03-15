@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ouvrages - Puissance Vendéenne</title>
+  <link rel="stylesheet" href="css/style.css" />
+ <style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
+    background-color: #f3f3f3;
+    background-image:
+      linear-gradient(rgba(243,243,243,0.92), rgba(243,243,243,0.92)),
+      url("images/coeur-vendeen-fond.png");
+    background-repeat: repeat-y;
+    background-position: center top;
+    background-size: 900px auto;
+    line-height: 1.45;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 72px 64px 90px;
+    color: #000;
+  }
+
+  h1 {
+    font-size: 74px;
+    line-height: 1.05;
+    margin: 0 0 54px;
+    font-weight: 800;
+    max-width: 980px;
+    color: #000;
+  }
+
+  h2 {
+    font-size: 54px;
+    margin: 70px 0 22px;
+    font-weight: 800;
+    color: #000;
+  }
+
+  .intro-note {
+    font-size: 28px;
+    font-style: italic;
+    margin-bottom: 56px;
+    color: #000;
+  }
+
+  .item {
+    margin: 46px 0 68px;
+  }
+
+  .item-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 18px;
+    color: #000;
+  }
+
+  .meta {
+    font-size: 27px;
+    font-style: italic;
+    font-weight: 700;
+    margin: 0 0 28px;
+    color: #000;
+  }
+
+  .meta .normal {
+    font-weight: 400;
+  }
+
+  .item p,
+  .item li,
+  .closing {
+    font-size: 28px;
+    margin: 0 0 16px;
+    color: #000;
+  }
+
+  .where {
+    margin-top: 24px;
+    margin-bottom: 8px;
+    font-size: 28px;
+    color: #000;
+  }
+
+  .dash-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 20px;
+  }
+
+  .dash-list li::before {
+    content: "- ";
+  }
+
+  .art-row {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 54px;
+    align-items: center;
+    margin: 48px 0 78px;
+  }
+
+  .art-row img {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    display: block;
+    cursor: zoom-in;
+  }
+
+  .source {
+    font-style: italic;
+    margin-top: 28px;
+    color: #000;
+  }
+
+  .closing {
+    font-style: italic;
+    margin-top: 70px;
+    margin-bottom: 120px;
+  }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    z-index: 9999;
+    cursor: zoom-out;
+  }
+
+  .lightbox.open {
+    display: flex;
+  }
+
+  .lightbox img {
+    max-width: 95vw;
+    max-height: 92vh;
+    width: auto;
+    height: auto;
+    box-shadow: 0 0 30px rgba(0,0,0,0.55);
+  }
+
+  @media (max-width: 900px) {
+    .page {
+      padding: 44px 22px 70px;
+    }
+
+    h1 {
+      font-size: 46px;
+    }
+
+    h2 {
+      font-size: 36px;
+    }
+
+    .intro-note,
+    .item p,
+    .item li,
+    .where,
+    .closing,
+    .meta,
+    .item-title {
+      font-size: 22px;
+    }
+
+    .art-row {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .art-row img {
+      max-width: 100%;
+    }
+  }
+
+.site-header {
+  background: #000;
+  border-top: 2px solid #5f95d8;
+  border-bottom: 2px solid #5f95d8;
+}
+
+.site-header .header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.site-header .logo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+
+.site-header .site-logo {
+  width: 122px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.site-header .main-nav {
+  display: flex;
+  align-items: center;
+  gap: 54px;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+.site-header .main-nav a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+
+.site-header .instagram-link {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-header .instagram-link svg {
+  width: 34px;
+  height: 34px;
+  fill: #fff;
+}
+
+.site-footer {
+  background: #000;
+  border-top: 2px solid #5f95d8;
+}
+
+.site-footer .footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 22px 48px;
+  min-height: 140px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.site-footer .footer-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.site-footer .footer-logo {
+  width: 56px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.site-footer .copyright {
+  margin: 0;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.site-footer .footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.site-footer .legal-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.site-footer .footer-instagram {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-footer .footer-instagram svg {
+  width: 34px;
+  height: 34px;
+  fill: #fff;
+}
+
+@media (max-width: 820px) {
+  .site-header .header-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+  }
+
+  .site-header .site-logo {
+    width: 96px;
+  }
+
+  .site-header .main-nav {
+    gap: 22px;
+    margin-left: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .site-footer .footer-inner {
+    padding: 22px 28px;
+  }
+}
+
+.site-header {
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+.site-footer {
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+</style>
+</head>
+<body>
+  <header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo-link">
+      <img src="images/logo-vendee.png" alt="Logo Puissance Vendéenne" class="site-logo" />
+    </a>
+
+    <nav class="main-nav" aria-label="Navigation principale">
+      <a href="index.html">Accueil</a>
+      <a href="contact.html">Contact</a>
+      <a href="donation.html">Donation</a>
+      <a
+        href="https://www.instagram.com/puissance_vendeenne?igsh=MTg5d29rczM3bHd3eA%3D%3D"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="instagram-link"
+        aria-label="Instagram"
+        title="Instagram"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+        </svg>
+      </a>
+    </nav>
+  </div>
+</header>
+
+  <main class="page">
+    <h1>Découvrez ci-dessous des ouvrages sur les guerres et le génocide vendéen</h1>
+
+    <h2>1 - Bibliographie</h2>
+    <p class="intro-note">- 21 ans ? Pensez PassCulture !</p>
+
+    <section class="item">
+      <h3 class="item-title">"Guerre de la Vendée et des chouans" par Joseph-Marie Lequinio</h3>
+      <p class="meta">Paru en 1794 ~21,50 euros</p>
+      <p>Cet ouvrage est l’un des premiers textes consacrés aux événements de la "guerre de Vendée". Son auteur, Joseph-Marie Lequinio, député révolutionnaire du Morbihan à la Convention nationale, y expose sa vision des causes et du déroulement de l’insurrection dans l’Ouest de la France.</p>
+      <p>Le livre prend la forme d’un mémoire politique, dans lequel l’auteur rassemble différents documents, lettres et témoignages concernant la guerre. Il évoque notamment les violences commises dans la région et critique certains excès des troupes républicaines.</p>
+      <p>Écrit au cœur même de la Révolution française, cet ouvrage constitue aujourd’hui un témoignage intéressant sur la perception des événements par certains acteurs révolutionnaires, bien que son interprétation reste marquée par le contexte politique de l’époque.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Les mémoires de la marquise de La Rochejaquelein" par Victoire de Donnissan de la Rochejaquelein</h3>
+      <p class="meta">Paru en 1814 ~14,90 euros <span class="normal">- Référence incontournable</span></p>
+      <p>Dans ces mémoires célèbres, Victoire de Donnissan, marquise de La Rochejaquelein, raconte son expérience personnelle durant les guerres de Vendée.</p>
+      <p>Épouse du général vendéen Louis de Lescure, puis du chef vendéen Henri de La Rochejaquelein, elle fut témoin direct des événements qui marquèrent l’insurrection royaliste de l’Ouest de la France.</p>
+      <p>Son récit décrit la vie quotidienne des insurgés, les combats, les fuites, les souffrances des populations et la foi qui animait de nombreux Vendéens durant cette guerre civile. Elle y évoque également la mort de plusieurs chefs vendéens et les difficultés rencontrées pendant la Virée de Galerne.</p>
+      <p>Publié pour la première fois au début du XIXᵉ siècle, cet ouvrage constitue aujourd’hui l’un des témoignages les plus connus et les plus précieux sur les "guerres de Vendée".</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Les mouchoirs rouges de Cholet" (Roman historique) par Michel Ragon</h3>
+      <p class="meta">Paru en 1983 ~9,20 euros <span class="normal">- (poche)</span></p>
+      <p>Dans ce roman historique, l’écrivain vendéen Michel Ragon s’inspire des événements de la guerre de Vendée pour raconter le destin de plusieurs personnages plongés dans ce conflit qui oppose insurgés vendéens et armées républicaines.</p>
+      <p>À travers une narration romancée, l’auteur évoque les combats, les souffrances des populations et les divisions provoquées par cette guerre civile dans l’Ouest de la France.</p>
+      <p>Le titre fait référence à une tradition selon laquelle certains combattants vendéens auraient porté des mouchoirs rouges afin de se reconnaître sur le champ de bataille.</p>
+      <p><em>Bien que reposant sur un contexte historique réel, l’ouvrage reste une fiction, mêlant éléments historiques et récit romanesque.</em></p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"La Vendée-Vengé : Le génocide franco-français" par Reynald Secher</h3>
+      <p class="meta">Paru en 1986 ~23,50 euros</p>
+      <p>Dans cet ouvrage, l’historien Reynald Secher étudie les événements survenus en Vendée pendant la Révolution française, notamment la lourde répression menée par les armées républicaines contre les populations insurgées.</p>
+      <p>À partir d’archives et de documents historiques, l’auteur développe la thèse selon laquelle les violences commises en Vendée entre 1793 et 1794 pourraient légitimement être qualifiées de génocide.</p>
+      <p>L’ouvrage reste aujourd’hui l’une des publications les plus connues dans le débat sur la nature des violences commises durant les guerres de Vendée.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Par principe d'humanité... La Terreur et la Vendée" par Alain Gérard</h3>
+      <p class="meta">Paru en 1999 ~35 euros</p>
+      <p>Dans cet ouvrage, l’historien Alain Gérard, spécialiste des guerres de Vendée, s’intéresse à la période de la Terreur et à la répression menée dans l’Ouest de la France contre les insurgés vendéens.</p>
+      <p>À partir de nombreuses archives et sources historiques, l’auteur analyse les décisions politiques prises par le gouvernement révolutionnaire et les actions menées par les autorités républicaines dans la région.</p>
+      <p>Le livre étudie notamment les violences commises durant cette période ainsi que les justifications avancées par les responsables révolutionnaires, souvent présentées comme nécessaires et même humanistes "par principe d’humanité" pour mettre fin à "la guerre civile".</p>
+      <p>Cet ouvrage constitue aujourd’hui une étude historique importante sur la répression en Vendée et sur le fonctionnement de la Terreur dans l’Ouest de la France.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"La désinformation autour des guerres de Vendée et du génocide vendéen" par Reynald Secher</h3>
+      <p class="meta">Paru en 2009 ~27 euros</p>
+      <p>Dans cet ouvrage, l’historien Reynald Secher s’intéresse aux débats et aux controverses entourant l’interprétation des guerres de Vendée.</p>
+      <p>L’auteur analyse la manière dont ces événements ont été présentés dans certains travaux historiques, dans les médias ou dans l’enseignement, et critique ce qu’il considère comme une désinformation ou une minimisation des violences commises durant la répression menée par les armées républicaines.</p>
+      <p>À travers l’étude de documents et de débats historiographiques, Reynald Secher défend l’idée que les événements de 1793-1794 en Vendée doivent être reconnus comme un génocide, et il répond aux critiques adressées à cette thèse.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Vendée 1793" par Michel Perraudeau</h3>
+      <p class="meta">Paru en 2010 ~9,90 euros</p>
+      <p>Dans cet ouvrage, l’auteur Michel Perraudeau retrace les principaux événements de l’insurrection vendéenne qui éclate en 1793 dans l’Ouest de la France.</p>
+      <p>Le livre revient sur les causes du soulèvement, la formation de l’Armée catholique et royale, ainsi que sur les grandes batailles qui opposèrent les insurgés vendéens aux troupes républicaines.</p>
+      <p>À travers un récit accessible et synthétique, l’auteur présente les principaux acteurs de cette guerre civile et les événements marquants qui ont façonné l’histoire de la Vendée pendant la Révolution française.</p>
+      <p>Cet ouvrage propose ainsi une introduction claire aux guerres de Vendée et à leurs enjeux historiques.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Vendée : Du génocide au mémoricide" par Reynald Secher</h3>
+      <p class="meta">Paru en 2011 ~27 euros</p>
+      <p>Dans cet ouvrage, l’historien Reynald Secher s’intéresse à la manière dont les événements des guerres de Vendée ont été interprétés et transmis dans l’histoire française.</p>
+      <p>L’auteur reprend sa thèse selon laquelle les violences commises en Vendée durant la Révolution française peuvent être considérées comme un génocide, et il développe l’idée qu’un "mémoricide" aurait ensuite été opéré, c’est-à-dire une forme d’effacement ou de marginalisation de ces événements dans la mémoire collective et dans l’enseignement de l’histoire.</p>
+      <p>À travers l’étude de documents, de débats historiographiques et de l’évolution du discours historique, Reynald Secher analyse la place accordée aux guerres de Vendée dans la mémoire nationale.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"L'empreinte de la guerre de Vendée" par le CVRH (Centre Vendéen de Recherches Historiques)</h3>
+      <p class="meta">Paru en 2016 ~25 euros</p>
+      <p>Cet ouvrage collectif s’intéresse aux conséquences durables des guerres de Vendée dans l’histoire, la mémoire et le territoire.</p>
+      <p>À travers les travaux de plusieurs historiens et chercheurs, le livre analyse l’impact du conflit sur la société locale, les paysages, la mémoire collective ainsi que sur la transmission de cet épisode dans l’histoire de France.</p>
+      <p>Issu d’un colloque scientifique, l’ouvrage propose différentes approches historiques et permet de mieux comprendre comment les événements de 1793-1796 ont marqué durablement la région et son identité.</p>
+      <p>Ce livre constitue ainsi une étude approfondie sur l’héritage historique et mémoriel des guerres de Vendée.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Vendée (1793-1794) - Crime de guerre ? Crime contre l'humanité ? Génocide ? Une étude juridique" par Jacques Villemain</h3>
+      <p class="meta">Paru en 2017 ~25 euros</p>
+      <p>Dans cet ouvrage, le juriste et diplomate Jacques Villemain analyse les événements de la répression menée en Vendée entre 1793 et 1794 à travers le prisme du droit international et du droit pénal moderne.</p>
+      <p>En s’appuyant sur des documents historiques et sur les catégories juridiques contemporaines, l’auteur examine si les violences commises durant cette période pourraient être qualifiées de crime de guerre, de crime contre l’humanité ou de génocide.</p>
+      <p>L’étude propose ainsi une approche juridique du conflit vendéen et s’inscrit dans le débat historiographique et mémoriel sur la nature des crimes commis durant les guerres de Vendée.</p>
+      <p>Cet ouvrage constitue une contribution importante au "débat" sur l’interprétation juridique et historique des événements de 1793-1794.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Génocide en Vendée" par Jacques Villemain</h3>
+      <p class="meta">Paru en 2020 ~29 euros</p>
+      <p>Dans cet ouvrage, le juriste et diplomate Jacques Villemain revient sur les événements survenus en Vendée durant la Révolution française, en particulier sur la répression menée par les armées républicaines entre 1793 et 1794.</p>
+      <p>À partir de sources historiques et d’une analyse fondée sur le droit international, l’auteur examine les violences commises dans la région et développe l’idée que celles-ci pourraient être interprétées comme un génocide au regard des critères juridiques modernes.</p>
+      <p>L’ouvrage s’inscrit dans le "débat" historique et juridique autour de la nature des crimes commis durant les guerres de Vendée et prolonge les recherches que Jacques Villemain avait déjà menées dans ses travaux précédents.</p>
+      <p>Ce livre propose ainsi une approche juridique approfondie de cet épisode de la Révolution française.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Guerres de Vendée : la mémoire du vitrail" par Nicolas Delahaye, Jean-Louis Sarrazin et Olivier Du Boucheron</h3>
+      <p class="meta">Paru en 2020 ~30 euros</p>
+      <p>Dans cet ouvrage, les auteurs Nicolas Delahaye, Jean-Louis Sarrazin et Olivier Du Boucheron s’intéressent à la manière dont les guerres de Vendée ont été représentées et transmises à travers l’art du vitrail.</p>
+      <p>Le livre étudie les vitraux présents dans différentes églises et monuments de l’Ouest de la France, qui évoquent les combats, les chefs vendéens ou les souffrances vécues pendant cette période troublée de la Révolution française.</p>
+      <p>À travers l’analyse de ces œuvres, les auteurs montrent comment l’art religieux et commémoratif a contribué à entretenir la mémoire des guerres de Vendée et à transmettre cet épisode de l’histoire locale aux générations suivantes.</p>
+      <p>Cet ouvrage propose ainsi une approche originale du conflit vendéen, en explorant la place de la mémoire et de la représentation artistique dans la construction du souvenir historique.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"La mémoire des guerres" par Kilian Jonet</h3>
+      <p class="meta">Paru en 2020 ~11,90 euros</p>
+      <p>Dans cet ouvrage, l’historien Kilian Jonet s’intéresse à la manière dont les guerres de Vendée ont été perçues, racontées et transmises au fil du temps.</p>
+      <p>Le livre explore la construction de la mémoire historique autour de ce conflit de la Révolution française, en étudiant les récits, les commémorations et les représentations qui ont contribué à façonner l’image de ces événements.</p>
+      <p>L’auteur analyse également les débats historiographiques et les différentes interprétations qui ont marqué l’étude des guerres de Vendée.</p>
+      <p>Cet ouvrage propose ainsi une réflexion sur la mémoire collective et la transmission de l’histoire de ce conflit dans la société française.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"La Vendée : Carrefour de l'histoire de France" par Charlotte de Villiers</h3>
+      <p class="meta">Paru en 2022 ~29,90 euros</p>
+      <p>Dans cet ouvrage, Charlotte de Villiers propose une réflexion sur la place particulière qu’occupe la Vendée dans toute l’histoire de France. L’objectif du livre n’est pas de raconter une nouvelle fois l’histoire complète de la région, mais plutôt de montrer comment les événements, les personnages et les traditions vendéennes ont influencé l’histoire nationale.</p>
+      <p>À travers différentes périodes historiques, l’auteure met en lumière le rôle de la Vendée comme un véritable carrefour historique, marqué par de nombreux épisodes importants, notamment durant la Révolution française et les guerres de Vendée.</p>
+      <p>L’ouvrage propose ainsi une approche synthétique de l’histoire vendéenne et de son influence sur la mémoire et l’identité françaises.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Punir et détruire en Vendée : La justice d'exception en guerre civile" par Anne Rolland-Boulestreau</h3>
+      <p class="meta">Paru en 2023 ~24 euros</p>
+      <p>Dans cet ouvrage, l’historienne Anne Rolland-Boulestreau, spécialiste de la Révolution française et des guerres de Vendée, étudie le fonctionnement de la justice d’exception mise en place par les autorités révolutionnaires entre 1793 et 1794.</p>
+      <p>À partir de nombreuses archives locales et judiciaires, l’auteure analyse la manière dont les tribunaux révolutionnaires, les commissions militaires et les comités révolutionnaires ont participé à la répression dans les territoires insurgés. Elle montre comment ces institutions ont été mises en place dans un contexte de guerre civile, où la justice devient un instrument de lutte contre les révoltés vendéens.</p>
+      <p>L’ouvrage s’intéresse notamment aux arrestations, aux conditions de détention des prisonniers et aux condamnations prononcées, ainsi qu’au fonctionnement concret de cette justice extraordinaire dans les départements de l’Ouest.</p>
+      <p>Ce livre propose ainsi une analyse approfondie des mécanismes de la répression judiciaire pendant la guerre de Vendée, en étudiant les pratiques réelles des institutions révolutionnaires et les effets de la guerre civile sur l’application du droit.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Quand la République tua la France : Génocide vendéen" par Le Royaliste Navarrais</h3>
+      <p class="meta">Paru en 2025 ~15,80 euros <span class="normal">- Ouvrage contemporain auto-édité / essai</span></p>
+      <p>Dans cet ouvrage, publié sous le pseudonyme "Le Royaliste Navarrais", l’auteur aborde les guerres de Vendée et la répression menée dans l’Ouest de la France durant la Révolution française. Le livre présente les massacres en Vendée et défend l’idée que les violences commises en 1793-1794 contre les populations vendéennes peuvent être qualifiées de génocide.</p>
+      <p>L’auteur revient sur les décisions politiques prises par le gouvernement révolutionnaire, sur les opérations militaires menées dans la région et sur les conséquences humaines de ce conflit.</p>
+      <p>Cet ouvrage propose une lecture un peu plus militante des guerres de Vendée.</p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Louis de Frotté - Le Chouan Normand" par Éric Leclercq</h3>
+      <p class="meta">Paru en 2025 ~18 euros</p>
+      <p>Dans cet ouvrage, l’auteur Éric Leclercq retrace la vie et le parcours de Louis de Frotté, l’un des principaux chefs de la chouannerie en Normandie pendant la Révolution française.</p>
+      <p>Le livre revient sur son engagement royaliste, l’organisation de la résistance contre les autorités révolutionnaires et les combats menés dans l’Ouest de la France à la fin du XVIIIᵉ siècle.</p>
+      <p>À travers ce portrait, l’auteur évoque également le contexte plus large des insurrections royalistes de l’Ouest, notamment les liens entre la chouannerie et les guerres de Vendée.</p>
+      <p>Cet ouvrage permet ainsi de mieux comprendre le rôle de Louis de Frotté dans l’histoire des mouvements contre-révolutionnaires et dans la lutte royaliste de cette période.</p>
+    </section>
+
+    <h2>2 - Films et documentaires</h2>
+
+    <section class="item">
+      <h3 class="item-title">"Chouans !" Film historique réalisé par Philippe de Broca, sorti en 1988</h3>
+      <p>Ce film se déroule pendant la chouannerie de 1793, dans l’Ouest de la France. L’histoire suit une jeune femme qui se retrouve au cœur du conflit entre deux hommes qu’elle aime, l’un partisan de la République et l’autre engagé dans la cause royaliste. À travers cette intrigue romanesque, le film montre la guerre civile qui oppose les insurgés chouans et les troupes révolutionnaires.</p>
+      <p class="where">Où le visionner ?</p>
+      <ul class="dash-list">
+        <li>DVD / Blu-ray</li>
+        <li>Amazon Prime Video</li>
+        <li>Canal VOD (selon disponibilité)</li>
+      </ul>
+      <p><em>NB : Les listes « Où le visionner ? » présentes sur cette page ne sont pas exhaustives.</em></p>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Vent de galerne (1793)" Film historique réalisé par Bernard Favre, sorti en 1989</h3>
+      <p>Ce film évoque la "guerre de Vendée" à travers l’histoire d’un village bouleversé par la Révolution. Un forgeron et les habitants s’organisent pour protéger leur prêtre réfractaire et résister aux soldats républicains. Le film montre la montée de la révolte paysanne et les tensions provoquées par la guerre civile dans l’Ouest.</p>
+      <p class="where">Où le visionner ?</p>
+      <ul class="dash-list">
+        <li>DVD</li>
+        <li>YouTube (selon périodes)</li>
+        <li>Parfois INA / plateformes cinéma patrimoine</li>
+      </ul>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"The war of the Vendée" Film historique réalisé par Jim Morlino, sorti en 2012</h3>
+      <p>Ce film raconte l’insurrection vendéenne de 1793, lorsque des paysans et des nobles se soulèvent contre le gouvernement révolutionnaire après plusieurs années de tensions religieuses et politiques. L’histoire suit plusieurs personnages engagés dans cette guerre civile et met en avant la dimension religieuse et monarchiste du mouvement.</p>
+      <p class="where">Où le visionner ?</p>
+      <ul class="dash-list">
+        <li>Formed.org</li>
+        <li>YouTube (selon périodes)</li>
+        <li>DVD</li>
+      </ul>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Le général du Roi" Télé-film historique réalisé par Nina Companeez, sorti en 2014</h3>
+      <p>Ce téléfilm suit le destin d’une jeune femme et d’un officier royaliste dont les vies sont bouleversées par la Révolution française. L’histoire se déroule en partie pendant la guerre de Vendée et la chouannerie, montrant comment le conflit transforme les destins individuels et les fidélités politiques.</p>
+      <p class="where">Où le visionner ?</p>
+      <ul class="dash-list">
+        <li>France TV</li>
+        <li>Amazon Prime Vidéo (parfois)</li>
+        <li>DVD</li>
+      </ul>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"La rébellion cachée" Documentaire historique réalisé par Daniel Rabourdin, sorti en 2016</h3>
+      <p>Ce documentaire s’intéresse aux guerres de Vendée et à la répression menée dans l’Ouest de la France pendant la Révolution française. À travers des témoignages d’historiens, des archives et des reconstitutions, il explore les événements de 1793-1794 et les violences commises durant cette "guerre civile".</p>
+      <p>Le documentaire aborde également la question de la mémoire de la Vendée, ainsi que les débats historiographiques autour de l’interprétation de ces événements.</p>
+      <p class="where">Où le visionner ?</p>
+      <ul class="dash-list">
+        <li>DVD</li>
+        <li>YouTube</li>
+        <li>Certaines plateformes de documentaires (selon disponibilité)</li>
+      </ul>
+    </section>
+
+    <section class="item">
+      <h3 class="item-title">"Vaincre ou mourir" Film historique réalisé par Paul Mignot & Vincent Mottez, sorti en 2023</h3>
+      <p>Produit par Puy du Fou Films, ce long-métrage raconte l’histoire du général vendéen François Athanase Charette de La Contrie. Le film suit son engagement à la tête des insurgés vendéens après le soulèvement de 1793 et retrace les principaux épisodes de la guerre contre les armées républicaines.</p>
+      <p class="where">Où le visionner ?</p>
+      <ul class="dash-list">
+        <li>DVD / Blu-ray</li>
+        <li>Amazon Prime Vidéo</li>
+        <li>Canal VOD</li>
+      </ul>
+    </section>
+
+    <h2>3 - Œuvres</h2>
+
+    <section class="art-row">
+      <img src="images/Henri de La Rochejaquelein au combat de Cholet.jpg" alt="Henri de la Rochejaquelein au combat de Cholet" class="zoomable" />
+      <div>
+        <h3 class="item-title">"Henri de la Rochejaquelein au combat de Cholet" par Paul-Émile Boutigny (1899)</h3>
+        <p>Cette œuvre dépeint avec intensité le général vendéen chargeant héroïquement ses troupes lors de la bataille décisive du 17 octobre 1793, où 80 000 Vendéens affrontèrent l'armée républicaine pour défendre leur cause contre-révolutionnaire.</p>
+        <p>Huile sur toile monumentale (260 x 400 cm), conservée au musée d'Angers, elle capture le cri légendaire "Si je recule, tuez-moi !" du jeune chef, entouré de cavaliers enflammés face aux canons bleus, symbolisant le sacrifice ultime de l'Armée catholique et royale face à la Terreur.</p>
+        <p>Ce tableau romantique, commandé pour glorifier la Vendée, insiste sur la bravoure chevaleresque de La Rochejaquelein qui semble tomber, mortellement blessé, immortalisant la défaite tragique de Cholet qui scella le sort de l'insurrection vendéenne.</p>
+        <p class="source">Image : Wikimédia Commons</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/Scène de la guerre des Chouans.jpg" alt="Scène de la guerre des Chouans" class="zoomable" />
+      <div>
+        <h3 class="item-title">"Scène de la guerre des Chouans" par Auguste Émile Bellet (1882)</h3>
+        <p>Auguste-Émile Bellet est un peintre académique du XIXᵉ siècle, il s’inscrit, lui aussi, dans une veine historique et contre-révolutionnaire marquée.</p>
+        <p>Avec cette œuvre, il met en scène un combattant vendéen isolé, blessé, face à une croix presque renversée, abîmée, symbole clair de la destruction religieuse opérée pendant la Révolution. L’œuvre renvoie directement au massacre des Vendéens, à la violence systématique des colonnes infernales, à l’anéantissement des populations civiles et à la profanation de la foi catholique. Bellet ne peint pas une bataille, mais les conséquences ; un peuple écrasé, une religion piétinée, et la mémoire d’un génocide politique et religieux encore nié à son époque (et aujourd'hui).</p>
+        <p class="source">Image : Wikimédia Commons</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/réfractaires leblant.webp" alt="Les Réfractaires" class="zoomable" />
+      <div>
+        <h3 class="item-title">"Les Réfractaires" par Julien Le Blant (1894)</h3>
+        <p>Cette œuvre conservée à l’Historial de la Vendée dépeint un groupe de conscrits vendéens réfractaires au tirage au sort, escortés par des grenadiers républicains le long de la Loire en 1793, prémisse tragique de la grande révolte contre la levée en masse jacobine.</p>
+        <p>Présentée au Salon de 1894, elle montre ces paysans vus de dos, s’enfonçant dans l’inconnu sous les baïonnettes bleues, tandis que deux femmes les regardent avec pitié, capturant la morne procession qui embrasa la Vendée par refus du service militaire de cinq ans imposé aux humbles face aux exemptions bourgeoises.</p>
+        <p>Ce tableau poignant, dernier grand cri du peintre en faveur des guerres vendéennes, insiste sur la cause profonde de l’insurrection - ces réfractaires martyrisés dont les émeutes du 11 mars 1793 lancèrent Cathelineau contre la Terreur - immortalisant la désobéissance héroïque des fils de l’Ouest catholique et royal.</p>
+        <p class="source">Image appartenant au site internet "LeBlant" : https://leblant.com/les-refractaires/</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/daphné du barry noyades.jpg" alt="Les Noyades de Nantes par Daphné du Barry" class="zoomable" />
+      <div>
+        <h3 class="item-title">"Les Noyades de Nantes" par Daphné du Barry (2020)</h3>
+        <p>Plus contemporaine, cette œuvre représente une sculpture monumentale en bronze patiné installée au Mémorial de la Vendée aux Lucs-sur-Boulogne. Elle dépeint avec tragique réalisme un groupe de prêtres réfractaires et de Vendéens entassés nus sur une gabarre sombrant dans la Loire glacée, victimes des "mariages républicains" ordonnés par Carrier en novembre 1793-février 1794.</p>
+        <p>Commandée par l’association "Mémoire du Futur de l’Europe", elle capture l’horreur des milliers noyés (femmes, enfants, prêtres ligotés deux par deux et précipités dans les flots), exaltant le martyre chrétien face à la Terreur sanguinaire qui noya jusqu’à 11 000 Vendéens innocents pour briser selon eux l’insurrection royaliste.</p>
+        <p>Cette œuvre contemporaine, aux corps tordus dans l’agonie, insiste sur la barbarie génocidaire républicaine, immortalisant les "baptêmes patriotiques" de la Loire comme symbole du sacrilège révolutionnaire contre la foi et la liberté de l’Ouest catholique réfractaire.</p>
+        <p class="source">Image appartenant à La Nef : https://lanef.net/2023/09/18/guerre-de-vendee-un-cas-decole/</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/Les Noyades de Nantes par Joseph-Jean-Félix Aubert.jpg" alt="Les Noyades de Nantes par Joseph-Jean-Félix Aubert" class="zoomable" />
+      <div>
+        <h3 class="item-title">"Les Noyades de Nantes" par Joseph-Jean-Félix Aubert (~1794)</h3>
+        <p>Toujours sur les noyades de Nantes, l’œuvre d’Aubert-Joseph-Félix Aubert est une gravure poignante, qui dépeint l'horreur des gabarres surchargées de prêtres réfractaires et Vendéens enchaînés, sombrant dans la Loire glacée sous les ordres de Carrier durant l’hiver 1793-1794.</p>
+        <p>Elle montre les victimes ; des hommes et des femmes nus ligotés dos à dos en "mariages républicains".</p>
+        <p>Cette gravure historique insiste elle aussi sur la barbarie génocidaire de la Terreur nantaise, immortalisant le sacrilège des noyades comme symbole du martyre chrétien vendéen face aux assoiffés de sang républicains profanant la foi certes, mais aussi la vie humaine.</p>
+        <p>Cette œuvre contemporaine, aux corps tordus dans l’agonie, insiste sur la barbarie génocidaire républicaine, immortalisant les "baptêmes patriotiques" de la Loire comme symbole du sacrilège révolutionnaire contre la foi et la liberté de l’Ouest catholique réfractaire.</p>
+        <p class="source">Image Wikimédia Commons</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/Massacre_des_Lucs-sur-Boulogne.jpg" alt="Le vitrail des Lucs-sur-Boulogne" class="zoomable" />
+      <div>
+        <h3 class="item-title">Le vitrail des Lucs-sur-Boulogne par Lux Fournier (1941)</h3>
+        <p>Le vitrail des Lucs-sur-Boulogne, situé dans l'église Saint-Pierre, commémore le massacre des Vendéens perpétré les 27 et 28 février 1794 par les colonnes infernales républicaines de Cordellier, qui tuèrent 564 habitants, dont 110 enfants de moins de 7 ans.</p>
+        <p>Réalisé en 1941 par le verrier Lux Fournier, il dépeint avec force le martyre de l'abbé Voyneau, curé du Petit-Luc, exécuté au gué de l'Audrenière, et l'horreur du carnage indiscriminé contre femmes, vieillards et civils fuyant les flammes et les baïonnettes.</p>
+        <p>Ce chef-d'œuvre du transept insiste sur la barbarie républicaine, immortalisant le "martyrologe des Lucs" dressé par l'abbé Barbedette pour honorer ces victimes du génocide vendéen.</p>
+        <p class="source">Image Wikimédia Commons</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/La_mort_de_Bonchamps_-_Thomas_Degeorge.jpg" alt="La Mort de Bonchamps" class="zoomable" />
+      <div>
+        <h3 class="item-title">"La Mort de Bonchamps" par Thomas deGeorge (1837)</h3>
+        <p>Ce tableau est une huile monumentale (380 x 590 cm) exposée au musée des Beaux-Arts d’Angers. Elle dépeint le général vendéen Charles de Bonchamps agonisant à Cholet le 18 octobre 1793, entouré de ses officiers.</p>
+        <p>Présentée au Salon de 1837, elle capture le noble sacrifice du chef royaliste, mortellement blessé mais ordonnant magnanime "Enfants de la Vendée, que mon sang vous recommande à la pitié !" ; il épargne ainsi 5 000 prisonniers républicains face à la fureur vengeresse de ses troupes après les massacres de Saumur et Angers.</p>
+        <p>Ce tableau romantique insiste sur la grandeur chevaleresque de Bonchamps, dernier rempart de l’humanité vendéenne contre la Terreur, immortalisant sa clémence christique qui scella la gloire tragique de l’Armée catholique et royale au seuil de la défaite de Cholet.</p>
+        <p class="source">Image Wikimédia Commons</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/Girardet_-_Déroute_de_Cholet.jpg" alt="Déroute de Cholet" class="zoomable" />
+      <div>
+        <h3 class="item-title">"Déroute de Cholet" par Jules Girardet (XIXᵉ siècle)</h3>
+        <p>Cette œuvre met en scène la fuite désespérée des chefs vendéens et de leurs soldats après la défaite de Cholet du 17 octobre 1793. On les voit là, entassés sur une voiture cahotante tirée au galop, emportant avec eux la cause agonisante de l’Armée catholique et royale.</p>
+        <p>On observe un groupe d’hommes armés, juchés sur une charrette bondée, chevaux affolés, drapeaux et panaches battus par le vent, traversant une campagne ravagée tandis que derrière eux montent la fumée et le fracas de la poursuite républicaine... Une image poignante de la débandade qui ouvre la Virée de Galerne.</p>
+        <p>Cette toile dramatique insiste sur la tragédie vendéenne avec ses chefs héroïques mais traqués, paysans épuisés, fuite sans retour vers le nord, immortalisant le moment où l’espérance royaliste bascule dans l’exode et le martyre collectif.</p>
+        <p class="source">Image Wikimédia Commons</p>
+      </div>
+    </section>
+
+    <section class="art-row">
+      <img src="images/Le_tombeau_de_Bonchamps_(Abbatiale_de_Saint-Florent-le-Vieil)_(9232020643).jpg" alt="Grâce aux prisonniers" class="zoomable" />
+      <div>
+        <h3 class="item-title">"Grâce aux prisonniers !" par David d'Angers (1825)</h3>
+        <p>Ci-contre la célèbre sculpture "Grâce aux prisonniers !" de David d'Angers, tombeau monumental en marbre blanc installé dans l'église abbatiale de Saint-Florent-le-Vieil. Celle-ci dépeint le généralissime Charles de Bonchamps, agonisant à Cholet le 18 octobre 1793, se soulevant sur son lit de mort pour ordonner la grâce des 5 000 prisonniers républicains malgré la fureur vengeresse de ses troupes vendéennes.</p>
+        <p>Réalisée par Pierre-Jean David d'Angers, fils d'un soldat républicain rescapé, précisément gracié par Bonchamps, en hommage reconnaissant à ce geste humaniste, symbole de clémence christique au cœur de la guerre de Vendée.</p>
+        <p>Inaugurée en 1825 sous la Restauration, cette œuvre magistrale insiste sur la magnanimité héroïque du chef catholique et royal, immortalisant son pardon comme rempart moral contre la "guerre à mort" républicaine, tendant la main aux réconciliations des mémoires vendéenne et républicaine.</p>
+        <p class="source">Image Wikimédia Commons</p>
+      </div>
+    </section>
+
+    <p class="closing">Pour toute erreur, précision ou réclamation concernant les œuvres présentées sur cette page, merci de nous contacter via le formulaire de contact du site ou directement sur le compte Instagram @puissance_vendeenne.</p>
+  </main>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-left">
+      <img src="images/logo-vendee.png" alt="Logo Puissance Vendéenne" class="footer-logo" />
+      <p class="copyright">© 2026</p>
+    </div>
+
+    <div class="footer-right">
+      <a
+        href="https://www.instagram.com/puissance_vendeenne?igsh=MTg5d29rczM3bHd3eA%3D%3D"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="footer-instagram"
+        aria-label="Instagram"
+        title="Instagram"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+        </svg>
+      </a>
+
+      <a href="mentions-legales.html" class="legal-link">Mentions légales</a>
+    </div>
+  </div>
+</footer>
+
+  <div class="lightbox" id="lightbox">
+    <img id="lightbox-image" alt="Agrandissement" />
+  </div>
+
+  <script>
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+
+    document.querySelectorAll('.zoomable').forEach(img => {
+      img.addEventListener('click', () => {
+        lightboxImage.src = img.src;
+        lightboxImage.alt = img.alt;
+        lightbox.classList.add('open');
+      });
+    });
+
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.remove('open');
+      lightboxImage.src = '';
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        lightbox.classList.remove('open');
+        lightboxImage.src = '';
+      }
+    });
+  </script>
+</body>
+</html>

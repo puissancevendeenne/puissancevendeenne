@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Massacres - Puissance Vendéenne</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+ <style>
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #000;
+    color: #fff;
+    line-height: 1.6;
+    border: none;
+    outline: none;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  img {
+    border: none;
+    max-width: 100%;
+    display: block;
+  }
+
+  .massacres-page {
+    background: #000;
+    color: #fff;
+  }
+
+  /* enlève la barre bleue héritée du css global */
+  .massacres-page .site-header {
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+
+  .massacres-page .site-footer {
+    border-top: none !important;
+    box-shadow: none !important;
+  }
+
+  .massacre-intro {
+    background: #000;
+    padding: 110px 24px 90px;
+    text-align: center;
+  }
+
+  .massacre-intro-inner {
+    max-width: 1150px;
+    margin: 0 auto;
+  }
+
+  .massacre-intro h1 {
+    margin: 0 0 34px;
+    font-size: 4rem;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .massacre-warning {
+    margin: 0 auto 42px;
+    max-width: 1150px;
+    font-size: 2rem;
+    line-height: 1.45;
+    font-style: italic;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .candles {
+    margin-top: 18px;
+    font-size: 1.8rem;
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    word-break: break-word;
+  }
+
+  .massacre-section {
+    position: relative;
+    padding: 90px 24px 110px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .massacre-section.has-water::before,
+  .massacre-section.has-fire::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-position: center top;
+    background-repeat: repeat-y;
+    background-size: cover;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .massacre-section.has-water::before {
+    background-image: linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.60)), url("images/eau Noyades.jpg");
+  }
+
+  .massacre-section.has-fire::before {
+    background-image: linear-gradient(rgba(0,0,0,0.76), rgba(0,0,0,0.76)), url("images/feu.jpg");
+    background-size: 480px auto;
+  }
+
+  .massacre-section-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .slider-wrap {
+    position: relative;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  .slide {
+    display: none;
+    text-align: center;
+  }
+
+  .slide.active {
+    display: block;
+  }
+
+  .slide h2 {
+    margin: 0 0 40px;
+    font-size: 4.2rem;
+    line-height: 1.1;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+  }
+
+  .massacre-image {
+    margin: 0 auto 28px;
+    max-width: 820px;
+    max-height: 520px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .image-source {
+    margin: 0 auto;
+    max-width: 820px;
+    text-align: center;
+    font-size: 1.15rem;
+    line-height: 1.5;
+    font-style: italic;
+    color: #fff;
+  }
+
+  .massacre-text {
+    max-width: 820px;
+    margin: 18px auto 0;
+    text-align: justify;       /* ← texte justifié */
+    text-justify: inter-word;
+    color: #fff;
+  }
+
+  .massacre-text p {
+    margin: 0 0 18px;
+    font-size: 1.12rem;
+    line-height: 1.7;
+    color: #fff;
+    text-align: justify;       /* ← texte justifié */
+    text-justify: inter-word;
+  }
+
+  .massacre-text blockquote {
+    margin: 30px 0;
+    padding: 0;
+    border: none;
+    font-style: italic;
+    text-align: justify;       /* ← texte justifié aussi pour la citation */
+    text-justify: inter-word;
+  }
+
+  .massacre-text strong {
+    font-weight: 800;
+  }
+
+  .massacre-text em {
+    font-style: italic;
+  }
+
+  .slider-arrow {
+    position: absolute;
+    top: 42%;
+    transform: translateY(-50%);
+    width: 54px;
+    height: 54px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.9);
+    font-size: 4rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 3;
+    padding: 0;
+  }
+
+  .slider-arrow:hover {
+    opacity: 0.85;
+  }
+
+  .slider-arrow.prev {
+    left: -12px;
+  }
+
+  .slider-arrow.next {
+    right: -12px;
+  }
+
+  .slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 30px;
+  }
+
+  .slider-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.5);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .slider-dot.active {
+    background: #fff;
+  }
+
+  .single-block {
+    max-width: 980px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .single-block h2 {
+    margin: 0 0 36px;
+    font-size: 4rem;
+    line-height: 1.12;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+  }
+
+  .single-block .massacre-image {
+    margin-bottom: 34px;
+  }
+
+  .single-block .massacre-text {
+    margin-top: 0;
+  }
+
+  .nuaillle-note {
+    margin: 0 auto 28px;
+    max-width: 820px;
+    text-align: center;
+    font-size: 1.15rem;
+    line-height: 1.5;
+    font-style: italic;
+    color: #fff;
+  }
+
+  .closing-section {
+    background: #000;
+    padding: 95px 24px 120px;
+  }
+
+  .closing-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .closing-inner p {
+    margin: 0 0 18px;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    font-style: italic;
+    color: #fff;
+    text-align: justify;       /* ← conclusion justifiée */
+    text-justify: inter-word;
+  }
+
+  @media (max-width: 1100px) {
+    .massacre-intro h1,
+    .slide h2,
+    .single-block h2 {
+      font-size: 3.2rem;
+    }
+
+    .massacre-warning {
+      font-size: 1.55rem;
+    }
+
+    .slider-arrow.prev {
+      left: 0;
+    }
+
+    .slider-arrow.next {
+      right: 0;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .massacre-intro {
+      padding: 70px 18px 60px;
+    }
+
+    .massacre-section,
+    .closing-section {
+      padding: 65px 18px 75px;
+    }
+
+    .massacre-intro h1,
+    .slide h2,
+    .single-block h2 {
+      font-size: 2.35rem;
+    }
+
+    .massacre-warning {
+      font-size: 1.2rem;
+    }
+
+    .candles {
+      font-size: 1.2rem;
+      letter-spacing: 0.08em;
+    }
+
+    .massacre-text p,
+    .image-source,
+    .nuaillle-note,
+    .closing-inner p {
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    .slider-arrow {
+      font-size: 2.9rem;
+      width: 42px;
+      height: 42px;
+      top: 38%;
+    }
+
+    .massacre-image {
+      max-height: none;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .massacre-intro h1,
+    .slide h2,
+    .single-block h2 {
+      font-size: 1.75rem;
+    }
+
+    .massacre-warning {
+      font-size: 1.02rem;
+    }
+
+    .massacre-text p,
+    .image-source,
+    .nuaillle-note,
+    .closing-inner p {
+      font-size: 0.96rem;
+    }
+
+    .slider-dot {
+      width: 15px;
+      height: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="massacres-page">
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo-vendee.png" alt="Logo Puissance Vendéenne" class="site-logo" />
+        </a>
+
+        <nav class="main-nav" aria-label="Navigation principale">
+          <a href="index.html">Accueil</a>
+          <a href="contact.html">Contact</a>
+          <a href="donation.html">Donation</a>
+          <a
+            href="https://www.instagram.com/puissance_vendeenne?igsh=MTg5d29rczM3bHd3eA%3D%3D"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="instagram-link"
+            aria-label="Instagram"
+            title="Instagram"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+            </svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="massacre-intro">
+      <div class="massacre-intro-inner">
+        <h1>Cette page présente les principaux massacres commis contre les civils vendéens</h1>
+        <p class="massacre-warning">
+          Attention : le contenu qui suit aborde des événements particulièrement violents et peut heurter la sensibilité de certains lecteurs.
+        </p>
+        <div class="candles">🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️</div>
+      </div>
+    </section>
+
+    <!-- NOYADES -->
+    <section class="massacre-section has-water">
+      <div class="massacre-section-inner">
+        <div class="slider-wrap massacre-slider" data-slider>
+          <button class="slider-arrow prev" type="button" aria-label="Précédent">‹</button>
+          <button class="slider-arrow next" type="button" aria-label="Suivant">›</button>
+
+          <div class="slide active">
+            <h2>Les noyades de Nantes</h2>
+            <img src="images/noyade nantes.jpg" alt="Les noyades de Nantes" class="massacre-image" />
+            <p class="image-source">Source de l'image : World History Encyclopedia →</p>
+          </div>
+
+          <div class="slide">
+            <h2>Les noyades de Nantes</h2>
+            <img src="images/noyades nantes.png" alt="Citation sur les noyades de Nantes" class="massacre-image" />
+            <div class="massacre-text">
+              <p>Après plusieurs batailles, notamment la défaite vendéenne de Savenay en décembre 1793, des milliers de vendéens notamment des soldats des prêtres des femmes et des enfants sont conduits à Nantes. La ville devient alors le théâtre d’un des épisodes les plus tragiques de la Révolution, que l'on appelle "les noyades de Nantes", organisées sous l’autorité du représentant en mission Jean-Baptiste Carrier.</p>
+              <p>Il est envoyé par la Convention pour écraser la révolte vendéenne et adopte une politique de terreur implacable. Convaincu que les insurgés représentent un danger mortel pour la République, il encourage des mesures d’extermination contre ceux qu’il appelle les « brigands ». Jugeant les exécutions classiques trop lentes, il adopte un moyen expéditif, celui des noyades dans la Loire, cyniquement désignées par certains révolutionnaires comme une « déportation verticale ».</p>
+              <p>Les exécutions se déroulent souvent la nuit. Des groupes de vendéen(ne)s, prêtres réfractaires, paysans, femmes, enfants sont embarqués de force sur des bateaux ou des barges préparées pour couler. Les couples sont séparés, déshumanisés, puis les victimes sont attachées nues, deux par deux et les embarcations sont conduites au milieu du fleuve puis sabordées. Ceux qui tentent de nager ou de se libérer sont souvent achevés par les soldats qui escortent l’opération. →</p>
+            </div>
+          </div>
+
+          <div class="slide">
+            <h2>Les noyades de Nantes</h2>
+            <img src="images/noyades 2.png" alt="Autre citation sur les noyades de Nantes" class="massacre-image" />
+            <div class="massacre-text">
+              <p>La première noyade importante survient en novembre 1793, lorsque des prêtres emprisonnés sont emmenés sur la Loire et précipités dans les eaux glacées du fleuve. D’autres noyades suivent dans les semaines suivantes. Au total, les historiens estiment qu’il y eut entre sept et onze noyades collectives, qui firent probablement entre 3 000 et 5 000 victimes, bien que le nombre exact reste incertain en raison du chaos de l’époque et du manque de registres fiables.</p>
+              <p>Ces massacres ne constituent qu’une partie de la répression menée à Nantes. Des fusillades de masse sont également organisées dans les carrières proches de la ville, et des milliers de prisonniers meurent dans les geôles, victimes du froid, de la faim ou des maladies. L’ensemble de ces violences fait de Nantes l’un des symboles les plus sombres de la Terreur révolutionnaire.</p>
+              <p>Pour les populations vendéennes, ces noyades représentent une tragédie profonde. Derrière les chiffres se cachent des vies brisées, des familles entières disparues, des prêtres arrachés à leurs paroisses, des paysans exécutés sans jugement. La Loire elle-même devint, dans la mémoire collective, le témoin silencieux d’un drame humain où la guerre civile avait conduit à l’effacement brutal de toute pitié.</p>
+              <p>Aujourd’hui encore, les noyades de Nantes demeurent l’un des épisodes les plus tragiques de la Révolution française. Elles rappellent combien une guerre civile peut pousser un régime à des violences extrêmes, et comment la peur, l’idéologie et la vengeance peuvent conduire à des massacres dont la mémoire continue de marquer l’histoire de la Vendée et de la France.</p>
+            </div>
+          </div>
+
+          <div class="slider-dots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LUCS -->
+    <section class="massacre-section has-fire">
+      <div class="massacre-section-inner">
+        <div class="slider-wrap massacre-slider" data-slider>
+          <button class="slider-arrow prev" type="button" aria-label="Précédent">‹</button>
+          <button class="slider-arrow next" type="button" aria-label="Suivant">›</button>
+
+          <div class="slide active">
+            <h2>Les Lucs-sur-Boulogne</h2>
+            <img src="images/lucs sur boulogne.jpg" alt="Les Lucs-sur-Boulogne" class="massacre-image" />
+            <p class="image-source">Source de l'image : Flickr</p>
+          </div>
+
+          <div class="slide">
+            <h2>Les Lucs-sur-Boulogne</h2>
+            <img src="images/LSB 2.png" alt="Texte sur le massacre des Lucs-sur-Boulogne" class="massacre-image" />
+            <div class="massacre-text">
+              <p>Au début de l’année 1794, la guerre de Vendée aurait pu s'arrêter là. En effet, la grande armée vendéenne a été décimée. Pourtant, la répression augmente et atteint un degré de violence extrême. Alors qu'il n'y a plus d'armée, la Convention nationale décide d’anéantir définitivement toute "résistance" (insuffisamment définie) dans l’Ouest. Un véritable génocide s'organise. Pour cela, le général Louis Marie Turreau met en place une stratégie de terre brûlée appelée les « colonnes infernales » que sont des unités militaires chargées de parcourir la Vendée pour détruire villages, récoltes et populations soupçonnées de soutenir les insurgés.</p>
+              <p>C’est dans ce contexte que survient le massacre des Lucs-sur-Boulogne, les 28 février et 1er mars 1794, dans le village du même nom " Les Lucs-sur-Boulogne", au cœur du bocage vendéen.</p>
+              <p>À la fin de l’hiver 1794, plusieurs colonnes républicaines parcourent la région. L’une d’elles, commandée par le général Étienne Cordellier, pénètre dans les villages des Lucs. Les soldats ont reçu l’ordre de brûler les fermes et d’éliminer les « brigands » (terme employé par la République pour désigner les insurgés vendéens).</p>
+              <p>Mais dans cette guerre civile confuse, la distinction entre combattants et civils disparaît souvent. Les troupes progressent de maison en maison. Les habitants tentent de fuir à travers le bocage, mais beaucoup sont rattrapés. Des fermes sont incendiées, des familles entières abattues ou massacrées.</p>
+              <p>La population du village est alors composée en grande majorité de femmes, d’enfants et de vieillards.</p>
+              <p>Une partie des habitants cherche refuge dans l'église du Petit-Luc, espérant trouver protection dans ce lieu sacré. Selon les témoignages conservés dans les archives paroissiales, les soldats pénètrent dans le village, incendient l'église où s'étaient réfugiés de nombreux vendéens et ouvrent le feu sur ceux tentant de s'échapper.</p>
+              <p>Le massacre est brutal. Les habitants sont abattus à bout portant et violemment achevés à la baïonnette. Beaucoup de victimes sont des enfants très jeunes, parfois des nourrissons torturés pour le sinistre "plaisir des soldats". →</p>
+            </div>
+          </div>
+
+          <div class="slide">
+            <h2>Les Lucs-sur-Boulogne</h2>
+            <img src="images/LSB 3.png" alt="Suite du texte sur les Lucs-sur-Boulogne" class="massacre-image" />
+            <div class="massacre-text">
+              <p>Un document essentiel pour comprendre ce drame est le martyrologe des Lucs, rédigé peu après les événements par le curé du lieu, Monsieur Pierre-François Robin. Il y consigne minutieusement les noms et les âges des victimes connues. Une véritable hécatombe de civils. En effet, ce registre mentionne 564 victimes identifiées, dont plus de 110 enfants de moins de 7 ans, de nombreuses femmes et plusieurs personnes âgées.</p>
+              <p>Certaines familles sont entièrement anéanties en quelques heures.</p>
+              <p>Le massacre ne se limite pas à l’église. Dans les hameaux et les fermes alentour, les colonnes républicaines poursuivent les habitants, tuant ceux qu’elles rencontrent et incendiant les bâtiments. Le bocage, qui avait longtemps protégé les insurgés, devient un piège pour ceux qui tentent de fuir.</p>
+              <p>Le massacre des Lucs n’est pas un épisode isolé. Il s’inscrit dans la politique de destruction menée par les colonnes infernales durant l’hiver et le printemps 1794.</p>
+              <p>Les ordres de Turreau prévoyaient explicitement de ravager la région insurgée, brûler les villages, détruire les récoltes et frapper les populations soupçonnées d’aider les rebelles. Dans la pratique, cette stratégie conduit souvent à des massacres indiscriminés.</p>
+              <p>Dans le village, une chapelle mémorielle " la chapelle du Petit-Luc " conserve les noms des victimes inscrits sur des plaques de marbre. Ce lieu de mémoire rappelle la brutalité de cette guerre civile où, en quelques heures, un village entier fut presque anéanti.</p>
+              <p>Derrière les chiffres se trouvent des destins humains, des mères serrant leurs enfants, des vieillards incapables de fuir, des familles entières effacées.</p>
+            </div>
+          </div>
+
+          <div class="slider-dots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NUAILLE -->
+    <section class="massacre-section has-fire">
+      <div class="massacre-section-inner">
+        <div class="slider-wrap massacre-slider" data-slider>
+          <button class="slider-arrow prev" type="button" aria-label="Précédent">‹</button>
+          <button class="slider-arrow next" type="button" aria-label="Suivant">›</button>
+
+          <div class="slide active">
+            <h2>Nuaillé-Vézin</h2>
+            <p class="nuaillle-note">Images directement prises du compte @puissance_vendeenne</p>
+            <img src="images/nuaillé 1.png" alt="Nuaillé-Vézin 1" class="massacre-image" />
+          </div>
+
+          <div class="slide">
+            <h2>Nuaillé-Vézin</h2>
+            <img src="images/nuaillé 2.png" alt="Nuaillé-Vézin 2" class="massacre-image" />
+          </div>
+
+          <div class="slide">
+            <h2>Nuaillé-Vézin</h2>
+            <img src="images/nuaillé 3.png" alt="Nuaillé-Vézin 3" class="massacre-image" />
+          </div>
+
+          <div class="slide">
+            <h2>Nuaillé-Vézin</h2>
+            <img src="images/nuaillé 4.png" alt="Nuaillé-Vézin 4" class="massacre-image" />
+          </div>
+
+          <div class="slide">
+            <h2>Nuaillé-Vézin</h2>
+            <img src="images/nuaillé 5.png" alt="Nuaillé-Vézin 5" class="massacre-image" />
+          </div>
+
+          <div class="slide">
+            <h2>Nuaillé-Vézin</h2>
+            <img src="images/nuaillé 6.png" alt="Nuaillé-Vézin 6" class="massacre-image" />
+          </div>
+
+          <div class="slide">
+            <h2>Nuaillé-Vézin</h2>
+            <img src="images/nuaillé 8.png" alt="Nuaillé-Vézin 8" class="massacre-image" />
+          </div>
+
+          <div class="slide">
+            <h2>Nuaillé-Vézin</h2>
+            <img src="images/nuaillé 9.png" alt="Nuaillé-Vézin 9" class="massacre-image" />
+          </div>
+
+          <div class="slider-dots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AVRILLE -->
+    <section class="massacre-section has-fire">
+      <div class="massacre-section-inner">
+        <div class="single-block">
+          <h2>Les fusillades d'Avrillé</h2>
+          <img src="images/avrillé.jpg" alt="Les fusillades d'Avrillé" class="massacre-image" />
+          <div class="massacre-text">
+            <p>1794, en pleine répression devenue religieuse, dans les champs situés près du village d’Avrillé, les autorités révolutionnaires organisent des exécutions massives de "prisonniers" vendéens alors âgés de 14 à 84 ans.</p>
+            <p>Après les combats de la fin de 1793, des colonnes de captifs arrivent à Angers : paysans du bocage, soldats vendéens capturés, prêtres réfractaires, mais aussi femmes et enfants, marchant sur le chemin de la mort. Deux bonnes sœurs "Marie-Anne" et "Odile" Baumgarten furent exécutées elles aussi. On compte jusqu'à 400 vendéens exécutés en un jour ; une véritable extermination.</p>
+            <p>Les prisons étant engorgées, les tribunaux révolutionnaires "jugeaient" à la chaîne, souvent en masse, et les condamnés sont conduits hors de la ville.</p>
+            <p>Dans les champs d’Avrillé, les groupes sont alignés face aux pelotons d’exécution. Les fusillades se succèdent pendant plusieurs semaines. Les corps sont grossièrement jetés dans des fosses communes creusées à la hâte.</p>
+            <p>Les estimations historiques parlent d'au moins 2 000 victimes exécutées dans ce lieu devenu plus tard le "Champ des Martyrs".</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLISSON -->
+    <section class="massacre-section has-fire">
+      <div class="massacre-section-inner">
+        <div class="single-block">
+          <h2>La Vendée rasée, la ville rasée</h2>
+          <img src="images/clisson.jpg" alt="Clisson ravagée" class="massacre-image" />
+          <div class="massacre-text">
+            <p>Les colonnes traversent la ville de Clisson comme une tempête de feu. Le général Westermann, grand bourreau de la Vendée, a rapporté d'infâmes propos après avoir commis des atrocités de Savenay à Clisson :</p>
+
+            <blockquote>
+              <p>"Il n'y a plus de Vendée, citoyens républicains. Elle est morte sous notre sabre libre, avec ses femmes et ses enfants. Je viens de l'enterrer dans les marais et dans les bois de Savenay. Suivant les ordres que vous m'aviez donnés, j'ai écrasé les enfants sous les pieds des chevaux, massacré des femmes, qui, au moins pour celles-là, n'enfanteront plus de Brigands. Je n'ai pas de prisonnier à me reprocher. J'ai tout exterminé. Un chef de Brigands, nommé Designy, a été tué par un maréchal-des-logis. Mes hussards ont tous à la queue de leurs chevaux des lambeaux d'étendards brigands. Les routes sont semées de cadavres. Il y en a tant que, sur plusieurs endroits, ils font pyramide. On fusille sans cesse à Savenay ; car, à chaque instant, il arrive des Brigands qui prétendent se rendre prisonniers. Kléber et Marceau ne sont pas là. Nous ne faisons pas de prisonniers ; il faudrait leur donner le pain de la liberté, et la pitié n'est pas révolutionnaire".</p>
+            </blockquote>
+
+            <p>A Clisson, les maisons sont incendiées, les granges brûlent, les rues se couvrent de débris, de cadavres et de cendres. Les habitants qui n’ont pas réussi à fuir sont abattus ou dispersés dans la campagne. Beaucoup tentent de se cacher dans les bois ou les chemins creux du bocage, mais la ville elle-même est condamnée, plus de 2 000 vendéens sont exécutés, représentant la quasi totalité de la ville.</p>
+            <p>Les flammes dévorent les habitations, les bâtiments publics et une grande partie de la cité médiévale historique. Lorsque les troupes quittent les lieux, Clisson n’est plus qu’un paysage de ruines fumantes.</p>
+            <p>Pendant des années, la ville reste presque abandonnée. Les voyageurs qui traversent la région évoquent un "bourg fantôme", marqué par les murs effondrés et les maisons calcinées.</p>
+            <p>Clisson devient alors l’un des symboles de la politique de terre brûlée menée dans la Vendée insurgée.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAUBRETIERE -->
+    <section class="massacre-section has-fire">
+      <div class="massacre-section-inner">
+        <div class="single-block">
+          <h2>Le massacre de la Gaubretière</h2>
+          <img src="images/la gaubretière.jpg" alt="Le massacre de la Gaubretière" class="massacre-image" />
+          <div class="massacre-text">
+            <p>Dans le bocage vendéen, la paroisse de La Gaubretière connaît elle aussi la violence des colonnes infernales en 1794. Aux yeux des autorités révolutionnaires, la population vendéenne devient suspecte dans son ensemble.</p>
+            <p>Lorsque les colonnes républicaines arrivent dans la paroisse de la Gaubretière, la panique gagne les habitants. Certains tentent de fuir à travers les chemins creux du bocage tandis que d’autres se cachent dans les fermes ou les granges.</p>
+            <p>Mais les soldats progressent méthodiquement. Les maisons sont fouillées, les habitations incendiées. Les habitants surpris sur leur chemin sont froidement abattus. Les flammes gagnent les toits de chaume et les fermes se consument rapidement.</p>
+            <p>Des familles entières disparaissent dans cette violence. Les survivants, souvent dispersés dans la campagne, découvrent après le passage des troupes un village ravagé, où les maisons brûlées et les corps abandonnés témoignent de la brutalité de la répression.</p>
+            <p>Des témoins évoquent des maisons brûlées avec leurs habitants, des familles massacrées et des villages vidés de leurs habitants.</p>
+            <p>Pour commémorer ce lourd passé, un "panthéon" a été inauguré. Il porte le nom de "Panthéon de la Vendée Militaire" (voir l'image).</p>
+            <p>Chaque famille contemporaine ayant une ascendance vendéenne durant cette période a au moins un(e) ancêtre ayant été tué(e) durant cette guerre et ce génocide vendéen.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONCLUSION -->
+    <section class="closing-section">
+      <div class="closing-inner">
+        <p>Durant les guerres de Vendée et la terrible répression qui s’ensuivit, des dizaines de paroisses furent ravagées, leurs habitants dispersés, emprisonnés ou exécutés. Villages incendiés, familles brisées, campagnes dévastées. La région entière fut marquée par une violence dont les cicatrices demeurent encore dans la mémoire des lieux.</p>
+        <p>Sur cette page ont été évoqués quelques-uns des massacres les plus marquants de cette période sombre. Ils ne représentent pourtant qu’une part de la tragédie, car bien d’autres villages et paroisses connurent des souffrances semblables, parfois sans laisser d’autres traces que les souvenirs transmis de génération en génération.</p>
+        <p>Ainsi s’achève cette page lourde de mémoire.</p>
+        <p>Que le souvenir de ces événements demeure non pour raviver la haine, mais pour rappeler le prix humain des guerres civiles.</p>
+        <p>Prions pour les âmes de tous les innocents qui périrent durant ces tragiques années.</p>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <img src="images/logo-vendee.png" alt="Logo Puissance Vendéenne" class="footer-logo" />
+          <p class="copyright">© 2026</p>
+        </div>
+
+        <div class="footer-right">
+          <a
+            href="https://www.instagram.com/puissance_vendeenne?igsh=MTg5d29rczM3bHd3eA%3D%3D"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-instagram"
+            aria-label="Instagram"
+            title="Instagram"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+            </svg>
+          </a>
+
+          <a href="mentions-legales.html" class="legal-link">Mentions légales</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    document.querySelectorAll('[data-slider]').forEach((slider) => {
+      const slides = Array.from(slider.querySelectorAll('.slide'));
+      const prevBtn = slider.querySelector('.prev');
+      const nextBtn = slider.querySelector('.next');
+      const dotsWrap = slider.querySelector('.slider-dots');
+      let index = 0;
+
+      function renderDots() {
+        dotsWrap.innerHTML = '';
+        slides.forEach((_, i) => {
+          const dot = document.createElement('button');
+          dot.className = 'slider-dot' + (i === index ? ' active' : '');
+          dot.type = 'button';
+          dot.setAttribute('aria-label', 'Aller à la diapositive ' + (i + 1));
+          dot.addEventListener('click', () => {
+            index = i;
+            updateSlider();
+          });
+          dotsWrap.appendChild(dot);
+        });
+      }
+
+      function updateSlider() {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === index);
+        });
+        renderDots();
+      }
+
+      prevBtn.addEventListener('click', () => {
+        index = (index - 1 + slides.length) % slides.length;
+        updateSlider();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        index = (index + 1) % slides.length;
+        updateSlider();
+      });
+
+      updateSlider();
+    });
+  </script>
+</body>
+</html>
