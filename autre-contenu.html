@@ -850,6 +850,44 @@
 
       updateSlider();
     });
+    <script>
+  document.querySelectorAll('[data-slider]').forEach((slider) => {
+    let startX = 0;
+    let endX = 0;
+
+    const prevBtn = slider.querySelector('.prev');
+    const nextBtn = slider.querySelector('.next');
+
+    function handleSwipe() {
+      const diff = endX - startX;
+      if (Math.abs(diff) < 40) return;
+
+      if (diff < 0) {
+        if (nextBtn) nextBtn.click();
+      } else {
+        if (prevBtn) prevBtn.click();
+      }
+    }
+
+    slider.addEventListener('touchstart', (e) => {
+      startX = e.changedTouches[0].clientX;
+    }, { passive: true });
+
+    slider.addEventListener('touchend', (e) => {
+      endX = e.changedTouches[0].clientX;
+      handleSwipe();
+    }, { passive: true });
+
+    slider.addEventListener('mousedown', (e) => {
+      startX = e.clientX;
+    });
+
+    slider.addEventListener('mouseup', (e) => {
+      endX = e.clientX;
+      handleSwipe();
+    });
+  });
+</script>
   </script>
 </body>
 </html>
