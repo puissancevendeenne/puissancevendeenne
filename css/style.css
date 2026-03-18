@@ -1971,3 +1971,7 @@ img {
   height: auto;
   max-width: 100%;
    }
+
+.tiktok-icon {
+  transform: scale(1.08);
+}
