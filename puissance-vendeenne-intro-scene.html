@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puissance Vendéenne - Intro Histoire</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --panel: rgba(8, 8, 8, 0.82);
+      --gold: #d7b56d;
+      --red: #c61e1e;
+      --white: #f1f1f1;
+      --muted: #cfc7b4;
+      --shadow: 0 12px 35px rgba(0,0,0,.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--white);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.03), transparent 50%),
+        linear-gradient(to bottom, #0a0a0a, #020202 60%, #000);
+    }
+
+    .layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .fade {
+      transition: opacity .9s ease, transform 1.2s ease, filter 1.2s ease;
+    }
+
+    .bg-map,
+    .map-red,
+    .communes-map,
+    .levy-paper,
+    .insurgents {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .bg-map,
+    .map-red,
+    .communes-map {
+      object-fit: cover;
+      transform-origin: center center;
+    }
+
+    .bg-map { opacity: 1; filter: drop-shadow(0 0 20px rgba(255,255,255,.04)); }
+    .map-red { opacity: 0; }
+
+    .levy-paper {
+      width: min(58vw, 820px);
+      height: auto;
+      inset: auto;
+      opacity: 0;
+      transform: scale(.82) translateY(30px);
+      box-shadow: var(--shadow);
+      border-radius: 10px;
+    }
+
+    .insurgents {
+      width: min(48vw, 720px);
+      height: auto;
+      inset: auto;
+      bottom: -10vh;
+      left: 50%;
+      transform: translateX(-50%) perspective(1200px) rotateX(82deg) translateY(260px) scale(.82);
+      transform-origin: center bottom;
+      opacity: 0;
+      filter: drop-shadow(0 20px 35px rgba(0,0,0,.45));
+    }
+
+    .title-wrap {
+      position: absolute;
+      left: 50%;
+      top: 14%;
+      transform: translateX(-50%);
+      text-align: center;
+      width: min(90vw, 1000px);
+      pointer-events: none;
+    }
+
+    .title-main,
+    .title-sub {
+      opacity: 0;
+      transition: opacity .7s ease, transform .9s ease;
+      text-shadow: 0 4px 18px rgba(0,0,0,.5);
+    }
+
+    .title-main {
+      color: var(--gold);
+      font-size: clamp(28px, 4.4vw, 64px);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin: 0;
+      transform: translateY(16px);
+    }
+
+    .title-sub {
+      margin-top: 16px;
+      color: #f5e7c6;
+      font-size: clamp(16px, 1.65vw, 24px);
+      transform: translateY(12px);
+    }
+
+    .intro-panel {
+      position: absolute;
+      left: 50%;
+      bottom: 5.5vh;
+      transform: translateX(-50%);
+      width: min(90vw, 1100px);
+      background: var(--panel);
+      border: 1px solid rgba(215,181,109,.28);
+      border-radius: 22px;
+      padding: 22px 26px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: opacity .7s ease, transform .7s ease;
+      pointer-events: auto;
+      backdrop-filter: blur(5px);
+    }
+
+    .intro-text {
+      margin: 0;
+      color: #f6f1e3;
+      font-size: clamp(15px, 1.4vw, 21px);
+      line-height: 1.55;
+    }
+
+    .visible {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      pointer-events: auto !important;
+    }
+
+    .paper-visible {
+      opacity: 1;
+      transform: scale(1.1) translateY(0);
+    }
+
+    .insurgents-visible {
+      opacity: 1;
+      transform: translateX(-50%) perspective(1200px) rotateX(0deg) translateY(0) scale(1);
+    }
+
+    .controls {
+      position: absolute;
+      right: 22px;
+      top: 22px;
+      display: flex;
+      gap: 10px;
+      z-index: 20;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(215,181,109,.45);
+      background: rgba(20,20,20,.85);
+      color: #f5eddc;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform .15s ease, background .2s ease, border-color .2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); border-color: rgba(215,181,109,.8); }
+
+    .warning-toast {
+      position: absolute;
+      left: 50%;
+      bottom: 18vh;
+      transform: translateX(-50%);
+      width: min(90vw, 900px);
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: rgba(12, 12, 12, 0.88);
+      border: 1px solid rgba(215,181,109,.28);
+      box-shadow: var(--shadow);
+      color: #e9dfcb;
+      font-size: clamp(12px, 1vw, 14px);
+      line-height: 1.45;
+      text-align: center;
+      opacity: 0;
+      transition: opacity .5s ease;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .warning-toast.visible {
+      opacity: 1;
+    }
+
+    .name-screen,
+    .map-screen,
+    .question-screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+
+    .name-screen.active,
+    .map-screen.active,
+    .question-screen.active {
+      display: block;
+    }
+
+    .name-card {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(92vw, 720px);
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 28px;
+      border: 1px solid rgba(215,181,109,.28);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .name-card h2 {
+      margin: 0 0 18px;
+      color: var(--gold);
+      font-size: clamp(24px, 3.2vw, 42px);
+    }
+
+    .name-card p {
+      color: #efe5cf;
+      margin: 0 0 16px;
+      font-size: clamp(15px, 1.35vw, 20px);
+    }
+
+    .name-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .name-input {
+      width: min(100%, 360px);
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(215,181,109,.35);
+      background: rgba(255,255,255,.06);
+      color: white;
+      font-size: 17px;
+      outline: none;
+    }
+
+    .hud {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      z-index: 15;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: rgba(10,10,10,.75);
+      border: 1px solid rgba(215,181,109,.28);
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: #f5eddc;
+      backdrop-filter: blur(5px);
+      box-shadow: var(--shadow);
+      font-size: 14px;
+    }
+
+    .map-viewport {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      cursor: grab;
+      background: linear-gradient(to bottom, #040404, #000);
+    }
+
+    .map-viewport.grabbing { cursor: grabbing; }
+
+    .map-world {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1600px;
+      height: 1000px;
+      transform: translate(-50%, -50%) scale(1);
+      transform-origin: center center;
+      transition: filter .35s ease;
+    }
+
+    .map-world img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .map-dim {
+      filter: grayscale(.86) brightness(.45);
+    }
+
+    .node {
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.9);
+      box-shadow: 0 0 0 0 rgba(215,181,109,.7);
+      background: rgba(198,30,30,.95);
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    .node.locked {
+      background: rgba(130,130,130,.55);
+      border-color: rgba(255,255,255,.4);
+      cursor: not-allowed;
+    }
+
+    .node.available {
+      animation: pulse 1.8s infinite;
+      background: rgba(198,30,30,1);
+    }
+
+    .node.done {
+      background: rgba(40,150,70,.92);
+      border-color: rgba(255,255,255,.9);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(215,181,109,.8); }
+      70% { box-shadow: 0 0 0 18px rgba(215,181,109,0); }
+      100% { box-shadow: 0 0 0 0 rgba(215,181,109,0); }
+    }
+
+    .tooltip {
+      position: absolute;
+      transform: translate(-50%, calc(-100% - 14px));
+      background: rgba(10,10,10,.88);
+      color: #fff;
+      border: 1px solid rgba(215,181,109,.38);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: var(--shadow);
+    }
+
+    .map-help {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      max-width: 360px;
+      background: rgba(10,10,10,.78);
+      border: 1px solid rgba(215,181,109,.25);
+      border-radius: 18px;
+      padding: 14px 16px;
+      color: #e8dcc4;
+      font-size: 14px;
+      line-height: 1.5;
+      box-shadow: var(--shadow);
+      z-index: 15;
+    }
+
+    .question-card {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(92vw, 960px);
+      background: rgba(12,12,12,.92);
+      border: 1px solid rgba(215,181,109,.32);
+      border-radius: 26px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .question-card h3 {
+      margin: 0 0 8px;
+      color: var(--gold);
+      font-size: clamp(18px, 2vw, 28px);
+    }
+
+    .question-card p {
+      margin: 0 0 22px;
+      color: #f5eddc;
+      font-size: clamp(17px, 1.6vw, 24px);
+      line-height: 1.45;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .answer {
+      appearance: none;
+      border: 1px solid rgba(215,181,109,.25);
+      background: rgba(255,255,255,.04);
+      color: #fff;
+      padding: 16px;
+      border-radius: 16px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background .2s ease, transform .12s ease, border-color .2s ease;
+    }
+
+    .answer:hover {
+      transform: translateY(-1px);
+      border-color: rgba(215,181,109,.8);
+    }
+
+    .answer.good { background: rgba(30,120,50,.72); }
+    .answer.bad { background: rgba(165,35,35,.8); }
+
+    .q-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+      color: #e6d8ba;
+      font-size: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .answers {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        right: 12px;
+        top: 12px;
+        flex-direction: column;
+      }
+
+      .map-world {
+        width: 1400px;
+        height: 900px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="controls" id="startControls">
+      <button class="btn" id="startIntroBtn">Lancer l’introduction</button>
+      <button class="btn" id="skipIntroBtn">Passer</button>
+    </div>
+
+    <audio id="audioMouettes" preload="auto" src="audio/MOUETTESPOURJEUPV.wav"></audio>
+    <audio id="audioIntro" preload="auto" src="audio/JEUHISTOIREINTROPV.wav"></audio>
+
+    <div id="introScreen">
+      <div class="layer">
+        <img class="bg-map fade" id="mapWhite" src="images/VENDEEBLANCHE.png" alt="Vendée blanche" />
+        <img class="map-red fade" id="mapRed" src="images/VENDEEROUGE.png" alt="Vendée rouge" />
+        <img class="levy-paper fade" id="levyPaper" src="images/leveemassepvjeu.png" alt="Décret de levée en masse" />
+        <img class="insurgents fade" id="insurgents" src="images/vendeenspaysansjeupv.png" alt="Insurgés vendéens" />
+      </div>
+
+      <div class="title-wrap">
+        <h1 class="title-main" id="titleInsurge">La Vendée s’insurge</h1>
+        <div class="title-sub" id="titleSubtitle">1793. La levée en masse embrase l’Ouest.</div>
+      </div>
+
+      <div class="warning-toast" id="warningToast">
+        Attention : les images sont des illustrations et ne représentent pas exactement la Vendée militaire telle qu’elle était.
+      </div>
+
+      <div class="intro-panel" id="introPanel">
+        <p class="intro-text" id="introText">
+          La Vendée est insurgée, aidez les Vendéens à récupérer les villes vendéennes en répondant à des questions sur l’Histoire et la géographie de la Vendée.
+        </p>
+        <div style="margin-top:16px;">
+          <button class="btn" id="nextAfterIntro">Suivant</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="name-screen" id="nameScreen">
+      <div class="name-card">
+        <h2>Quel est votre nom, insurgé vendéen ?</h2>
+        <p>Choisissez le nom qui apparaîtra dans le mode Histoire.</p>
+        <div class="name-row">
+          <input class="name-input" id="playerNameInput" maxlength="28" placeholder="Entrez votre nom..." />
+          <button class="btn" id="confirmNameBtn">Confirmer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-screen" id="mapScreen">
+      <div class="hud">
+        <div class="chip" id="playerChip">Nom : Un Chouan</div>
+        <div class="chip" id="lifeChip">Vies : 5/5</div>
+        <div class="chip" id="cityChip">Ville : Île d’Yeu</div>
+      </div>
+
+      <div class="map-viewport map-dim" id="mapViewport">
+        <div class="map-world" id="mapWorld">
+          <img src="images/VENDEE50COMMUNESBLANCHES.png" alt="Carte de Vendée avec communes" />
+
+          <button class="node available" id="yeuNode" style="left: 54px; top: 444px; width: 22px; height: 22px;"></button>
+          <div class="tooltip" style="left: 54px; top: 444px;">Île d’Yeu</div>
+
+          <button class="node locked" id="noirmoutierNode" style="left: 115px; top: 315px; width: 22px; height: 22px;"></button>
+          <div class="tooltip" style="left: 115px; top: 315px;">Noirmoutier</div>
+        </div>
+      </div>
+
+      <div class="map-help">
+        Vous pouvez déplacer la carte, mais seule la première ville disponible est cliquable. Une fois l’Île d’Yeu terminée, Noirmoutier se débloque.
+      </div>
+    </div>
+
+    <div class="question-screen" id="questionScreen">
+      <div class="question-card">
+        <div class="q-meta">
+          <span id="qProgress">Question 1 / 10</span>
+          <span id="qLives">Vies : 5/5</span>
+        </div>
+        <h3 id="qCityTitle">Île d’Yeu</h3>
+        <p id="qText"></p>
+        <div class="answers" id="answersBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_BASE_LIVES = 5;
+    const LIFE_REGEN_MS = 45 * 60 * 1000;
+
+    const state = {
+      playerName: 'Un Chouan',
+      lives: 5,
+      introStarted: false,
+      yeuDone: false,
+      currentQuestionIndex: 0,
+      questions: [
+        {
+          city: 'Île d’Yeu',
+          text: 'De quelle île s’emparent les Vendéens dès le 19 mars 1793 ?',
+          answers: ['L’île d’Yeu', 'L’île de Ré', 'L’île de Noirmoutier', 'L’île d’Oléron'],
+          correct: 2,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Sur quelle île fut fusillé le généralissime Maurice Gigost d’Elbée ?',
+          answers: ['Sur l’île d’Yeu', 'Sur l’île de Ré', 'Sur l’île de Noirmoutier', 'Sur l’île de Groix'],
+          correct: 2,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Quelle est la localité principale de l’île d’Yeu ?',
+          answers: ['Port-Joinville', 'Saint-Gilles-Croix-de-Vie', 'L’Herbaudière', 'Fromentine'],
+          correct: 0,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Sur quelle île vendéenne fut exilé Philippe Pétain jusqu’à sa mort ?',
+          answers: ['L’île d’Yeu', 'L’île de Ré', 'Noirmoutier', 'L’île d’Oléron'],
+          correct: 0,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Quelle célèbre île se trouve au large des Sables-d’Olonne ?',
+          answers: ['Ré', 'Yeu', 'Oléron', 'Belle-Île-en-Mer'],
+          correct: 1,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Quel est le principal accès maritime historique de la Vendée ?',
+          answers: ['Les Sables-d’Olonne', 'La Rochelle', 'Nantes', 'Brest'],
+          correct: 0,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Comment appelle-t-on souvent le littoral vendéen ?',
+          answers: ['La Côte sauvage', 'La Côte d’Argent', 'La Côte de Lumière', 'La Côte blanche'],
+          correct: 2,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Quel océan borde la Vendée ?',
+          answers: ['Le Pacifique', 'L’Atlantique', 'L’Indien', 'L’Arctique'],
+          correct: 1,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Quel type de côte caractérise la Vendée ?',
+          answers: ['Une côte rocheuse', 'Une côte sableuse', 'Une côte volcanique', 'Une côte glacée'],
+          correct: 1,
+        },
+        {
+          city: 'Île d’Yeu',
+          text: 'Quelle île est réputée pour ses pommes de terre ?',
+          answers: ['Noirmoutier', 'Ré', 'Oléron', 'Yeu'],
+          correct: 0,
+        },
+      ],
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      startControls: $('startControls'),
+      startIntroBtn: $('startIntroBtn'),
+      skipIntroBtn: $('skipIntroBtn'),
+      nextAfterIntro: $('nextAfterIntro'),
+      mapWhite: $('mapWhite'),
+      mapRed: $('mapRed'),
+      levyPaper: $('levyPaper'),
+      insurgents: $('insurgents'),
+      titleInsurge: $('titleInsurge'),
+      titleSubtitle: $('titleSubtitle'),
+      introPanel: $('introPanel'),
+      introScreen: $('introScreen'),
+      nameScreen: $('nameScreen'),
+      mapScreen: $('mapScreen'),
+      questionScreen: $('questionScreen'),
+      playerNameInput: $('playerNameInput'),
+      confirmNameBtn: $('confirmNameBtn'),
+      playerChip: $('playerChip'),
+      lifeChip: $('lifeChip'),
+      cityChip: $('cityChip'),
+      mapViewport: $('mapViewport'),
+      mapWorld: $('mapWorld'),
+      yeuNode: $('yeuNode'),
+      noirmoutierNode: $('noirmoutierNode'),
+      qProgress: $('qProgress'),
+      qLives: $('qLives'),
+      qCityTitle: $('qCityTitle'),
+      qText: $('qText'),
+      answersBox: $('answersBox'),
+      audioMouettes: $('audioMouettes'),
+      audioIntro: $('audioIntro'),
+      warningToast: $('warningToast')
+    };
+
+    let flashInterval = null;
+    let introTimers = [];
+
+    function ensureGameDefaults() {
+      if (localStorage.getItem("pvj_vies") === null) localStorage.setItem("pvj_vies", "5");
+      if (localStorage.getItem("pvj_pieces") === null) localStorage.setItem("pvj_pieces", "0");
+      if (localStorage.getItem("pvj_sel") === null) localStorage.setItem("pvj_sel", "0");
+      if (localStorage.getItem("pvj_pseudo") === null) localStorage.setItem("pvj_pseudo", "Un Chouan");
+      if (localStorage.getItem("pvj_last_life_gain") === null) localStorage.setItem("pvj_last_life_gain", Date.now().toString());
+      if (localStorage.getItem("pvj_yeu_done") === null) localStorage.setItem("pvj_yeu_done", "false");
+    }
+
+    function regenerateLivesIfNeeded() {
+      let lives = parseInt(localStorage.getItem("pvj_vies"), 10);
+      if (Number.isNaN(lives)) lives = 5;
+
+      if (lives >= MAX_BASE_LIVES) {
+        localStorage.setItem("pvj_last_life_gain", Date.now().toString());
+        return lives;
+      }
+
+      let lastGain = parseInt(localStorage.getItem("pvj_last_life_gain"), 10);
+      if (Number.isNaN(lastGain)) lastGain = Date.now();
+
+      const now = Date.now();
+      const elapsed = now - lastGain;
+      const gained = Math.floor(elapsed / LIFE_REGEN_MS);
+
+      if (gained > 0) {
+        lives = Math.min(MAX_BASE_LIVES, lives + gained);
+        localStorage.setItem("pvj_vies", String(lives));
+
+        if (lives >= MAX_BASE_LIVES) {
+          localStorage.setItem("pvj_last_life_gain", now.toString());
+        } else {
+          localStorage.setItem("pvj_last_life_gain", String(lastGain + gained * LIFE_REGEN_MS));
+        }
+      }
+
+      return lives;
+    }
+
+    function getLives() {
+      return regenerateLivesIfNeeded();
+    }
+
+    function saveLives(value) {
+      const previous = parseInt(localStorage.getItem("pvj_vies"), 10);
+      const oldLives = Number.isNaN(previous) ? MAX_BASE_LIVES : previous;
+      const clamped = Math.max(0, value);
+
+      localStorage.setItem("pvj_vies", String(clamped));
+
+      if (clamped < oldLives && clamped < MAX_BASE_LIVES) {
+        localStorage.setItem("pvj_last_life_gain", Date.now().toString());
+      }
+
+      state.lives = clamped;
+      els.lifeChip.textContent = `Vies : ${clamped}/${MAX_BASE_LIVES}`;
+      els.qLives.textContent = `Vies : ${clamped}/${MAX_BASE_LIVES}`;
+    }
+
+    function loadLivesIntoUI() {
+      const lives = getLives();
+      state.lives = lives;
+      els.lifeChip.textContent = `Vies : ${lives}/${MAX_BASE_LIVES}`;
+      els.qLives.textContent = `Vies : ${lives}/${MAX_BASE_LIVES}`;
+    }
+
+    function setPlayerName(name) {
+      const finalName = name?.trim() || localStorage.getItem("pvj_pseudo") || "Un Chouan";
+      state.playerName = finalName;
+      localStorage.setItem("pvj_pseudo", finalName);
+      els.playerChip.textContent = `Nom : ${finalName}`;
+    }
+
+    function clearIntroTimers() {
+      introTimers.forEach(clearTimeout);
+      introTimers = [];
+      if (flashInterval) {
+        clearInterval(flashInterval);
+        flashInterval = null;
+      }
+    }
+
+    function schedule(fn, ms) {
+      const t = setTimeout(fn, ms);
+      introTimers.push(t);
+    }
+
+    function startFlashingMap() {
+      let red = false;
+      flashInterval = setInterval(() => {
+        red = !red;
+        els.mapRed.style.opacity = red ? '1' : '0';
+      }, 420);
+    }
+
+    function stopFlashingMap(forceRed = true) {
+      if (flashInterval) clearInterval(flashInterval);
+      flashInterval = null;
+      els.mapRed.style.opacity = forceRed ? '1' : '0';
+    }
+
+    async function safePlay(audio, loop = false, volume = 1) {
+      try {
+        audio.loop = loop;
+        audio.volume = volume;
+        audio.currentTime = 0;
+        await audio.play();
+      } catch (e) {
+        console.warn('Lecture audio bloquée :', e);
+      }
+    }
+
+    function showWarningToast() {
+      els.warningToast.classList.add('visible');
+      schedule(() => {
+        els.warningToast.classList.remove('visible');
+      }, 3800);
+    }
+
+    function runIntro() {
+      if (state.introStarted) return;
+      state.introStarted = true;
+      els.startControls.style.display = 'none';
+
+      safePlay(els.audioMouettes, false, 0.65);
+
+      schedule(() => {
+        els.audioMouettes.pause();
+        els.audioMouettes.currentTime = 0;
+        els.levyPaper.classList.add('paper-visible');
+        safePlay(els.audioIntro, false, 0.95);
+        startFlashingMap();
+      }, 2500);
+
+      schedule(() => {
+        els.titleInsurge.classList.add('visible');
+        els.titleSubtitle.classList.add('visible');
+      }, 5200);
+
+      schedule(() => {
+        stopFlashingMap(true);
+        els.levyPaper.style.opacity = '0';
+        els.levyPaper.style.transform = 'scale(1.18) translateY(-10px)';
+      }, 8300);
+
+      schedule(() => {
+        els.insurgents.classList.add('insurgents-visible');
+      }, 8600);
+
+      schedule(() => {
+        showWarningToast();
+      }, 9500);
+
+      schedule(() => {
+        els.introPanel.classList.add('visible');
+      }, 10400);
+    }
+
+    function skipIntro() {
+      clearIntroTimers();
+      els.audioIntro.pause();
+      els.audioMouettes.pause();
+      els.audioMouettes.currentTime = 0;
+      els.audioIntro.currentTime = 0;
+
+      stopFlashingMap(true);
+      els.startControls.style.display = 'none';
+      els.levyPaper.style.opacity = '0';
+      els.insurgents.classList.add('insurgents-visible');
+      els.titleInsurge.classList.add('visible');
+      els.titleSubtitle.classList.add('visible');
+      els.introPanel.classList.add('visible');
+      state.introStarted = true;
+      showWarningToast();
+    }
+
+    function goToNameScreen() {
+      clearIntroTimers();
+      els.audioIntro.pause();
+      els.audioMouettes.pause();
+      els.introScreen.style.display = 'none';
+      els.nameScreen.classList.add('active');
+      els.playerNameInput.value = localStorage.getItem("pvj_pseudo") || "Un Chouan";
+      setTimeout(() => els.playerNameInput.focus(), 50);
+    }
+
+    function goToMapScreen() {
+      els.nameScreen.classList.remove('active');
+      els.mapScreen.classList.add('active');
+      loadLivesIntoUI();
+      refreshProgress();
+      centerMapOnYeu();
+    }
+
+    function centerMapOnYeu() {
+      currentTransform.scale = 1.65;
+      currentTransform.x = 230;
+      currentTransform.y = 70;
+      applyMapTransform();
+    }
+
+    function refreshProgress() {
+      const yeuDone = localStorage.getItem("pvj_yeu_done") === "true";
+      state.yeuDone = yeuDone;
+
+      if (yeuDone) {
+        els.yeuNode.classList.remove('available');
+        els.yeuNode.classList.add('done');
+        unlockNoirmoutier();
+        els.cityChip.textContent = 'Ville : Noirmoutier débloquée';
+        els.mapViewport.classList.remove('map-dim');
+      } else {
+        els.yeuNode.classList.add('available');
+        els.noirmoutierNode.classList.add('locked');
+        els.noirmoutierNode.classList.remove('available');
+        els.cityChip.textContent = 'Ville : Île d’Yeu';
+        els.mapViewport.classList.add('map-dim');
+      }
+    }
+
+    function unlockNoirmoutier() {
+      els.noirmoutierNode.classList.remove('locked');
+      els.noirmoutierNode.classList.add('available');
+      els.mapViewport.classList.remove('map-dim');
+    }
+
+    function startYeuQuiz() {
+      els.mapScreen.classList.remove('active');
+      els.questionScreen.classList.add('active');
+      state.currentQuestionIndex = 0;
+      renderQuestion();
+    }
+
+    function endYeuQuiz(success) {
+      els.questionScreen.classList.remove('active');
+      els.mapScreen.classList.add('active');
+
+      if (success) {
+        state.yeuDone = true;
+        localStorage.setItem("pvj_yeu_done", "true");
+        els.yeuNode.classList.remove('available');
+        els.yeuNode.classList.add('done');
+        unlockNoirmoutier();
+        els.cityChip.textContent = 'Ville : Noirmoutier débloquée';
+      } else {
+        els.cityChip.textContent = 'Ville : Défaite à l’Île d’Yeu';
+      }
+    }
+
+    function renderQuestion() {
+      const q = state.questions[state.currentQuestionIndex];
+      els.qProgress.textContent = `Question ${state.currentQuestionIndex + 1} / ${state.questions.length}`;
+      els.qCityTitle.textContent = q.city;
+      els.qText.textContent = q.text;
+      els.answersBox.innerHTML = '';
+
+      q.answers.forEach((ans, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer';
+        btn.textContent = `${String.fromCharCode(65 + idx)}) ${ans}`;
+        btn.onclick = () => answerQuestion(idx, btn);
+        els.answersBox.appendChild(btn);
+      });
+    }
+
+    function answerQuestion(choice, buttonEl) {
+      const q = state.questions[state.currentQuestionIndex];
+      const buttons = [...els.answersBox.querySelectorAll('.answer')];
+
+      buttons.forEach((b, i) => {
+        b.disabled = true;
+        if (i === q.correct) b.classList.add('good');
+      });
+
+      if (choice !== q.correct) {
+        buttonEl.classList.add('bad');
+        saveLives(state.lives - 1);
+      }
+
+      setTimeout(() => {
+        if (state.lives <= 0) {
+          endYeuQuiz(false);
+          return;
+        }
+
+        state.currentQuestionIndex += 1;
+
+        if (state.currentQuestionIndex >= state.questions.length) {
+          endYeuQuiz(true);
+        } else {
+          renderQuestion();
+        }
+      }, 900);
+    }
+
+    els.startIntroBtn.onclick = runIntro;
+    els.skipIntroBtn.onclick = skipIntro;
+    els.nextAfterIntro.onclick = goToNameScreen;
+
+    els.confirmNameBtn.onclick = () => {
+      setPlayerName(els.playerNameInput.value);
+      goToMapScreen();
+    };
+
+    els.playerNameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') els.confirmNameBtn.click();
+    });
+
+    els.yeuNode.onclick = () => {
+      if (!els.yeuNode.classList.contains('available')) return;
+
+      loadLivesIntoUI();
+
+      if (state.lives <= 0) {
+        alert("Vous n’avez plus de vies. Attendez qu’une vie se régénère ou utilisez la roulette.");
+        return;
+      }
+
+      els.cityChip.textContent = 'Ville : Île d’Yeu';
+      startYeuQuiz();
+    };
+
+    // Déplacement de carte
+    const currentTransform = { x: 0, y: 0, scale: 1 };
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let originX = 0;
+    let originY = 0;
+
+    function applyMapTransform() {
+      els.mapWorld.style.transform = `translate(calc(-50% + ${currentTransform.x}px), calc(-50% + ${currentTransform.y}px)) scale(${currentTransform.scale})`;
+    }
+
+    els.mapViewport.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      els.mapViewport.classList.add('grabbing');
+      startX = e.clientX;
+      startY = e.clientY;
+      originX = currentTransform.x;
+      originY = currentTransform.y;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      currentTransform.x = originX + (e.clientX - startX);
+      currentTransform.y = originY + (e.clientY - startY);
+      applyMapTransform();
+    });
+
+    window.addEventListener('pointerup', () => {
+      dragging = false;
+      els.mapViewport.classList.remove('grabbing');
+    });
+
+    els.mapViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.08 : 0.08;
+      currentTransform.scale = Math.max(0.8, Math.min(3.2, currentTransform.scale + delta));
+      applyMapTransform();
+    }, { passive: false });
+
+    // Initialisation
+    ensureGameDefaults();
+    setPlayerName(localStorage.getItem("pvj_pseudo") || "Un Chouan");
+    loadLivesIntoUI();
+    refreshProgress();
+  </script>
+</body>
+</html>

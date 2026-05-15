@@ -1,0 +1,378 @@
+<!DOCTYPE html>  <html lang="fr">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Puissance Vendéenne</title>  
+  <link rel="stylesheet" href="css/menujeu.css" />  
+</head>  
+<body>  <div id="startOverlay">
+  <div id="welcome-message" class="welcome-message hidden">
+  <p> <i> Ce jeu, ainsi que le site internet auquel il est associé, sont entièrement gratuits et sans publicité. <br>
+L’objectif n’est en aucun cas de tirer profit des événements tragiques survenus en Vendée entre 1793 et 1832, mais de contribuer à faire vivre et transmettre cette mémoire. <br>
+Ce travail bénévole a nécessité environ <b> 100 heures </b> de développement et de recherche. <br>
+Si vous appréciez ce projet et souhaitez soutenir la création d’initiatives similaires, vous pouvez effectuer un don via la page « Donation » du site puissance-vendeenne.fr. <br>
+L’intégralité des dons est consacrée au fonctionnement du site et au développement de nouveaux projets, ayant pour seul dessein la préservation de la mémoire vendéenne. </i> </p>
+</div>
+<button id="startBtn">Entrer dans le jeu</button> </div>  <div class="page-overlay"></div>    <header class="topbar">  
+  <a href="index.html" class="retour-site">← Je vais d'abord réviser</a>    <div class="ressources">  
+    <div class="resource-life-group">  
+      <div class="ressource-box tooltip-box" data-tooltip="Ceci est votre nombre de vies restantes. Elles vous permettent de faire quelques erreurs en mode Histoire.">  
+        <img src="images/viejeupvcoeur.png" alt="Vies" class="ressource-icon" />  
+        <span class="ressource-value" id="vies-count">5/5</span>  
+      </div>  <div class="life-timer" id="life-timer-text">Prochaine vie dans --:--</div>  
+</div>  
+
+<div class="ressource-box tooltip-box" data-tooltip="Ce sont vos pièces. Elles vous permettent notamment d’acheter de nouveaux avatars.">  
+  <img src="images/piece1780.png" alt="Pièces" class="ressource-icon piece-icon" />  
+  <span class="ressource-value" id="pieces-count">0</span>  
+</div>  
+
+<div class="ressource-box tooltip-box" data-tooltip="Le sel est une denrée rare. Il vous permet d’obtenir des récompenses et décorations uniques !">  
+  <img src="images/seljeupvdiamant.png" alt="Sel" class="ressource-icon" />  
+  <span class="ressource-value" id="sel-count">0</span>  
+</div>
+
+  </div>  
+</header>    <main class="menu-main">  
+    <div class="menu-left">  
+      <div class="title-block" aria-label="Puissance Vendéenne Jeu">  
+        <h1 class="title-wave">  
+          <span>P</span><span>u</span><span>i</span><span>s</span><span>s</span><span>a</span><span>n</span><span>c</span><span>e</span>  
+          <span class="space"> </span>  
+          <span>V</span><span>e</span><span>n</span><span>d</span><span>é</span><span>e</span><span>n</span><span>n</span><span>e</span>  
+        </h1>  <div class="title-subwave">  
+      <span>L</span><span>e</span><span>&nbsp;</span><span>J</span><span>e</span><span>u</span>  
+    </div>  
+  </div>  
+
+  <div class="menu-buttons">  
+    <a href="intro.html" class="menu-btn">Histoire</a>  
+
+    <a href="diplome.html" class="menu-btn">Diplôme</a>  
+    <a href="recompenses.html" class="menu-btn">Récompenses</a>  
+  </div>  
+</div>  
+
+<aside class="profile-card">  
+  <div class="profile-avatar-shell">  
+    <div class="profile-avatar-wrap">  
+      <img  
+        src="images/unchouanphotoprofildefautpvjeu.png"  
+        alt="Avatar du joueur"  
+        class="profile-avatar"  
+        id="profile-avatar"  
+      />  
+      <img src="" alt="Décoration" class="profile-decoration"
+      id="profile-decoration" />
+      <img  
+        src=""  
+        alt="Couronne"  
+        class="profile-crown hidden"  
+        id="profile-crown"  
+      />  
+
+    </div>  
+  </div>  
+
+  <div class="profile-info">  
+    <div class="profile-name" id="profile-name">Profil à créer</div>  
+
+    <div class="profile-lys">  
+      <img src="images/lysdeniveaupvjeu.png" alt="Lys" class="lys-icon" />  
+      <span id="profile-lys-count">0</span>  
+    </div>  
+
+    <div class="profile-rank" id="profile-rank">Pacifiste</div>  
+  </div>  
+</aside>
+
+  </main>    <a href="roulette.html" class="roulette-btn roulette-image-btn">  
+    <img  
+      src="images/rouejeupvfinale.png"  
+      alt="Roulette"  
+      class="roulette-menu-img"  
+      id="menu-wheel"  
+    />  
+  </a>    
+
+<audio id="menuMusic" preload="auto" loop>
+  <source src="audio/musiquejeupuissancevendeenne.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>  
+    const MAX_BASE_LIVES = 5;  
+    const LIFE_REGEN_MS = 18*60*1000;  
+    const welcomeMessage = document.getElementById("welcome-message");
+  
+    function ensureStorageDefaults() {  
+      if (localStorage.getItem("pvj_vies") === null) localStorage.setItem("pvj_vies", "5");  
+      if (localStorage.getItem("pvj_pieces") === null) localStorage.setItem("pvj_pieces", "0");  
+      if (localStorage.getItem("pvj_sel") === null) localStorage.setItem("pvj_sel", "0");  
+      if (localStorage.getItem("pvj_unlimited_lives_until") === null) localStorage.setItem("pvj_unlimited_lives_until", "");  
+      if (localStorage.getItem("pvj_has_reroll") === null) localStorage.setItem("pvj_has_reroll", "false");  
+      if (localStorage.getItem("pvj_last_spin") === null) localStorage.setItem("pvj_last_spin", "");  
+      if (localStorage.getItem("pvj_life_regen_anchor") === null)  
+        localStorage.setItem("pvj_life_regen_anchor", "");  
+    }  
+  
+    function ensureProfileDefaults() {  
+      if (localStorage.getItem("pvj_pseudo") === null) localStorage.setItem("pvj_pseudo", "");  
+      if (localStorage.getItem("pvj_lys") === null) localStorage.setItem("pvj_lys", "0");  
+      if (localStorage.getItem("pvj_grade") === null) localStorage.setItem("pvj_grade", "Pacifiste");  
+      if (localStorage.getItem("pvj_avatar") === null) localStorage.setItem("pvj_avatar", "images/unchouanphotoprofildefautpvjeu.png");  
+      if (localStorage.getItem("pvj_crown") === null) localStorage.setItem("pvj_crown", "");  
+    }  
+  
+    function isUnlimitedLivesActive() {  
+      const until = localStorage.getItem("pvj_unlimited_lives_until");  
+      if (!until) return false;  
+      return Date.now() < new Date(until).getTime();  
+    }  
+    function formatRemainingTime(ms) {  
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));  
+  const hours = Math.floor(totalSeconds / 3600);  
+  const minutes = Math.floor((totalSeconds % 3600) / 60);  
+  const seconds = totalSeconds % 60;  
+  
+  if (hours > 0) {  
+    return `${hours}h ${String(minutes).padStart(2, "0")}min`;  
+  }  
+  
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;  
+}  
+  
+function updateLifeRegeneration() {  
+  const timerEl = document.getElementById("life-timer-text");  
+  if (!timerEl) return;  
+  
+  if (isUnlimitedLivesActive()) {  
+    timerEl.textContent = "Vies illimitées actives";  
+    return;  
+  }  
+  
+  let lives = parseInt(localStorage.getItem("pvj_vies"), 10);  
+  if (Number.isNaN(lives)) lives = 5;  
+  
+  let anchor = localStorage.getItem("pvj_life_regen_anchor");  
+  
+  if (lives >= MAX_BASE_LIVES) {  
+    localStorage.setItem("pvj_life_rege⁠n_anchor", "");  
+    timerEl.textContent = "Vies au maximum";  
+    return;  
+  }  
+  
+  if (!anchor) {  
+    anchor = new Date().toISOString();  
+    localStorage.setItem("pvj_life_regen_anchor", anchor);  
+  }  
+  
+  let anchorTime = new Date(anchor).getTime();  
+  const now = Date.now();  
+  
+  if (Number.isNaN(anchorTime)) {  
+    anchorTime = now;  
+    localStorage.setItem("pvj_life_regen_anchor", new Date(now).toISOString());  
+  }  
+  
+  let elapsed = now - anchorTime;  
+  
+  while (elapsed >= LIFE_REGEN_MS && lives < MAX_BASE_LIVES) {  
+    lives += 1;  
+    anchorTime += LIFE_REGEN_MS;  
+    elapsed = now - anchorTime;  
+  }  
+  
+  localStorage.setItem("pvj_vies", String(Math.min(lives, MAX_BASE_LIVES)));  
+  
+  if (lives >= MAX_BASE_LIVES) {  
+    localStorage.setItem("pvj_life_regen_anchor", "");  
+    timerEl.textContent = "Vies au maximum";  
+  } else {  
+    localStorage.setItem("pvj_life_regen_anchor", new Date(anchorTime).toISOString());  
+    const remaining = LIFE_REGEN_MS - (now - anchorTime);  
+    timerEl.textContent = `Prochaine vie dans ${formatRemainingTime(remaining)}`;  
+  }  
+}  
+  
+  
+    function refreshTopbar() {  
+      const vies = parseInt(localStorage.getItem("pvj_vies"), 10);  
+      const pieces = parseInt(localStorage.getItem("pvj_pieces"), 10);  
+      const sel = parseInt(localStorage.getItem("pvj_sel"), 10);  
+  
+      document.getElementById("vies-count").textContent = isUnlimitedLivesActive()  
+        ? `${Number.isNaN(vies) ? 5 : vies}/${MAX_BASE_LIVES}∞`  
+        : `${Number.isNaN(vies) ? 5 : vies}/${MAX_BASE_LIVES}`;  
+  
+      document.getElementById("pieces-count").textContent = Number.isNaN(pieces) ? "0" : String(pieces);  
+      document.getElementById("sel-count").textContent = Number.isNaN(sel) ? "0" : String(sel);  
+    }  
+  
+    function refreshProfileCard() {  
+      const pseudoRaw = (localStorage.getItem("pvj_pseudo") || "").trim();  
+      const pseudo = pseudoRaw || "Créez votre profil";  
+      const lys = parseInt(localStorage.getItem("pvj_lys"), 10) || 0;  
+      const grade = localStorage.getItem("pvj_grade") || "Pacifiste";  
+      const avatar = localStorage.getItem("pvj_avatar") || "images/unchouanphotoprofildefautpvjeu.png";  
+      const crown = localStorage.getItem("pvj_crown") || "";  
+      const decoration = localStorage.getItem("pvj_selected_decoration") || "";
+      const decorationEl = document.getElementById("profile-decoration");
+
+if (decoration) {
+  decorationEl.src = decoration;
+  decorationEl.style.display = "block";
+} else {
+  decorationEl.src = "";
+  decorationEl.style.display = "none";
+}
+
+  
+      document.getElementById("profile-name").textContent = pseudo;  
+      document.getElementById("profile-lys-count").textContent = lys;  
+      document.getElementById("profile-rank").textContent = grade;  
+  
+      const avatarEl = document.getElementById("profile-avatar");  
+      avatarEl.src = avatar;  
+      avatarEl.onerror = () => {  
+        avatarEl.src = "images/unchouanphotoprofildefautpvjeu.png";  
+      };  
+  
+      const crownEl = document.getElementById("profile-crown");  
+      if (crown) {  
+        crownEl.src = crown;  
+        crownEl.classList.remove("hidden");  
+      } else {  
+        crownEl.src = "";  
+        crownEl.classList.add("hidden");  
+      }  
+    }  
+  
+    function isWheelAvailable() {  
+      const lastSpin = localStorage.getItem("pvj_last_spin");  
+      if (!lastSpin) return true;  
+  
+      const elapsed = Date.now() - new Date(lastSpin).getTime();  
+      const cooldown = 24 * 60 * 60 * 1000;  
+      const hasReroll = localStorage.getItem("pvj_has_reroll") === "true";  
+  
+      return elapsed >= cooldown || hasReroll;  
+    }  
+  
+    function updateWheelAnimation() {  
+      const wheel = document.getElementById("menu-wheel");  
+      if (!wheel) return;  
+  
+      if (isWheelAvailable()) {  
+        wheel.classList.add("wheel-available");  
+      } else {  
+        wheel.classList.remove("wheel-available");  
+      }  
+    }  
+  
+    function refreshMenuPage() {  
+      updateLifeRegeneration();  
+      refreshTopbar();  
+      refreshProfileCard();  
+      updateWheelAnimation();  
+    }  
+  
+const menuMusic = document.getElementById("menuMusic");
+const startOverlay = document.getElementById("startOverlay");
+const startBtn = document.getElementById("startBtn");
+const AUDIO_UNLOCK_TAB_KEY = "pvj_audio_unlocked_tab";
+const navEntry = performance.getEntriesByType("navigation")[0];
+const isReload = navEntry && navEntry.type === "reload";
+
+
+function startMenuMusic(){
+  if(!menuMusic) return;
+
+  menuMusic.loop = true;
+  menuMusic.volume = 0.35;
+
+  const playPromise = menuMusic.play();
+
+  if(playPromise !== undefined){
+    playPromise
+      .then(() => {
+        console.log("Musique menu lancée");
+      })
+      .catch(err => {
+        console.warn("Autoplay bloqué :", err);
+      });
+  }
+}
+
+
+
+const AUDIO_UNLOCK_KEY = "pvj_audio_unlocked";
+
+startBtn.addEventListener("click", () => {
+  sessionStorage.setItem(AUDIO_UNLOCK_TAB_KEY, "true");
+  startMenuMusic();
+  startOverlay.style.display = "none";
+});
+
+
+if (isReload) {
+  sessionStorage.removeItem(AUDIO_UNLOCK_TAB_KEY);
+}
+
+if (sessionStorage.getItem(AUDIO_UNLOCK_TAB_KEY) === "true") {
+  startOverlay.style.display = "none";
+  welcomeMessage.classList.add("hidden");
+
+  const resumeMusicOnInteraction = () => {
+    startMenuMusic();
+    document.removeEventListener("click", resumeMusicOnInteraction);
+    document.removeEventListener("keydown", resumeMusicOnInteraction);
+  };
+
+  document.addEventListener("click", resumeMusicOnInteraction, { once: true });
+  document.addEventListener("keydown", resumeMusicOnInteraction, { once: true });
+} else {
+  startOverlay.style.display = "flex";
+  welcomeMessage.classList.remove("hidden");
+}
+
+
+function prepareNextPageMusic(target){
+  sessionStorage.setItem("pvj_next_music_target", target);
+}
+
+document.querySelector('a[href="roulette.html"]')?.addEventListener("click", () => {
+  prepareNextPageMusic("roulette");
+});
+
+document.querySelector('a[href="recompenses.html"]')?.addEventListener("click", () => {
+  prepareNextPageMusic("page");
+});
+
+document.querySelector('a[href="diplome.html"]')?.addEventListener("click", () => {
+  prepareNextPageMusic("page");
+});
+
+document.querySelector('a[href="intro.html"]')?.addEventListener("click", () => {
+  prepareNextPageMusic("history");
+});
+
+
+    ensureStorageDefaults();  
+    ensureProfileDefaults();  
+    refreshMenuPage();  
+  
+    window.addEventListener("pageshow", refreshMenuPage);  
+    window.addEventListener("focus", refreshMenuPage);  
+    document.addEventListener("visibilitychange", () => {  
+      if (!document.hidden) refreshMenuPage();  
+    });  
+  
+    setInterval(() => {  
+      updateLifeRegeneration();  
+      refreshTopbar();  
+      updateWheelAnimation();  
+    }, 1000);  
+  </script> 
+
+   </body>  
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roulette - Puissance VendéJeUnne</title>
+  <link rel="stylesheet" href="css/roulette.css" />
+</head>
+<body>
+
+  <div class="page-overlay"></div>
+
+  <header class="topbar">
+    <a href="menujeu.html" class="retour-site">← Retour</a>
+
+    <div class="ressources">
+  <div class="ressource-box tooltip-box" data-tooltip="Ceci est votre nombre de vies restantes. Elles vous permettent de faire quelques erreurs en mode Histoire.">
+    <img src="images/viejeupvcoeur.png" alt="Vies" class="ressource-icon" />
+    <span class="ressource-value" id="vies-count">5/5</span>
+  </div>
+
+  <div class="ressource-box tooltip-box" data-tooltip="Ce sont vos pièces. Elles vous permettent notamment d’acheter de nouveaux avatars.">
+    <img src="images/piece1780.png" alt="Pièces" class="ressource-icon piece-icon" />
+    <span class="ressource-value" id="pieces-count">0</span>
+  </div>
+
+  <div class="ressource-box tooltip-box" data-tooltip="Le sel est une denrée rare. Il vous permet d’obtenir des récompenses et décorations uniques.">
+    <img src="images/seljeupvdiamant.png" alt="Sel" class="ressource-icon" />
+    <span class="ressource-value" id="sel-count">0</span>
+  </div>
+</div>
+  </header>
+
+  <main class="roulette-main">
+    <h1>Roulette quotidienne</h1>
+
+    <div class="roulette-zone">
+      <div class="wheel-wrapper">
+        <img
+          src="images/rouejeupvfinale.png"
+          alt="Roulette"
+          id="wheel"
+          class="wheel"
+        />
+      </div>
+
+      <img
+        src="images/curseurrouejeupv.png"
+        alt="Curseur"
+        class="wheel-pointer"
+      />
+
+      <div id="reward-popup" class="reward-popup hidden">
+        <div class="reward-popup-content">
+          <span id="reward-popup-text">+50 pièces</span>
+        </div>
+           <div id="unlock-popup" class="unlock-popup hidden">
+  <div class="unlock-popup-content">
+    <div class="unlock-title">🎉 Nouvelle décoration débloquée !</div>
+    <img id="unlock-image" src="" alt="" class="unlock-image">
+    <div id="unlock-name" class="unlock-name"></div>
+    <button id="unlock-close" class="unlock-btn">Continuer</button>
+  </div>
+</div>
+
+      </div>
+
+    </div>
+
+
+    <div class="roulette-actions">
+      <button id="spin-btn" class="spin-btn">Tourner la roue</button>
+      <p id="status-text" class="status-text">Chargement...</p>
+    </div>
+  </main>
+
+<audio id="rouletteMusic" src="audio/musiquejeupuissancevendeenne.mp3" preload="auto" loop></audio>
+<audio id="spinMusic" src="audio/dansebriochejeupv.mp3" preload="auto"></audio>
+
+
+
+  <script>
+    const TEST_MODE = false;
+    const MAX_BASE_LIVES = 5;
+    const UNLIMITED_LIVES_DURATION_MS = 18 * 60 * 1000;
+    const SPIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spin-btn");
+    const statusText = document.getElementById("status-text");
+    const rewardPopup = document.getElementById("reward-popup");
+    const rewardPopupText = document.getElementById("reward-popup-text");
+    const rouletteMusic = document.getElementById("rouletteMusic");
+const spinMusic = document.getElementById("spinMusic");
+
+
+document.getElementById("unlock-close").addEventListener("click", () => {
+  const popup = document.getElementById("unlock-popup");
+  popup.classList.remove("show");
+  popup.classList.add("hidden");
+});
+
+function checkRouletteUnlock(){
+  const spins = parseInt(localStorage.getItem("pvj_spin_count"), 10) || 0;
+  let owned = JSON.parse(localStorage.getItem("pvj_owned_decorations") || "[]");
+
+  if(spins >= 20 && !owned.includes("fusil_munitions")){
+    unlockItem("fusil_munitions");
+  }
+}
+
+function unlockItem(item){
+  let owned = JSON.parse(localStorage.getItem("pvj_owned_decorations") || "[]");
+
+  if(!owned.includes(item)){
+    owned.push(item);
+    localStorage.setItem("pvj_owned_decorations", JSON.stringify(owned));
+
+    showUnlockPopup(item);
+  }
+}
+
+function showUnlockPopup(itemId){
+  const popup = document.getElementById("unlock-popup");
+  const image = document.getElementById("unlock-image");
+  const name = document.getElementById("unlock-name");
+
+  const items = {
+    "fusil_munitions": {
+      name: "Fusil de munitions",
+      image: "images/fusilmunitiondecopvjeu.png"
+    }
+  };
+
+  const item = items[itemId];
+  if(!item) return;
+
+  image.src = item.image;
+  name.textContent = item.name;
+
+  popup.classList.remove("hidden");
+  popup.classList.add("show");
+}
+
+function startRouletteMusic(){
+  if(!rouletteMusic) return;
+
+  rouletteMusic.loop = true;
+  rouletteMusic.volume = 0.35;
+
+  const playPromise = rouletteMusic.play();
+  if(playPromise !== undefined){
+    playPromise.catch(err => {
+      console.warn("Lecture musique roulette bloquée :", err);
+    });
+  }
+}
+
+function stopRouletteMusic(){
+  if(!rouletteMusic) return;
+  rouletteMusic.pause();
+}
+
+function playSpinMusic(){
+  if(!spinMusic) return;
+
+  spinMusic.currentTime = 0;
+  spinMusic.volume = 0.6;
+
+  const playPromise = spinMusic.play();
+  if(playPromise !== undefined){
+    playPromise.catch(err => {
+      console.warn("Lecture musique lancement roue bloquée :", err);
+    });
+  }
+}
+
+function stopSpinMusic(){
+  if(!spinMusic) return;
+  spinMusic.pause();
+  spinMusic.currentTime = 0;
+}
+
+function enableRoulettePageMusic(){
+  const shouldStart = sessionStorage.getItem("pvj_next_music_target") === "roulette";
+
+  if (!shouldStart) return;
+
+  const startOnPageClick = () => {
+    if (!spinning) {
+      startRouletteMusic();
+    }
+    sessionStorage.removeItem("pvj_next_music_target");
+    document.removeEventListener("click", startOnPageClick);
+    document.removeEventListener("keydown", startOnPageClick);
+  };
+
+  document.addEventListener("click", startOnPageClick, { once: true });
+  document.addEventListener("keydown", startOnPageClick, { once: true });
+}
+
+
+
+
+
+
+
+    const viesCount = document.getElementById("vies-count");
+    const piecesCount = document.getElementById("pieces-count");
+    const selCount = document.getElementById("sel-count");
+
+    let spinning = false;
+    let currentVisualAngle = 0;
+
+    const rewards = [
+      { id: "salt", label: "+1 sel", probability: 4, angle: 0, type: "salt", amount: 1 },
+      { id: "coins50", label: "+50 pièces", probability: 9, angle: 30, type: "coins", amount: 50 },
+      { id: "life1", label: "+1 vie", probability: 11.5, angle: 60, type: "life", amount: 1 },
+      { id: "nothing1", label: "Aucun gain", probability: 8.3333, angle: 90, type: "nothing" },
+      { id: "coins35", label: "+35 pièces", probability: 11.5, angle: 120, type: "coins", amount: 35 },
+      { id: "unlimitedLives", label: "Vies illimitées pendant 20 min", probability: 8, angle: 150, type: "unlimitedLives" },
+      { id: "reroll", label: "Relance", probability: 5, angle: 180, type: "reroll" },
+      { id: "coins250", label: "+250 pièces", probability: 7, angle: 210, type: "coins", amount: 250 },
+      { id: "nothing2", label: "Aucun gain", probability: 8.3333, angle: 240, type: "nothing" },
+      { id: "life3", label: "+3 vies", probability: 5, angle: 270, type: "life", amount: 3 },
+      { id: "coins10", label: "+10 pièces", probability: 14, angle: 300, type: "coins", amount: 10 },
+      { id: "nothing3", label: "Aucun gain", probability: 8.3334, angle: 330, type: "nothing" }
+    ];
+
+    function initStorage() {
+      if (localStorage.getItem("pvj_vies") === null) localStorage.setItem("pvj_vies", "5");
+      if (localStorage.getItem("pvj_pieces") === null) localStorage.setItem("pvj_pieces", "0");
+      if (localStorage.getItem("pvj_sel") === null) localStorage.setItem("pvj_sel", "0");
+      if (localStorage.getItem("pvj_has_reroll") === null) localStorage.setItem("pvj_has_reroll", "false");
+      if (localStorage.getItem("pvj_unlimited_lives_until") === null) localStorage.setItem("pvj_unlimited_lives_until", "");
+      if (localStorage.getItem("pvj_last_spin") === null) localStorage.setItem("pvj_last_spin", "");
+      if (localStorage.getItem("pvj_spin_count") === null) {
+  localStorage.setItem("pvj_spin_count", "0");
+}
+    }
+
+    function getLives() {
+      return parseInt(localStorage.getItem("pvj_vies"), 10) || 5;
+    }
+
+    function setLives(value) {
+      localStorage.setItem("pvj_vies", String(value));
+    }
+
+    function getCoins() {
+      return parseInt(localStorage.getItem("pvj_pieces"), 10) || 0;
+    }
+
+    function setCoins(value) {
+      localStorage.setItem("pvj_pieces", String(value));
+    }
+
+    function getSalt() {
+      return parseInt(localStorage.getItem("pvj_sel"), 10) || 0;
+    }
+
+    function setSalt(value) {
+      localStorage.setItem("pvj_sel", String(value));
+    }
+
+    function setReroll(value) {
+      localStorage.setItem("pvj_has_reroll", value ? "true" : "false");
+    }
+
+    function hasReroll() {
+      return localStorage.getItem("pvj_has_reroll") === "true";
+    }
+
+    function consumeReroll() {
+      localStorage.setItem("pvj_has_reroll", "false");
+    }
+
+    function setUnlimitedLivesUntil(value) {
+      localStorage.setItem("pvj_unlimited_lives_until", value);
+    }
+
+    function isUnlimitedLivesActive() {
+      const until = localStorage.getItem("pvj_unlimited_lives_until");
+      if (!until) return false;
+      return Date.now() < new Date(until).getTime();
+    }
+
+    function getLastSpin() {
+      return localStorage.getItem("pvj_last_spin") || "";
+    }
+
+    function setLastSpin(value) {
+      localStorage.setItem("pvj_last_spin", value);
+    }
+
+    function getRemainingCooldownMs() {
+      const lastSpin = getLastSpin();
+      if (!lastSpin) return 0;
+
+      const elapsed = Date.now() - new Date(lastSpin).getTime();
+      const remaining = SPIN_COOLDOWN_MS - elapsed;
+      return Math.max(0, remaining);
+    }
+
+    function canSpinNow() {
+      if (TEST_MODE) return true;
+      if (hasReroll()) return true;
+      return getRemainingCooldownMs() === 0;
+    }
+
+    function formatRemainingTime(ms) {
+      const totalSeconds = Math.ceil(ms / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      return `${hours}h ${minutes}min`;
+    }
+
+    function updateDisplay() {
+      const lives = getLives();
+      const coins = getCoins();
+      const salt = getSalt();
+
+      viesCount.textContent = isUnlimitedLivesActive()
+        ? `${lives}/${MAX_BASE_LIVES}∞`
+        : `${lives}/${MAX_BASE_LIVES}`;
+
+      piecesCount.textContent = coins;
+      selCount.textContent = salt;
+
+      
+    }
+
+    function updateSpinAvailability() {
+      if (spinning) return;
+
+      if (canSpinNow()) {
+        spinBtn.disabled = false;
+
+        if (hasReroll() && !TEST_MODE) {
+          statusText.textContent = "Tu as une relance disponible.";
+        } else if (TEST_MODE) {
+          statusText.textContent = "Mode test : tu peux lancer la roue librement.";
+        } else {
+          statusText.textContent = "Vous pouvez tourner la roue !";
+        }
+      } else {
+        const remaining = getRemainingCooldownMs();
+        spinBtn.disabled = true;
+        statusText.textContent = `Prochain lancer dans ${formatRemainingTime(remaining)}.`;
+      }
+    }
+
+    function pickReward() {
+      const r = Math.random() * 100;
+      let cumulative = 0;
+
+      for (const reward of rewards) {
+        cumulative += reward.probability;
+        if (r <= cumulative) return reward;
+      }
+
+      return rewards[rewards.length - 1];
+    }
+
+    function showRewardPopup(text) {
+      rewardPopupText.textContent = text;
+      rewardPopup.classList.remove("hidden");
+      rewardPopup.classList.add("show");
+
+    }
+
+    function applyReward(reward) {
+      let popupText = reward.label;
+
+      if (reward.type === "coins") {
+        setCoins(getCoins() + reward.amount);
+        popupText = `+${reward.amount} pièces`;
+      }
+
+      if (reward.type === "life") {
+        setLives(getLives() + reward.amount);
+        popupText = `+${reward.amount} vie${reward.amount > 1 ? "s" : ""}`;
+      }
+
+      if (reward.type === "salt") {
+        setSalt(getSalt() + reward.amount);
+        popupText = `+${reward.amount} sel`;
+      }
+
+      if (reward.type === "reroll") {
+        setReroll(true);
+        popupText = "Relance gagnée";
+      }
+
+      if (reward.type === "unlimitedLives") {
+        const until = new Date(Date.now() + UNLIMITED_LIVES_DURATION_MS).toISOString();
+        setUnlimitedLivesUntil(until);
+        popupText = "Vies illimitées pendant 20 min";
+      }
+
+      if (reward.type === "nothing") {
+        popupText = "Aucun gain";
+      }
+
+      updateDisplay();
+      showRewardPopup(popupText);
+    }
+
+  function spinWheel() {
+  if (spinning) return;
+
+  if (!canSpinNow()) {
+    updateSpinAvailability();
+    return;
+  }
+
+  spinning = true;
+  spinBtn.disabled = true;
+  statusText.textContent = "La roue tourne...";
+
+  stopRouletteMusic();
+  playSpinMusic();
+
+  const usedReroll = !TEST_MODE && hasReroll();
+  const reward = pickReward();
+
+  const angleOffset = 0;
+  const targetAngle = (reward.angle + angleOffset) % 360;
+  const extraTurns = 6 + Math.floor(Math.random() * 3);
+
+  const destination =
+    currentVisualAngle +
+    (extraTurns * 360) +
+    ((360 - targetAngle - currentVisualAngle + 360) % 360);
+
+  wheel.style.transition = "transform 5s cubic-bezier(0.12, 0.85, 0.16, 1)";
+  wheel.style.transform = `rotate(${destination}deg)`;
+
+  setTimeout(() => {
+    currentVisualAngle = (360 - targetAngle) % 360;
+
+    wheel.style.transition = "none";
+    wheel.style.transform = `rotate(${currentVisualAngle}deg)`;
+
+    void wheel.offsetWidth;
+
+    applyReward(reward);
+
+    // compteur spins
+let spins = parseInt(localStorage.getItem("pvj_spin_count"), 10) || 0;
+localStorage.setItem("pvj_spin_count", spins + 1);
+
+// check unlock
+checkRouletteUnlock();
+
+    if (!TEST_MODE) {
+      if (usedReroll) {
+        consumeReroll();
+      } else {
+        setLastSpin(new Date().toISOString());
+      }
+    }
+
+    statusText.textContent = reward.label;
+    spinBtn.disabled = false;
+    spinning = false;
+
+    stopSpinMusic();
+    startRouletteMusic();
+
+    updateSpinAvailability();
+  }, 5000);
+}
+
+
+    spinBtn.addEventListener("click", spinWheel);
+
+   initStorage();
+updateDisplay();
+updateSpinAvailability();
+enableRoulettePageMusic();
+
+setInterval(() => {
+  updateDisplay();
+  updateSpinAvailability();
+}, 1000);
+
+document.querySelector('a[href="menujeu.html"]')?.addEventListener("click", () => {
+  sessionStorage.setItem("pvj_audio_unlocked_tab", "true");
+  sessionStorage.setItem("pvj_next_music_target", "menu");
+});
+
+
+  </script>
+
+</body>
+</html>

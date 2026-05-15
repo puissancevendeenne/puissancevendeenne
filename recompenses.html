@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Récompenses - Puissance Vendéenne</title>
+  <link rel="stylesheet" href="css/recompenses.css" />
+</head>
+<body>
+
+  <div class="page-overlay"></div>
+
+  <header class="topbar">
+    <a href="menujeu.html" class="retour-site">← Retour au menu</a>
+
+    <div class="ressources">
+  <div class="resource-life-group">
+    <div class="ressource-box tooltip-box" data-tooltip="Ceci est votre nombre de vies restantes. Elles vous permettent de faire quelques erreurs en mode Histoire.">
+      <img src="images/viejeupvcoeur.png" alt="Vies" class="ressource-icon" />
+      <span class="ressource-value" id="vies-count">5/5</span>
+    </div>
+    <div class="life-timer" id="life-timer-text"></div>
+  </div>
+
+  <div class="ressource-box tooltip-box" data-tooltip="Ce sont vos pièces. Elles vous permettent notamment d’acheter de nouveaux avatars.">
+    <img src="images/piece1780.png" alt="Pièces" class="ressource-icon piece-icon" />
+    <span class="ressource-value" id="pieces-count">0</span>
+  </div>
+
+  <div class="ressource-box tooltip-box" data-tooltip="Le sel est une denrée rare. Il vous permet d’obtenir des récompenses et décorations uniques.">
+    <img src="images/seljeupvdiamant.png" alt="Sel" class="ressource-icon" />
+    <span class="ressource-value" id="sel-count">0</span>
+  </div>
+</div>
+
+  </header>
+
+  <main class="recompenses-main">
+    <h1>Récompenses</h1>
+
+    <section class="reward-section">
+      <h2>Avatars</h2>
+      <div class="reward-grid" id="avatars-grid"></div>
+    </section>
+
+    <section class="reward-section">
+      <h2>Décorations</h2>
+      <div class="reward-grid deco-grid" id="decorations-grid"></div>
+    </section>
+
+    <section class="reward-section">
+      <h2>Couronnes</h2>
+      <div class="reward-grid crowns-grid" id="crowns-grid"></div>
+    </section>
+  </main>
+
+ <audio id="rouletteMusic" src="audio/musiquejeupuissancevendeenne.mp3" preload="auto" loop></audio>
+<audio id="spinMusic" src="audio/dansebriochejeupv.mp3" preload="auto"></audio>
+
+
+
+  <script>
+
+    const pageMusic = document.getElementById("pageMusic");
+
+function startPageMusic(){
+  if(!pageMusic) return;
+
+  pageMusic.loop = true;
+  pageMusic.volume = 0.35;
+
+  const playPromise = pageMusic.play();
+  if(playPromise !== undefined){
+    playPromise.catch(err => {
+      console.warn("Lecture musique page bloquée :", err);
+    });
+  }
+}
+
+function enablePageMusic(){
+  const shouldStart = sessionStorage.getItem("pvj_next_music_target") === "page";
+
+  if (!shouldStart) return;
+
+  const startOnPageClick = () => {
+    startPageMusic();
+    sessionStorage.removeItem("pvj_next_music_target");
+    document.removeEventListener("click", startOnPageClick);
+    document.removeEventListener("keydown", startOnPageClick);
+  };
+
+  document.addEventListener("click", startOnPageClick, { once: true });
+  document.addEventListener("keydown", startOnPageClick, { once: true });
+}
+
+
+
+
+
+    const MAX_BASE_LIVES = 5;
+
+    const avatarItems = [
+      {
+        id: "unchouan",
+        name: "Un Chouan",
+        image: "images/unchouanphotoprofildefautpvjeu.png",
+        price: 0,
+        currency: "coins"
+      },
+      {
+        id: "unechouanne",
+        name: "Une Chouanne",
+        image: "images/unechouannephotoprofildefautpvjeu.png",
+        price: 0,
+        currency: "coins"
+      },
+      {
+        id: "embleme",
+        name: "Emblème",
+        image: "images/avataremblemeroyalistepvjeu.png",
+        price: 75,
+        currency: "coins"
+      },
+      {
+        id: "jean_cottereau",
+        name: "Jean Cottereau",
+        image: "images/JeanChouanavatarjeupv.png",
+        price: 175,
+        currency: "coins"
+      },
+      {
+        id: "latremoille",
+        name: "Antoine Philippe de La Trémoille",
+        image: "images/apdelatremoilleavatarjeupv.png",
+        price: 265,
+        currency: "coins"
+      },
+      {
+        id: "donnissan",
+        name: "Victoire de Donnissan",
+        image: "images/victoirededonnissanavatarjeupv.png",
+        price: 310,
+        currency: "coins"
+      },
+      {
+        id: "adelaide",
+        name: "Madame du Fief",
+        image: "images/mmedufiefadelaideavatarjeupv.png",
+        price: 385,
+        currency: "coins"
+      },
+      {
+        id: "sapinaud",
+        name: "Charles Sapinaud de La Rairie",
+        image: "images/csapinaudavatarpvjeu.png",
+        price: 440,
+        currency: "coins"
+      },
+      {
+        id: "celeste",
+        name: "Céleste Bulkeley",
+        image: "images/celestebulkeleyavatarpvjeu.png",
+        price: 510,
+        currency: "coins"
+      },
+      {
+        id: "lescure",
+        name: "Louis de Salgues de Lescure",
+        image: "images/lslescureavatarjeupv.png",
+        price: 590,
+        currency: "coins"
+      },
+      {
+        id: "delbee",
+        name: "Maurice d’Elbée",
+        image: "images/delbeeavatarpvjeu.png",
+        price: 660,
+        currency: "coins"
+      },
+      {
+        id: "renee_bordereau",
+        name: "Renée Bordereau",
+        image: "images/reneebordereauavatarjeupv.png",
+        price: 785,
+        currency: "coins"
+      },
+      {
+        id: "stofflet",
+        name: "Jean-Nicolas Stofflet",
+        image: "images/jnstoffletjeupvavatar.png",
+        price: 890,
+        currency: "coins"
+      },
+      {
+        id: "bonchamps",
+        name: "Charles de Bonchamps",
+        image: "images/cbonchampspvjeuavatar.png",
+        price: 1000,
+        currency: "coins"
+      },
+      {
+        id: "cathelineau",
+        name: "Jacques Cathelineau",
+        image: "images/jcathelineaupvjeuavatar.png",
+        price: 1350,
+        currency: "coins"
+      },
+      {
+        id: "larochejacquelein",
+        name: "Henri de La Rochejaquelein",
+        image: "images/henrilrjjeupvavatar.png",
+        price: 1750,
+        currency: "coins"
+      },
+      {
+        id: "decharette",
+        name: "François Athanase Charette de la Contrie",
+        image: "images/decharetteavatarjeupv.png",
+        price: 2000,
+        currency: "coins"
+      },
+      {
+        id: "marie_antoinette",
+        name: "Reine Marie-Antoinette",
+        image: "images/mantoinetteavatarjeupv.png",
+        price: 2,
+        currency: "salt"
+      },
+      {
+        id: "louis_xvi",
+        name: "Roy Louis XVI",
+        image: "images/louisxviavatarjeupv.png",
+        price: 4,
+        currency: "salt"
+      }
+    ];
+
+    const decorationItems = [
+      {
+        id: "baton",
+        name: "Bâton",
+        image: "images/batondecopvjeu.png",
+        price: 300,
+        currency: "coins",
+        unlockType: "shop"
+      },
+      {
+        id: "pique",
+        name: "Pique",
+        image: "images/piquedecopvjeu.png",
+        price: 800,
+        currency: "coins",
+        unlockType: "shop"
+      },
+      {
+        id: "fusil_munitions",
+        name: "Fusil de munitions",
+        image: "images/fusilmunitiondecopvjeu.png",
+        unlockType: "progress",
+        description: "Déblocage au 20ᵉ lancer de roue."
+      },
+      {
+        id: "fusil_chasse",
+        name: "Fusil de chasse",
+        image: "images/fusilchassedecopvjeu.png",
+        unlockType: "progress",
+        description: "Déblocage à la 100ᵉ réponse donnée."
+      },
+      {
+        id: "faux",
+        name: "Faux",
+        image: "images/fauxdecopvjeu.png",
+        unlockType: "progress",
+        description: "Déblocage à la 200ᵉ bonne réponse."
+      },
+      {
+        id: "fourche",
+        name: "Fourche",
+        image: "images/fourchedecopvjeu.png",
+        price: 2,
+        currency: "salt",
+        unlockType: "shop"
+      },
+      {
+        id: "canon",
+        name: "Canon",
+        image: "images/canondecopvjeu.png",
+        price: 5,
+        currency: "salt",
+        unlockType: "shop"
+      },
+      {
+        id: "drapeau_acr",
+        name: "Drapeau Armée Catholique et Royale",
+        image: "images/drapeauacrdecopvjeu.png",
+        unlockType: "progress",
+        description: "Déblocage avec le Diplôme d’or."
+      }
+    ];
+
+    const crownItems = [
+      {
+        id: "bronze",
+        name: "Couronne de bronze",
+        image: "images/couronnebronzepvjeu.png",
+        lockedImage: "images/couronnebronzenondebloqueepvjeu.png"
+      },
+      {
+        id: "argent",
+        name: "Couronne d’argent",
+        image: "images/couronneargentpvjeu.png",
+        lockedImage: "images/couronneargentpasdebloqueepvjeu.png"
+      },
+      {
+        id: "or",
+        name: "Couronne d’or",
+        image: "images/couronneorpvjeu.png",
+        lockedImage: "images/couronneorpasdebloqueepvjeu.png"
+      }
+    ];
+
+    function ensureDefaults() {
+      if (localStorage.getItem("pvj_vies") === null) localStorage.setItem("pvj_vies", "5");
+      if (localStorage.getItem("pvj_pieces") === null) localStorage.setItem("pvj_pieces", "0");
+      if (localStorage.getItem("pvj_sel") === null) localStorage.setItem("pvj_sel", "0");
+      if (localStorage.getItem("pvj_unlimited_lives_until") === null) localStorage.setItem("pvj_unlimited_lives_until", "");
+      if (localStorage.getItem("pvj_pseudo") === null) localStorage.setItem("pvj_pseudo", "Un Chouan");
+      if (localStorage.getItem("pvj_lys") === null) localStorage.setItem("pvj_lys", "0");
+      if (localStorage.getItem("pvj_grade") === null) localStorage.setItem("pvj_grade", "Pacifiste");
+      if (localStorage.getItem("pvj_avatar") === null) localStorage.setItem("pvj_avatar", "images/unchouanphotoprofildefautpvjeu.png");
+      if (localStorage.getItem("pvj_crown") === null) localStorage.setItem("pvj_crown", "");
+      if (localStorage.getItem("pvj_owned_decorations") === null) localStorage.setItem("pvj_owned_decorations", JSON.stringify([]));
+      if (localStorage.getItem("pvj_selected_decoration") === null) localStorage.setItem("pvj_selected_decoration", "");
+      if (localStorage.getItem("pvj_owned_crowns") === null) localStorage.setItem("pvj_owned_crowns", JSON.stringify([]));
+
+      if (localStorage.getItem("pvj_owned_avatars") === null) {
+        localStorage.setItem("pvj_owned_avatars", JSON.stringify([
+          "unchouan",
+          "unechouanne"
+        ]));
+      }
+    }
+
+    function isUnlimitedLivesActive() {
+      const until = localStorage.getItem("pvj_unlimited_lives_until");
+      if (!until) return false;
+      return Date.now() < new Date(until).getTime();
+    }
+
+    function refreshTopbar() {
+      const vies = parseInt(localStorage.getItem("pvj_vies"), 10) || 5;
+      const pieces = parseInt(localStorage.getItem("pvj_pieces"), 10) || 0;
+      const sel = parseInt(localStorage.getItem("pvj_sel"), 10) || 0;
+
+      document.getElementById("vies-count").textContent = isUnlimitedLivesActive()
+        ? `${vies}/${MAX_BASE_LIVES}∞`
+        : `${vies}/${MAX_BASE_LIVES}`;
+
+      document.getElementById("pieces-count").textContent = pieces;
+      document.getElementById("sel-count").textContent = sel;
+    }
+
+    function getOwnedAvatars() {
+      try {
+        return JSON.parse(localStorage.getItem("pvj_owned_avatars")) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setOwnedAvatars(arr) {
+      localStorage.setItem("pvj_owned_avatars", JSON.stringify(arr));
+    }
+
+    function getOwnedDecorations() {
+      try {
+        return JSON.parse(localStorage.getItem("pvj_owned_decorations")) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setOwnedDecorations(arr) {
+      localStorage.setItem("pvj_owned_decorations", JSON.stringify(arr));
+    }
+
+    function getOwnedCrowns() {
+      try {
+        return JSON.parse(localStorage.getItem("pvj_owned_crowns")) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setOwnedCrowns(arr) {
+      localStorage.setItem("pvj_owned_crowns", JSON.stringify(arr));
+    }
+
+    function getCoins() {
+      return parseInt(localStorage.getItem("pvj_pieces"), 10) || 0;
+    }
+
+    function setCoins(value) {
+      localStorage.setItem("pvj_pieces", String(value));
+    }
+
+    function getSalt() {
+      return parseInt(localStorage.getItem("pvj_sel"), 10) || 0;
+    }
+
+    function setSalt(value) {
+      localStorage.setItem("pvj_sel", String(value));
+    }
+
+    function canAfford(item) {
+      return item.currency === "coins"
+        ? getCoins() >= item.price
+        : getSalt() >= item.price;
+    }
+
+    function getPriceLabel(item) {
+      if (item.price === 0) return "Gratuit";
+      return item.currency === "coins"
+        ? `${item.price} pièce${item.price > 1 ? "s" : ""}`
+        : `${item.price} sel${item.price > 1 ? "s" : ""}`;
+    }
+
+    function isSelected(item) {
+      return localStorage.getItem("pvj_avatar") === item.image;
+    }
+
+    function buyAvatar(itemId) {
+      const item = avatarItems.find(a => a.id === itemId);
+      if (!item) return;
+
+      const owned = getOwnedAvatars();
+      if (owned.includes(item.id)) return;
+      if (!canAfford(item)) return;
+
+      if (item.currency === "coins") {
+        setCoins(getCoins() - item.price);
+      } else {
+        setSalt(getSalt() - item.price);
+      }
+
+      owned.push(item.id);
+      setOwnedAvatars(owned);
+      renderAvatars();
+      refreshTopbar();
+    }
+
+    function selectAvatar(itemId) {
+      const item = avatarItems.find(a => a.id === itemId);
+      if (!item) return;
+
+      const owned = getOwnedAvatars();
+      if (!owned.includes(item.id)) return;
+
+      localStorage.setItem("pvj_avatar", item.image);
+      renderAvatars();
+    }
+
+    function renderAvatars() {
+      const grid = document.getElementById("avatars-grid");
+      const owned = getOwnedAvatars();
+      grid.innerHTML = "";
+
+      avatarItems.forEach(item => {
+        const ownedItem = owned.includes(item.id);
+        const selected = isSelected(item);
+        const affordable = canAfford(item);
+
+        const card = document.createElement("article");
+        card.className = "avatar-card";
+
+        if (!ownedItem) card.classList.add("locked-soft");
+        if (!ownedItem && affordable) card.classList.add("affordable-soft");
+        if (selected) card.classList.add("selected");
+
+
+        const buttonHtml = ownedItem
+          ? `<button class="avatar-btn select-btn ${selected ? "is-selected" : ""}" data-select="${item.id}">
+               ${selected ? "Sélectionné" : "Sélectionner"}
+             </button>`
+          : `<button class="avatar-btn buy-btn" data-buy="${item.id}" ${!affordable ? "disabled" : ""}>
+               Acheter
+             </button>`;
+
+        card.innerHTML = `
+          <div class="avatar-frame">
+            <img src="${item.image}" alt="${item.name}" class="avatar-image ${item.id === "embleme" ? "emblem-fit" : ""}" />
+          </div>
+          <div class="avatar-name">${item.name}</div>
+          <div class="avatar-price">${getPriceLabel(item)}</div>
+          ${buttonHtml}
+        `;
+
+        grid.appendChild(card);
+      });
+
+      grid.querySelectorAll("[data-buy]").forEach(btn => {
+        btn.addEventListener("click", () => buyAvatar(btn.dataset.buy));
+      });
+
+      grid.querySelectorAll("[data-select]").forEach(btn => {
+        btn.addEventListener("click", () => selectAvatar(btn.dataset.select));
+      });
+    }
+
+    function isDecorationSelected(item) {
+      return localStorage.getItem("pvj_selected_decoration") === item.image;
+    }
+
+    function canAffordDecoration(item) {
+      if (item.unlockType !== "shop") return false;
+      return item.currency === "coins"
+        ? getCoins() >= item.price
+        : getSalt() >= item.price;
+    }
+
+    function getDecorationPriceLabel(item) {
+      if (item.unlockType === "progress") {
+        return item.description || "À débloquer";
+      }
+
+      if (item.price === 0) return "Gratuit";
+
+      return item.currency === "coins"
+        ? `${item.price} pièce${item.price > 1 ? "s" : ""}`
+        : `${item.price} sel${item.price > 1 ? "s" : ""}`;
+    }
+
+    function buyDecoration(itemId) {
+      const item = decorationItems.find(d => d.id === itemId);
+      if (!item || item.unlockType !== "shop") return;
+
+      const owned = getOwnedDecorations();
+      if (owned.includes(item.id)) return;
+      if (!canAffordDecoration(item)) return;
+
+      if (item.currency === "coins") {
+        setCoins(getCoins() - item.price);
+      } else {
+        setSalt(getSalt() - item.price);
+      }
+
+      owned.push(item.id);
+      setOwnedDecorations(owned);
+      renderDecorations();
+      refreshTopbar();
+    }
+
+    function selectDecoration(itemId) {
+      const item = decorationItems.find(d => d.id === itemId);
+      if (!item) return;
+
+      const owned = getOwnedDecorations();
+      if (!owned.includes(item.id)) return;
+
+      localStorage.setItem("pvj_selected_decoration", item.image);
+      renderDecorations();
+    }
+
+    function renderDecorations() {
+      const grid = document.getElementById("decorations-grid");
+      const owned = getOwnedDecorations();
+      grid.innerHTML = "";
+
+      decorationItems.forEach(item => {
+        const ownedItem = owned.includes(item.id);
+        const selected = isDecorationSelected(item);
+        const affordable = canAffordDecoration(item);
+        const locked = !ownedItem;
+
+        const card = document.createElement("article");
+        card.className = "deco-card";
+
+        if (locked) card.classList.add("locked-soft");
+        if (!ownedItem && affordable)
+          card.classList.add("affordable-soft");
+        if (selected) card.classList.add("selected");
+
+        let buttonHtml = "";
+
+        if (ownedItem) {
+          buttonHtml = `
+            <button class="avatar-btn select-btn ${selected ? "is-selected" : ""}" data-select-decoration="${item.id}">
+              ${selected ? "Sélectionnée" : "Sélectionner"}
+            </button>
+          `;
+        } else if (item.unlockType === "shop") {
+          buttonHtml = `
+            <button class="avatar-btn buy-btn" data-buy-decoration="${item.id}" ${!affordable ? "disabled" : ""}>
+              Acheter
+            </button>
+          `;
+        } else {
+          buttonHtml = `
+            <button class="avatar-btn progress-btn" disabled>
+              À débloquer
+            </button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="deco-frame">
+            <img src="${item.image}" alt="${item.name}" class="deco-image" />
+          </div>
+          <div class="avatar-name">${item.name}</div>
+          <div class="avatar-price">${getDecorationPriceLabel(item)}</div>
+          ${buttonHtml}
+        `;
+
+        grid.appendChild(card);
+      });
+
+      grid.querySelectorAll("[data-buy-decoration]").forEach(btn => {
+        btn.addEventListener("click", () => buyDecoration(btn.dataset.buyDecoration));
+      });
+
+      grid.querySelectorAll("[data-select-decoration]").forEach(btn => {
+        btn.addEventListener("click", () => selectDecoration(btn.dataset.selectDecoration));
+      });
+    }
+
+    function isCrownSelected(item) {
+      return localStorage.getItem("pvj_crown") === item.image;
+    }
+
+    function equipCrown(crownId) {
+      const item = crownItems.find(c => c.id === crownId);
+      if (!item) return;
+
+      const owned = getOwnedCrowns();
+      if (!owned.includes(item.id)) return;
+
+      localStorage.setItem("pvj_crown", item.image);
+      renderCrowns();
+    }
+
+    function renderCrowns() {
+      const grid = document.getElementById("crowns-grid");
+      const owned = getOwnedCrowns();
+      grid.innerHTML = "";
+
+      crownItems.forEach(item => {
+        const ownedItem = owned.includes(item.id);
+        const selected = isCrownSelected(item);
+
+        const card = document.createElement("article");
+        card.className = "crown-card";
+
+        if (!ownedItem) card.classList.add("locked");
+        if (selected) card.classList.add("selected");
+
+        const shownImage = ownedItem ? item.image : item.lockedImage;
+        const buttonHtml = ownedItem
+          ? `<button class="avatar-btn select-btn ${selected ? "is-selected" : ""}" data-select-crown="${item.id}">
+               ${selected ? "Équipée" : "Équiper"}
+             </button>`
+          : `<button class="avatar-btn progress-btn" disabled>
+               À débloquer en Diplôme
+             </button>`;
+
+        card.innerHTML = `
+          <div class="crown-frame">
+            <img src="${shownImage}" alt="${item.name}" class="crown-image" />
+          </div>
+          <div class="crown-title crown-title-light">${item.name}</div>
+          <div class="avatar-price">${ownedItem ? "Débloquée" : "Non débloquée"}</div>
+          ${buttonHtml}
+        `;
+
+        grid.appendChild(card);
+      });
+
+      grid.querySelectorAll("[data-select-crown]").forEach(btn => {
+        btn.addEventListener("click", () => equipCrown(btn.dataset.selectCrown));
+      });
+    }
+
+    ensureDefaults();
+    refreshTopbar();
+    renderAvatars();
+    renderDecorations();
+    renderCrowns();
+
+    window.addEventListener("pageshow", () => {
+      refreshTopbar();
+      renderAvatars();
+      renderDecorations();
+      renderCrowns();
+    });
+
+    window.addEventListener("focus", () => {
+      refreshTopbar();
+      renderAvatars();
+      renderDecorations();
+      renderCrowns();
+    });
+
+enablePageMusic();
+
+document.querySelector('a[href="menujeu.html"]')?.addEventListener("click", () => {
+  sessionStorage.setItem("pvj_audio_unlocked_tab", "true");
+  sessionStorage.setItem("pvj_next_music_target", "menu");
+});
+
+
+  </script>
+
+</body>
+</html>

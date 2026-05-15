@@ -1,0 +1,5607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puissance Vendéenne - Histoire</title>
+
+ <div id="provinceOverlay" class="reward-overlay hidden">
+    <div class="reward-card">
+      <h2 class="reward-title">🏆 Province conquise !</h2>
+      <div class="reward-city" id="provincePopupTitle">Nom de la province</div>
+      <div class="reward-score" id="provincePopupGrade">Nouveau grade : Révolté</div>
+      <div class="reward-coins" id="provincePopupSalt">+2 sel</div>
+  
+
+      <div class="reward-actions">
+        <button class="btn" id="provinceContinueBtn">Continuer</button>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    :root{
+      --gold:#d7b56d;
+      --gold-soft:#f1deb0;
+      --red:#c71f1f;
+      --paper:#f5efe2;
+      --ink:#3f2417;
+      --panel:rgba(18,10,10,.84);
+      --panel-border:rgba(215,181,109,.34);
+      --shadow:0 14px 34px rgba(0,0,0,.32);
+      --node-size:18px;
+      --label-size:11px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      font-family:Georgia,"Times New Roman",serif;
+      background:#060606;
+      color:#fff;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.04), transparent 54%),
+        linear-gradient(to bottom, #0b0b0b, #020202 60%, #000);
+    }
+
+    .hidden{display:none !important;}
+
+    #app{
+      position:relative;
+      width:100vw;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    /* ---------------- INTRO ---------------- */
+
+    #introScreen{
+      position:absolute;
+      inset:0;
+      z-index:5;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.03), transparent 55%),
+        linear-gradient(to bottom, #0b0b0b, #020202 60%, #000);
+    }
+
+    .intro-layer{
+      position:absolute;
+      inset:0;
+    }
+
+    .intro-map,
+    .intro-map-red{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+    }
+
+    .intro-map{
+      opacity:1;
+      filter:brightness(1.08);
+    }
+
+    .intro-map-red{
+      opacity:0;
+      transition:opacity .22s linear;
+    }
+
+    .levy-paper{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:min(44vw,650px);
+      max-width:86vw;
+      transform:translate(-50%,-50%) scale(.86);
+      opacity:0;
+      transition:transform 1.2s ease, opacity 1s ease;
+      box-shadow:var(--shadow);
+      border-radius:10px;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+    }
+
+    .levy-paper.visible{
+      opacity:1;
+      transform:translate(-50%,-50%) scale(1);
+    }
+
+    .intro-insurgents{
+      position:absolute;
+      left:50%;
+      bottom:-2vh;
+      width:min(36vw,520px);
+      max-width:54vw;
+      transform:
+        translateX(-50%)
+        perspective(1200px)
+        rotateX(82deg)
+        translateY(180px)
+        scale(.84);
+      transform-origin:center bottom;
+      opacity:0;
+      transition:transform 1.35s ease, opacity 1.15s ease;
+      filter:drop-shadow(0 18px 35px rgba(0,0,0,.45));
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+    }
+
+    .intro-insurgents.visible{
+      opacity:1;
+      transform:
+        translateX(-50%)
+        perspective(1200px)
+        rotateX(0deg)
+        translateY(0)
+        scale(1);
+    }
+
+    .intro-title-wrap{
+      position:absolute;
+      left:50%;
+      top:12%;
+      transform:translateX(-50%);
+      width:min(92vw,1150px);
+      text-align:center;
+      pointer-events:none;
+    }
+
+    .intro-title{
+      margin:0;
+      color:var(--gold);
+      text-shadow:0 5px 18px rgba(0,0,0,.45);
+      font-size:clamp(30px,5vw,78px);
+      letter-spacing:.03em;
+      opacity:0;
+      transform:translateY(16px);
+      transition:opacity .8s ease, transform .9s ease;
+      text-transform:uppercase;
+      line-height:1.05;
+    }
+
+    .intro-subtitle{
+      margin-top:14px;
+      color:#f5ead0;
+      text-shadow:0 4px 14px rgba(0,0,0,.45);
+      font-size:clamp(16px,2vw,26px);
+      opacity:0;
+      transform:translateY(14px);
+      transition:opacity .8s ease, transform .9s ease;
+    }
+
+    .intro-title.visible,
+    .intro-subtitle.visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .intro-card{
+      position:absolute;
+      left:50%;
+      bottom:4.8vh;
+      transform:translateX(-50%);
+      width:min(88vw,860px);
+      background:rgba(30,8,8,.82);
+      border:1px solid var(--panel-border);
+      border-radius:24px;
+      padding:24px 24px 18px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(6px);
+      opacity:0;
+      transition:opacity .7s ease, transform .7s ease;
+    }
+
+    .intro-card.visible{
+      opacity:1;
+    }
+
+    .intro-text{
+      margin:0;
+      color:#f5efe3;
+      font-size:clamp(16px,1.55vw,25px);
+      line-height:1.5;
+      text-align:center;
+    }
+
+    .intro-note{
+      position:absolute;
+      left:50%;
+      bottom:18vh;
+      transform:translateX(-50%);
+      width:min(82vw,760px);
+      text-align:center;
+      font-size:clamp(12px,1vw,14px);
+      line-height:1.35;
+      color:#e5dac4;
+      background:rgba(12,12,12,.74);
+      border:1px solid rgba(215,181,109,.22);
+      border-radius:14px;
+      padding:10px 14px;
+      box-shadow:var(--shadow);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .45s ease;
+    }
+
+    .intro-note.visible{
+      opacity:1;
+    }
+
+    .intro-bottom-actions{
+      margin-top:18px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(215,181,109,.45);
+      background:rgba(20,20,20,.9);
+      color:#f7edd7;
+      border-radius:15px;
+      padding:12px 20px;
+      font-size:17px;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      transition:transform .15s ease, border-color .2s ease, background .2s ease;
+      font-family:inherit;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(215,181,109,.85);
+    }
+
+    .intro-launch{
+      position:absolute;
+      left:50%;
+      bottom:4vh;
+      transform:translateX(-50%);
+      z-index:8;
+    }
+
+    /* ---------------- NAME SCREEN ---------------- */
+
+    #nameScreen,
+    #mapScreen,
+    #questionScreen{
+      position:absolute;
+      inset:0;
+      z-index:4;
+      display:none;
+    }
+
+    #nameScreen.active,
+    #mapScreen.active,
+    #questionScreen.active{
+      display:block;
+    }
+
+    #nameScreen{
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.03), transparent 50%),
+        linear-gradient(to bottom, #0b0b0b, #020202 60%, #000);
+    }
+
+    .name-card{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(92vw,760px);
+      border:1px solid var(--panel-border);
+      border-radius:26px;
+      padding:28px;
+      box-shadow:var(--shadow);
+      text-align:center;
+    }
+
+    .name-card h2{
+      margin:0 0 16px;
+      color:var(--gold);
+      font-size:clamp(28px,3.1vw,44px);
+    }
+
+    .name-card p{
+      margin:0 0 18px;
+      color:#efe5cf;
+      font-size:clamp(15px,1.35vw,20px);
+    }
+
+    .name-row{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .name-input{
+      width:min(100%,360px);
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(215,181,109,.36);
+      background:rgba(255,255,255,.07);
+      color:#fff;
+      font-size:17px;
+      outline:none;
+      font-family:inherit;
+    }
+
+    .name-error{
+      margin-top:14px;
+      min-height:20px;
+      color:#ffb5b5;
+      font-size:15px;
+    }
+
+    /* ---------------- MAP SCREEN ---------------- */
+
+    #mapScreen{
+      background:#090909;
+      overflow:hidden;
+    }
+
+    .resource-bar{
+      position:absolute;
+      right:20px;
+      top:18px;
+      z-index:12;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .resource-life-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+
+.life-timer{
+  font-size:12px;
+  color:#9b5a54;
+  background:rgba(255,250,245,.88);
+  border:1px solid rgba(110,70,45,.12);
+  border-radius:10px;
+  padding:3px 8px;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+
+    .resource-box{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:78px;
+      padding:9px 14px;
+      border-radius:16px;
+      background:rgba(255,250,245,.92);
+      border:1px solid rgba(110,70,45,.18);
+      box-shadow:0 8px 20px rgba(0,0,0,.18);
+      color:#611f16;
+      font-weight:bold;
+      font-size:15px;
+    }
+
+    .resource-box img{
+      width:22px;
+      height:22px;
+      object-fit:contain;
+      display:block;
+    }
+
+    .profile-card{
+      position:absolute;
+      right:20px;
+      top:118px;
+      width:210px;
+      min-height:305px;
+      z-index:12;
+      padding:16px 14px;
+      border-radius:24px;
+      background:rgba(255,250,245,.78);
+      border:1px solid rgba(110,70,45,.12);
+      box-shadow:0 10px 22px rgba(0,0,0,.14);
+      backdrop-filter:blur(2px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      text-align:center;
+      color:#5b241b;
+    }
+
+   .profile-avatar-shell {
+  width: 136px;
+  height: 136px;
+  padding: 5px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(220, 214, 205, 0.92) 0%, rgba(188, 180, 169, 0.92) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,0.40),
+    0 6px 14px rgba(60, 30, 18, 0.10);
+}
+
+   .profile-avatar-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  overflow: visible;
+  background: rgba(245, 239, 231, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+    .profile-avatar{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center center;
+      display:block;
+    }
+
+    .profile-decoration {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 4;
+  display: none;
+}
+
+   .profile-crown {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 78px;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.profile-crown.hidden {
+  display: none;
+}
+
+    .profile-name{
+      font-size:1.12rem;
+      font-weight:bold;
+    }
+
+    .profile-lys{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-size:1rem;
+      font-weight:bold;
+      color:#7a2a1d;
+    }
+
+    .profile-lys img{
+      width:18px;
+      height:18px;
+      object-fit:contain;
+    }
+
+    .profile-rank{
+      font-size:1rem;
+      font-weight:bold;
+      color:#8c5a2d;
+    }
+
+    .map-help{
+      position:absolute;
+      left:18px;
+      bottom:18px;
+      width:min(340px,40vw);
+      z-index:12;
+      background:rgba(15,10,10,.76);
+      border:1px solid rgba(215,181,109,.2);
+      border-radius:16px;
+      padding:14px 16px;
+      color:#e9dfc8;
+      font-size:14px;
+      line-height:1.45;
+      box-shadow:var(--shadow);
+    }
+
+    .map-viewport{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      cursor:grab;
+      z-index:6;
+      touch-action:none;
+    }
+
+    .map-viewport.dragging{
+      cursor:grabbing;
+    }
+
+    .map-world{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:min(1180px,84vw);
+      aspect-ratio:1536 / 983;
+      transform:translate(-50%,-50%) scale(1);
+      transform-origin:center center;
+    }
+
+    .map-base{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      user-select:none;
+      -webkit-user-drag:none;
+      filter:brightness(1.12);
+      pointer-events:none;
+    }
+
+    .city-layer{
+      position:absolute;
+      inset:0;
+      z-index:7;
+    }
+
+    .city{
+      position:absolute;
+      transform:translate(-50%,-50%);
+      z-index:8;
+    }
+
+    .city-point{
+      width:var(--node-size);
+      height:var(--node-size);
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,.95);
+      box-shadow:0 0 0 0 rgba(215,181,109,.6);
+      background:#d9d9d9;
+      cursor:default;
+      transition:transform .15s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+      position:relative;
+      z-index:2;
+    }
+
+    .city.available .city-point{
+      background:#ffffff;
+      cursor:pointer;
+      animation:pulse 1.8s infinite;
+    }
+
+    .city.locked .city-point{
+      background:#7b7b7b;
+      border-color:rgba(255,255,255,.45);
+      opacity:.65;
+    }
+
+    .city.done .city-point{
+      background:#ffffff;
+      border-color:#ffffff;
+      cursor:default;
+    }
+
+    .city.available:hover .city-point{
+      transform:scale(1.08);
+    }
+
+    .city-label{
+      position:absolute;
+      left:50%;
+      bottom:calc(100% + 7px);
+      transform:translateX(-50%);
+      white-space:nowrap;
+      background:rgba(18,18,18,.74);
+      color:#f0e6d0;
+      border:1px solid rgba(215,181,109,.22);
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:var(--label-size);
+      line-height:1.1;
+      box-shadow:0 6px 14px rgba(0,0,0,.22);
+      pointer-events:none;
+      max-width:110px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .city-lys{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:14px;
+      height:14px;
+      transform:translate(-50%,-50%);
+      z-index:3;
+      display:none;
+      pointer-events:none;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));
+    }
+
+    .city.done .city-lys{
+      display:block;
+    }
+
+    @keyframes pulse{
+      0%{ box-shadow:0 0 0 0 rgba(215,181,109,.7); }
+      70%{ box-shadow:0 0 0 14px rgba(215,181,109,0); }
+      100%{ box-shadow:0 0 0 0 rgba(215,181,109,0); }
+    }
+
+    /* ---------------- QUESTION SCREEN ---------------- */
+
+    #questionScreen{
+      background:
+        linear-gradient(rgba(245,239,226,.86), rgba(245,239,226,.88)),
+        url("images/vieuxpapier.jpg") center center / cover no-repeat;
+    }
+
+    .question-card{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(94vw,980px);
+      background:rgba(255,251,244,.9);
+      border:1px solid rgba(110,70,45,.18);
+      border-radius:26px;
+      padding:28px;
+      box-shadow:0 14px 34px rgba(61,28,15,.16);
+      color:var(--ink);
+    }
+
+    .q-meta{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+      color:#7a2a1d;
+      font-size:15px;
+      font-weight:bold;
+    }
+
+    .question-card h3{
+      margin:0 0 10px;
+      color:#7a2a1d;
+      font-size:clamp(20px,2vw,30px);
+    }
+
+    .question-card p{
+      margin:0 0 22px;
+      color:#4a2a1c;
+      font-size:clamp(18px,1.7vw,26px);
+      line-height:1.45;
+    }
+
+    .answers{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .answer{
+      appearance:none;
+      border:1px solid rgba(110,70,45,.2);
+      background:rgba(255,255,255,.72);
+      color:#4a2a1c;
+      padding:16px;
+      border-radius:16px;
+      text-align:left;
+      cursor:pointer;
+      font-size:16px;
+      font-family:inherit;
+      transition:transform .12s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .answer:hover{
+      transform:translateY(-1px);
+      border-color:rgba(122,42,29,.5);
+    }
+
+    .answer.good{
+      background:rgba(70,150,95,.22);
+      border-color:rgba(50,110,70,.6);
+    }
+
+    .answer.bad{
+      background:rgba(190,60,60,.18);
+      border-color:rgba(150,40,40,.6);
+    }
+
+    @media (max-width: 980px){
+      .profile-card{
+        width:184px;
+        min-height:280px;
+      }
+      .profile-avatar-shell{
+        width:110px;
+        height:110px;
+      }
+      .map-world{
+        width:min(1240px,104vw);
+      }
+      .city-label{
+        font-size:10px;
+        max-width:95px;
+      }
+    }
+
+    @media (max-width: 760px){
+      .resource-bar{
+        right:10px;
+        top:10px;
+        gap:8px;
+      }
+      .resource-box{
+        min-width:68px;
+        padding:7px 10px;
+        font-size:13px;
+      }
+      .profile-card{
+        right:10px;
+        top:98px;
+        width:158px;
+        min-height:245px;
+        padding:12px 10px;
+      }
+      .profile-avatar-shell{
+        width:92px;
+        height:92px;
+      }
+      .profile-name{
+        font-size:1rem;
+      }
+      .map-help{
+        width:min(280px,58vw);
+        font-size:12px;
+      }
+      .answers{
+        grid-template-columns:1fr;
+      }
+      .question-card{
+        padding:20px;
+      }
+      .map-world{
+        width:min(1320px,126vw);
+      }
+      .city-label{
+        font-size:9px;
+        padding:2px 6px;
+        max-width:88px;
+      }
+      .intro-insurgents{
+        width:min(48vw,460px);
+      }
+    }
+
+
+@media (max-width: 520px){
+  .resource-bar{
+    right: 10px;
+    top: 10px;
+    gap: 8px;
+  }
+
+  .resource-box{
+    min-width: 64px;
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+
+  .map-menu-btn{
+    left: 10px;
+    top: 10px;
+    z-index: 20;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .life-timer{
+    left: 10px;
+    top: 62px;
+    font-size: 0.78rem;
+    padding: 6px 10px;
+  }
+
+  .profile-card{
+    position: absolute;
+    right: 10px;
+    top: 92px;
+    width: 142px;
+    min-height: 220px;
+    padding: 10px 8px;
+    z-index: 12;
+  }
+
+  .profile-avatar-shell{
+    width: 82px;
+    height: 82px;
+  }
+
+  .profile-name{
+    font-size: 0.95rem;
+  }
+
+  .profile-lys,
+  .profile-rank{
+    font-size: 0.9rem;
+  }
+
+
+
+.map-help{
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+
+  width: auto;
+  max-width: none;
+
+  padding: 14px 16px;
+
+  font-size: 0.82rem;
+  line-height: 1.35;
+
+  background: rgba(20, 15, 12, 0.78);
+  border-radius: 14px;
+
+  backdrop-filter: blur(4px);
+
+  z-index: 11;
+}
+
+
+  .map-world{
+    width: min(1320px, 132vw);
+  }
+
+  .city-label{
+    font-size: 8px;
+    padding: 2px 5px;
+    max-width: 78px;
+  }
+}
+
+
+    .map-menu-btn{
+      position:absolute;
+      left:18px;
+      top:18px;
+      z-index:13;
+    }
+
+    .question-back-btn{
+      position:absolute;
+      left:18px;
+      top:18px;
+      z-index:13;
+    }
+
+    #questionScreen .resource-bar{
+      position:absolute;
+      right:20px;
+      top:18px;
+      z-index:12;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    #questionScreen .profile-card{
+      position:absolute;
+      right:20px;
+      top:118px;
+      width:210px;
+      min-height:305px;
+      z-index:12;
+      padding:16px 14px;
+      border-radius:24px;
+      background:rgba(255,250,245,.78);
+      border:1px solid rgba(110,70,45,.12);
+      box-shadow:0 10px 22px rgba(0,0,0,.14);
+      backdrop-filter:blur(2px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      text-align:center;
+      color:#5b241b;
+    }
+
+    .reward-overlay{
+      position:absolute;
+      inset:0;
+      z-index:30;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.34);
+      backdrop-filter:blur(3px);
+    }
+
+    .reward-card{
+      position:relative;
+      width:min(92vw,650px);
+      padding:28px 24px 22px;
+      border-radius:28px;
+      background:rgba(255,249,239,.97);
+      border:1px solid rgba(110,70,45,.16);
+      box-shadow:0 18px 40px rgba(0,0,0,.24);
+      text-align:center;
+      color:#5b241b;
+      overflow:hidden;
+      animation:rewardPop .35s ease;
+    }
+
+    @keyframes rewardPop{
+      from{ transform:scale(.9); opacity:0; }
+      to{ transform:scale(1); opacity:1; }
+    }
+
+    .reward-title{
+      margin:0;
+      font-size:clamp(28px,3vw,42px);
+      color:#7a2a1d;
+    }
+
+    .reward-city{
+      margin-top:8px;
+      font-size:clamp(18px,1.8vw,28px);
+      color:#8c5a2d;
+      font-weight:bold;
+    }
+
+  .reward-lys-row{
+  margin-top:18px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:18px;
+  min-height:62px;
+}
+
+.reward-lys-row img{
+  width:32px;
+  height:32px;
+  object-fit:contain;
+  opacity:0;
+  transform:translateY(18px) scale(0.2);
+}
+
+.reward-lys-row img.big{
+  width:40px;
+  height:40px;
+}
+
+.reward-lys-row img.fly-in{
+  animation: lysFlyIn .42s ease forwards;
+}
+
+@keyframes lysFlyIn{
+  0%{
+    opacity:0;
+    transform:translateY(28px) scale(1.8);
+    filter:blur(2px);
+  }
+  55%{
+    opacity:1;
+    transform:translateY(-6px) scale(0.92);
+    filter:blur(0);
+  }
+  100%{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:blur(0);
+  }
+}
+
+
+    .reward-score{
+      margin-top:14px;
+      font-size:22px;
+      font-weight:bold;
+      color:#5b241b;
+    }
+
+    .reward-coins{
+      margin-top:8px;
+      font-size:24px;
+      font-weight:bold;
+      color:#a46a00;
+    }
+
+    .reward-completion{
+      margin-top:8px;
+      min-height:22px;
+      font-size:15px;
+      color:#7a2a1d;
+    }
+
+    .reward-actions{
+      margin-top:18px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .reward-fireworks{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+
+    .reward-fireworks span{
+      position:absolute;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      opacity:0;
+      animation:firework 4.9s ease forwards;
+    }
+
+    .reward-fireworks span:nth-child(1){ left:18%; top:20%; background:#d7b56d; animation-delay:.0s; }
+    .reward-fireworks span:nth-child(2){ left:26%; top:10%; background:#c71f1f; animation-delay:.12s; }
+    .reward-fireworks span:nth-child(3){ left:74%; top:18%; background:#e49f1c; animation-delay:.08s; }
+    .reward-fireworks span:nth-child(4){ left:83%; top:28%; background:#d7b56d; animation-delay:.18s; }
+    .reward-fireworks span:nth-child(5){ left:21%; top:62%; background:#c71f1f; animation-delay:.22s; }
+    .reward-fireworks span:nth-child(6){ left:78%; top:62%; background:#e49f1c; animation-delay:.28s; }
+
+    @keyframes firework{
+      0%{ transform:scale(.2); opacity:0; box-shadow:0 0 0 0 currentColor; }
+      25%{ opacity:1; }
+      100%{
+        transform:scale(1);
+        opacity:0;
+        box-shadow:
+          0 -28px 0 3px currentColor,
+          0 28px 0 3px currentColor,
+          28px 0 0 3px currentColor,
+          -28px 0 0 3px currentColor,
+          20px 20px 0 2px currentColor,
+          -20px 20px 0 2px currentColor,
+          20px -20px 0 2px currentColor,
+          -20px -20px 0 2px currentColor;
+      }
+    }
+
+    @media (max-width:760px){
+      .map-menu-btn,
+      .question-back-btn{
+        left:10px;
+        top:10px;
+      }
+
+      #questionScreen .resource-bar{
+        right:10px;
+        top:10px;
+        gap:8px;
+      }
+
+      #questionScreen .profile-card{
+        right:10px;
+        top:98px;
+        width:158px;
+        min-height:245px;
+        padding:12px 10px;
+      }
+
+      .reward-card{
+        padding:22px 16px 18px;
+      }
+
+      .reward-score{
+        font-size:19px;
+      }
+
+      .reward-coins{
+        font-size:21px;
+      }
+    }
+
+    #provinceOverlay {
+  backdrop-filter: blur(4px);
+}
+
+.reward-card {
+  animation: popupAppear 0.3s ease;
+}
+
+@keyframes popupAppear {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 520px){
+  #questionScreen .resource-bar{
+    right: 10px;
+    top: 10px;
+    gap: 8px;
+  }
+
+  #questionScreen .question-back-btn{
+    left: 10px;
+    top: 10px;
+    z-index: 13;
+  }
+
+  #questionScreen .question-card{
+    position: static;
+    transform: none;
+    width: calc(100% - 20px);
+    margin: 92px auto 12px;
+    padding: 20px;
+  }
+
+  #questionScreen .quiz-profile-card{
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    width: 85% !important;
+    min-height: auto !important;
+    margin: 12px auto 16px !important;
+    padding: 12px 10px !important;
+    z-index: auto !important;
+  }
+
+  #questionScreen .quiz-profile-card .profile-avatar-shell{
+    width: 88px;
+    height: 88px;
+  }
+
+  #questionScreen .quiz-profile-card .profile-name{
+    font-size: 1rem;
+  }
+
+  #questionScreen .quiz-profile-card .profile-lys,
+  #questionScreen .quiz-profile-card .profile-rank{
+    font-size: 0.92rem;
+  }
+
+  #questionScreen{
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 24px;
+}
+
+#questionScreen .question-card{
+  position: static !important;
+  transform: none !important;
+  width: calc(100% - 20px) !important;
+  margin: 92px auto 12px !important;
+}
+
+#questionScreen .quiz-profile-card{
+  position: static !important;
+  transform: none !important;
+  width: 85% !important;
+  margin: 12px auto 16px !important;
+}
+
+#questionScreen .question-back-btn{
+  left: 10px;
+  top: 10px;
+  z-index: 13;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  max-width: 52vw;
+}
+
+#questionScreen .resource-bar{
+  right: 10px;
+  top: 58px;
+  gap: 8px;
+}
+
+#questionScreen .resource-life-wrap{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+#questionScreen .life-timer{
+  position: static;
+  margin-top: 6px;
+}
+
+#questionScreen .question-card{
+  margin: 142px auto 12px !important;
+}
+
+
+
+}
+
+@media (max-width: 380px){
+
+  #mapScreen .resource-bar{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    right: 8px;
+    top: 56px;
+  }
+
+  #mapScreen .resource-box{
+    min-width: 56px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  #mapScreen .life-timer{
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  top: 88px; /* descend un peu */
+  opacity: 0.85; /* plus léger visuellement */
+}
+
+#mapScreen .life-timer{
+  font-size: 0.62rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+
+}
+
+
+ #insurgeContainer {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#insurgeContainer img {
+  width: 110px;
+  height: auto;
+  opacity: 0.95;
+}
+
+@media (max-width: 500px){
+  #insurgeContainer img {
+    width: 80px;
+  }
+}
+
+#nameBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background: url("images/linsurgeinconnuintro-fond.png") center/cover no-repeat;
+
+  filter: brightness(0.95);
+  transform: scale(1.1);
+
+  z-index: 0;
+}
+
+.name-card {
+  position: relative;
+  z-index: 1;
+}
+
+.name-input::placeholder {
+    color: rgba(30, 30, 30, 0.7);
+}
+
+
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- INTRO -->
+    <section id="introScreen">
+      <button class="btn intro-launch" id="launchIntroBtn">Lancer l’introduction ▶️</button>
+
+      <div class="intro-layer">
+        <img class="intro-map" id="introMapWhite" src="images/VENDEEBLANCHE.png" alt="Vendée" />
+        <img class="intro-map-red" id="introMapRed" src="images/VENDEEROUGE.png" alt="Vendée rouge" />
+        <img class="levy-paper" id="levyPaper" src="images/leveemassepvjeu.png" alt="Levée en masse" />
+        <img class="intro-insurgents" id="introInsurgents" src="images/vendeenspaysansjeupv.png" alt="Insurgés vendéens" />
+      </div>
+
+      <div class="intro-title-wrap">
+        <h1 class="intro-title" id="introTitle">La Vendée s’insurge</h1>
+        <div class="intro-subtitle" id="introSubtitle">1793. La levée en masse embrase l’Ouest.</div>
+      </div>
+
+      <div class="intro-note" id="introNote">
+        Attention : les images sont des illustrations et ne représentent pas exactement la Vendée militaire telle qu’elle était.
+      </div>
+
+      <div class="intro-card" id="introCard">
+        <p class="intro-text">
+          La Vendée est insurgée, aidez les Vendéens à récupérer les villes vendéennes en répondant à des questions sur l’Histoire et la géographie de la Vendée.
+        </p>
+        <div class="intro-bottom-actions">
+          <button class="btn" id="introNextBtn">Suivant</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOM -->
+    <section id="nameScreen">
+      <div id="nameBackground"> </div>
+      <div class="name-card">
+        <div id="insurgeContainer">
+  <img src="images/linsurgeinconnuintro.png" alt="Insurgé vendéen">
+</div>
+        <h2>Eh vous ! <br> Il faut sauver nos paroisses ! <br> Quel est votre prénom &nbsp;?</h2>
+        <p>Répondez à l'insurgé vendéen qui vous demande votre prénom. Il sera affiché sur votre profil et ne pourra <b> pas </b> être changé.</p>
+
+        <div class="name-row">
+          <input
+            id="playerNameInput"
+            class="name-input"
+            type="text"
+            maxlength="14"
+            placeholder="Entrez votre prénom..."
+            autocomplete="off"
+          />
+          <button class="btn" id="confirmNameBtn">C'est mon prénom</button>
+        </div>
+
+        <div class="name-error" id="nameError"></div>
+      </div>
+    </section>
+
+    <!-- CARTE -->
+    <section id="mapScreen">
+      <button class="btn map-menu-btn" id="backToMenuBtn">Retour au menu</button>
+
+      <div class="resource-bar">
+  <div class="resource-life-wrap">
+    <div class="resource-box">
+      <img src="images/viejeupvcoeur.png" alt="Vies" />
+      <span id="viesCount">5/5</span>
+    </div>
+    <div class="life-timer" id="lifeTimerText">Prochaine vie dans --:--</div>
+  </div>
+
+  <div class="resource-box">
+    <img src="images/piece1780.png" alt="Pièces" />
+    <span id="piecesCount">0</span>
+  </div>
+
+  <div class="resource-box">
+    <img src="images/seljeupvdiamant.png" alt="Sel" />
+    <span id="selCount">0</span>
+  </div>
+</div>
+
+
+      <aside class="profile-card">
+        <div class="profile-avatar-shell">
+          <div class="profile-avatar-wrap">
+            <img id="profileAvatar" class="profile-avatar" src="images/unchouanphotoprofildefautpvjeu.png" alt="Avatar" />
+            <img id="profileCrown" class="profile-crown" src="" alt="Couronne" />
+            <img id="profileDecoration" class="profile-decoration" src="" alt="Décoration" />
+          </div>
+        </div>
+
+        <div class="profile-name" id="profileName">Profil à créer</div>
+
+        <div class="profile-lys">
+          <img src="images/lysdeniveaupvjeu.png" alt="Lys" />
+          <span id="profileLysCount">0</span>
+        </div>
+
+        <div class="profile-rank" id="profileRank">Pacifiste</div>
+      </aside>
+
+      <div class="map-viewport" id="mapViewport">
+        <div class="map-world" id="mapWorld">
+          <img class="map-base" src="images/VENDEE50COMMUNESBLANCHES.png" alt="Carte de Vendée" />
+          <div class="city-layer" id="cityLayer"></div>
+        </div>
+      </div>
+
+      <div class="map-help" id="mapHelp">
+        Vous habitez à l'île d'Yeu. Pour récupérer votre île des bleus, vous devez répondre à dix questions. Vous pouvez déplacer la carte pour vous y rendre. Vous devez reprendre toutes les paroisses vendéennes en répondant à des questions. Prouvez, que vous êtes un vrai vendéen.
+      </div>
+    </section>
+
+   <!-- QUESTIONS -->
+  <section id="questionScreen">
+  <div class="resource-bar">
+    <div class="resource-life-wrap">
+      <div class="resource-box">
+        <img src="images/viejeupvcoeur.png" alt="Vies" />
+        <span id="quizViesCount">5/5</span>
+      </div>
+      <div class="life-timer" id="quizLifeTimerText">Prochaine vie dans --:--</div>
+    </div>
+
+    <div class="resource-box">
+      <img src="images/piece1780.png" alt="Pièces" />
+      <span id="quizPiecesCount">0</span>
+    </div>
+
+    <div class="resource-box">
+      <img src="images/seljeupvdiamant.png" alt="Sel" />
+      <span id="quizSelCount">0</span>
+    </div>
+  </div>
+
+
+
+      <button class="btn question-back-btn" id="backToMapBtn">Retour à la carte</button>
+
+      <div class="question-card">
+        <div class="q-meta">
+          <span id="qProgress">Question 1 / 10</span>
+          <span id="qLives">Vies : 5</span>
+          <span id="qCityMeta">Commune : Île d’Yeu</span>
+        </div>
+
+        <h3 id="qCityTitle">Île d’Yeu</h3>
+        <p id="qText"></p>
+
+        <div class="answers" id="answersBox"></div>
+      </div>
+
+  <aside class="profile-card quiz-profile-card">
+        <div class="profile-avatar-shell">
+          <div class="profile-avatar-wrap">
+            <img id="quizProfileAvatar" class="profile-avatar" src="images/unchouanphotoprofildefautpvjeu.png" alt="Avatar" />
+            <img id="quizProfileCrown" class="profile-crown" src="" alt="Couronne" />
+            <img id="quizProfileDecoration" class="profile-decoration" src="" alt="Décoration" />
+          </div>
+        </div>
+
+        <div class="profile-name" id="quizProfileName">Profil à créer</div>
+
+        <div class="profile-lys">
+          <img src="images/lysdeniveaupvjeu.png" alt="Lys" />
+          <span id="quizProfileLysCount">0</span>
+        </div>
+
+        <div class="profile-rank" id="quizProfileRank">Pacifiste</div>
+      </aside>
+
+    </section>
+
+<div id="rewardOverlay" class="reward-overlay hidden">
+      <div class="reward-card" id="rewardCard">
+        <div class="reward-fireworks">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <h2 class="reward-title">Commune libérée !</h2>
+        <div class="reward-city" id="rewardCityName">Île d’Yeu</div>
+
+        <div class="reward-lys-row" id="rewardLysRow"></div>
+
+        <div class="reward-score" id="rewardScoreText">Score : 10 / 10</div>
+        <div class="reward-coins" id="rewardCoinsText">+100 pièces</div>
+        <div class="reward-completion" id="rewardCompletionText"></div>
+
+        <div class="reward-actions">
+          <button class="btn" id="rewardContinueBtn">Retour à la carte</button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="audioMouettes" preload="auto" src="audio/MOUETTESPOURJEUPV.wav"></audio>
+    <audio id="audioIntro" preload="auto" src="audio/JEUHISTOIREINTROPV.wav"></audio>
+    <audio id="audioGameMusic" preload="auto" loop>
+      <source src="audio/musiquejeupuissancevendeenne.mp3" type="audio/mpeg"> 
+      </audio>
+  </div>
+
+  <script>
+
+    const STORAGE = {
+      pseudo: "pvj_pseudo",
+      vies: "pvj_vies",
+      pieces: "pvj_pieces",
+      sel: "pvj_sel",
+      avatar: "pvj_avatar",
+      crown: "pvj_crown",
+      lys: "pvj_lys",
+      grade: "pvj_grade",
+      introSeen: "pvj_history_intro_seen",
+      historyUnlocked: "pvj_history_unlocked_cities",
+      historyDone: "pvj_history_done_cities",
+      historyCurrentCity: "pvj_history_current_city",
+      historyCurrentQuestion: "pvj_history_current_question",
+
+      historyRewards: "pvj_history_rewards_by_city",
+      unlimitedLivesUntil: "pvj_unlimited_lives_until",
+      lifeRegenAnchor: "pvj_life_regen_anchor",
+      allLysBonusClaimed: "pvj_all_lys_bonus_claimed"
+    };
+
+
+    const MAX_BASE_LIVES = 5;
+    const LIFE_REGEN_MS = 18 * 60 * 1000;
+const UNLIMITED_LIVES_KEY = "pvj_unlimited_lives_until";
+const LIFE_REGEN_ANCHOR_KEY = "pvj_life_regen_anchor";
+
+
+    const CITY_DATA = [
+      { key:"yeu", name:"Île d’Yeu", x:2.4, y:45.95, initial:true },
+      { key:"noirmoutier", name:"Noirmoutier-en-l’Île", x:7.47, y:10.61 },
+
+      { key:"beauvoir", name:"Beauvoir-sur-Mer", x:20.07, y:17.87 },
+      { key:"stjeandemonts", name:"Saint-Jean-de-Monts", x:19.53, y:35.38 },
+      { key:"leperrier", name:"Le Perrier", x:27.93, y:23.98 },
+      { key:"challans", name:"Challans", x:28.4, y:38.07 },
+      { key:"soullans", name:"Soullans", x:28.27, y:47.71 },
+      { key:"palluau", name:"Palluau", x:38.87, y:30.61 },
+      { key:"commequiers", name:"Commequiers", x:37.6, y:41.8 },
+      { key:"coex", name:"Coëx", x:37.73, y:52.17 },
+      { key:"lessables", name:"Les Sables d'Olonne", x:32.8, y:63.26 },
+
+      { key:"leslucs", name:"Les Lucs-sur-Boulogne", x:50.73, y:29.89 },
+      { key:"bremsurmer", name:"Brem-sur-Mer", x:38.4, y:64.29 },
+      { key:"talmont", name:"Talmont-Saint-Hilaire", x:43.13, y:72.79 },
+      { key:"achards", name:"Les Achards", x:45.67, y:59.32 },
+      { key:"jard", name:"Jard-sur-Mer", x:47.67, y:75.59 },
+      { key:"laroche", name:"La Roche-sur-Yon", x:49.47, y:47.82 },
+
+      { key:"montaigu", name:"Montaigu-Vendée", x:61.33, y:12.27 },
+      { key:"tiffauges", name:"Tiffauges", x:74.87, y:12.48 },
+      { key:"longville", name:"Longville-sur-Mer", x:50.67, y:79.42 },
+      { key:"letablier", name:"Le Tablier", x:54.4, y:61.29 },
+      { key:"boissierelandes", name:"La Boissière-des-Landes", x:56.13, y:69.99 },
+      { key:"angles", name:"Angles", x:55.07, y:80.46 },
+      { key:"bellevigny", name:"Bellevigny", x:54.8, y:39.42 },
+      { key:"brouzils", name:"Les Brouzils", x:63.53, y:26.5 },
+      { key:"fougere", name:"Fougeré", x:58.13, y:47.19 },
+      { key:"stfulgent", name:"Saint-Fulgent", x:65, y:40.04 },
+
+      { key:"lesepesses", name:"Les Epesses", x:72.33, y:24.91 },
+      { key:"chantonnay", name:"Chantonnay", x:75.6, y:39.73 },
+      { key:"mortagne", name:"Mortagne-sur-Sèvre", x:82.93, y:27.61 },
+      { key:"mesmin", name:"Saint Mesmin", x:86.53, y:37.87 },
+      { key:"rivesyon", name:"Rives de l’Yon", x:61.8, y:54.24 },
+
+      { key:"aiguillon", name:"L’Aiguillon-la-Presqu’île", x:59.13, y:86.88 },
+      { key:"stmichelenlherm", name:"Saint Michel-en-l'Herm", x:64.2, y:77.76 },
+      { key:"puyravault", name:"Puyravault", x:69.6, y:86.05 },
+      { key:"lucon", name:"Luçon", x:70.53, y:72.79 },
+      { key:"stehermine", name:"Sainte-Hermine", x:69.73, y:60.35 },
+      { key:"thire", name:"Thiré", x:74.33, y:50.09 },
+      { key:"bazauges", name:"Bazoges-en-Pareds", x:81.27, y:48.02 },
+      { key:"montournais", name:"Montournais", x:89.93, y:43.26 },
+      { key:"terval", name:"Terval", x:91.07, y:47.4 },
+      { key:"lachat", name:"La Châtaigneraie", x:86.47, y:55.69 },
+      { key:"marillet", name:"Marillet", x:93.27, y:57.35 },
+      { key:"fontenay", name:"Fontenay-le-Comte", x:80.67, y:65.22 },
+      { key:"sthilaireloges", name:"Saint Hilaire-des-Loges", x:92.47, y:68.54 },
+      { key:"fraigneau", name:"Saint-Martin-de-Fraigneau", x:86.6, y:72.79 },
+      { key:"montreuil", name:"Montreuil", x:78.53, y:78.28 },
+      { key:"autise", name:"Rives-d'Autise", x:90.73, y:79.84 },
+      { key:"benet", name:"Benet", x:91.4, y:88.64 },
+      { key:"maille", name:"Maillé", x:81.6, y:88.54 },
+      { key:"chailles", name:"Chaillé-les-Marais", x:74.4, y:84.81 }
+    ];
+
+    const QUESTIONS_BY_CITY = {
+  "yeu": [
+    {
+      text: "Pour commencer, quand a été créé le compte Instagram @puissance_vendeenne ?",
+      answers: ["En janvier 2021", "En février 2022", "En mars 2023", "En janvier 2024"],
+      correct: 1
+    },
+    {
+      text: "En quelle année débute la première guerre de Vendée ?",
+      answers: ["en 1791", "en 1792", "en 1793", "en 1794"],
+      correct: 2
+    },
+    {
+      text: "Quel est le surnom le plus donné à François Athanase Charette de La Contrie ?",
+      answers: ["Le roi de Bretagne", "Le roi de France", "Le roi de Vendée", "Le duc de Vendée"],
+      correct: 2
+    },
+    {
+      text: "Henri du Vergier de La Rochejaquelein était issu d’une famille noble de l’Ouest de la France. Quel était son titre ?",
+      answers: ["Baron de La Rochejaquelein", "Vicomte de La Rochejaquelein", "Comte de La Rochejaquelein", "Duc de La Rochejaquelein"],
+      correct: 2
+    },
+    {
+      text: "Quel régiment a intégré le généralissime Charles-Melchior Artus de Bonchamps ?",
+      answers: ["Le régiment de Bretagne", "Le régiment de la Loire", "Le régiment de Normandie", "Le régiment d’Aquitaine"],
+      correct: 3
+    },
+    {
+      text: "Comment les révolutionnaires voyaient-ils les Vendéens ?",
+      answers: ["Comme des agneaux", "Comme des pucerons", "Comme des ennemis", "Comme des étrangers"],
+      correct: 2
+    },
+    {
+      text: "Avant la guerre de Vendée, quel rôle jouèrent les « Mulotins » aussi appelés « Montfortains » dans le bocage vendéen ?",
+      answers: ["Une propagande jacobine au sein des vendéens afin de les diviser et de rendre les troupes républicaines plus fortes", "Le renforcement de la foi catholique traditionnelle depuis le XVIIe siècle", "L’organisation de milices antiroyalistes pré-guerre", "La promotion de la laïcité maçonnique"],
+      correct: 1
+    },
+    {
+      text: "Quelle structure administrative remplace les provinces françaises en 1790 ?",
+      answers: ["Les départements", "Les régions", "Les communes", "Les collectivités territoriales"],
+      correct: 0
+    },
+    {
+      text: "Quel est le point culminant de la Vendée ?",
+      answers: ["Le mont des Alouettes", "Le Grand Puy Soleil", "Le signal de Tesla", "Le site de Saint-Michel-Mont-Mercure"],
+      correct: 3
+    },
+    {
+      text: "Dans les chants vendéens et royalistes, à qui la fidélité est-elle généralement portée ?",
+      answers: ["A Dieu et Marie", "A Dieu et au Roy", "A la Convention et aux députés", "A la Vendée et aux fleuves"],
+      correct: 1
+    }
+  ],
+
+  "noirmoutier": [
+    {
+      text: "Quelle était la profession de François Athanase Charette de La Contrie ?",
+      answers: ["Il était officier de marine", "Il était forgeron", "Il était paysan", "Il était boulanger"],
+      correct: 0
+    },
+    {
+      text: "De quelle famille noble était issu Jean Chouan ?",
+      answers: ["De la noblesse niçoise", "De la noblesse allemande", "C’était un bourgeois", "Aucune, il était paysan"],
+      correct: 3
+    },
+    {
+      text: "Que comprenait la Vendée militaire ?",
+      answers: ["L’Anjou", "Le Poitou", "La Loire-Inférieure", "Tout cela (ABC)"],
+      correct: 3
+    },
+    {
+      text: "A quel moment les Colonnes infernales furent-elles principalement actives ?",
+      answers: ["Entre mars et juin 1793", "Entre janvier et mai 1794", "Entre octobre et décembre 1794", "Durant seulement 10 jours en 1795"],
+      correct: 1
+    },
+    {
+      text: "Qui était Renée Bordereau ?",
+      answers: ["Une duchesse vendéenne notable", "Une combattante vendéenne", "Une religieuse ayant gracié tous les républicains", "Une espionne républicaine"],
+      correct: 1
+    },
+    {
+      text: "En mai 1793, quelle ville du Poitou fut prise par les Vendéens le 5 mai, livrant armes et munitions ?",
+      answers: ["Fontenay-le-Comte", "Angers", "Saumur", "Thouars"],
+      correct: 3
+    },
+    {
+      text: "Où fut exécuté François Athanase Charette de la Contrie ?",
+      answers: ["Paris, place de la Concorde", "Nantes, place Viarme", "Angers, place de Dieu", "Lyon, place Antika"],
+      correct: 1
+    },
+    {
+      text: "Quelle bataille de septembre 1793 vit une victoire vendéenne contre l’Armée de Mayence ?",
+      answers: ["La bataille de Cholet", "La bataille de Luçon", "La bataille de Torfou", "La bataille de Ponts-de-Cé"],
+      correct: 2
+    },
+    {
+      text: "Quels types de combats étaient les plus redoutés par les Vendéens ?",
+      answers: ["Les batailles en terrain ouvert", "Les embuscades dites « en eau »", "Les attaques nocturnes", "Les raids de minuit"],
+      correct: 0
+    },
+    {
+      text: "Qui dirigeait la République pendant la Terreur ?",
+      answers: ["C'était Napoléon Bonaparte", "C'était Maximilien de Robespierre", "C'était toujours Louis XVI", "C'était Jean Robinson Legraincheus"],
+      correct: 1
+    }
+  ],
+
+  "beauvoir": [
+    {
+      text: "Quelle était la célèbre devise de François Athanase Charette de La Contrie ?",
+      answers: ["Combattu parfois, mais je bats tout le temps", "Combattu souvent, battu parfois, abattu jamais", "Des champs je renais pour chasser la gueuse plus souvent", "Abattu jamais, bien que battu parfois, et très souvent je fus combattu"],
+      correct: 1
+    },
+    {
+      text: "Quel âge avait Charles de Bonchamps à sa mort ?",
+      answers: ["33 ans", "32 ans", "15 ans", "12 ans seulement"],
+      correct: 0
+    },
+    {
+      text: "Parmi ces propositions, à quelle bataille Charles de Bonchamps n'a t'il pas participé ?",
+      answers: ["Celle de Nantes", "Celle de Cholet", "Celle de Thouars", "Celle de Clisson"],
+      correct: 3
+    },
+    {
+      text: "Quel territoire incluant la Vendée a été rattaché à la Cité des Pictons et à la province d'Aquitaine peu avant la naissance de Jésus-Christ ?",
+      answers: ["Celui des Ambilatres", "Celui des Pictons de l'Ouest", "Celui des Vénètes", "Celui des Arvernes"],
+      correct: 0
+    },
+    {
+      text: "Quel climat domine en Vendée ?",
+      answers: ["Montagnard", "Méditerranéen", "Océanique", "Continental"],
+      correct: 2
+    },
+    {
+      text: "Quel élément rendait la guerre de Vendée particulièrement complexe ?",
+      answers: ["Le terrain", "La religion", "La politique", "Tous ces éléments à la fois"],
+      correct: 3
+    },
+    {
+      text: "Que met en valeur le Puy du Fou ?",
+      answers: ["La République principalement", "La monarchie principalement", "L'Histoire de France parfois romancée", "La science"],
+      correct: 2
+    },
+    {
+      text: "Comment sont exécutés la plupart des condamnés sous le régime de la Terreur ?",
+      answers: ["Au fusil", "Au poison", "À la guillotine", "Par noyade uniquement"],
+      correct: 2
+    },
+    {
+      text: "Quel enfant Roy était détenu pendant la Révolution ?",
+      answers: ["Louis XIV", "Louis XV", "Louis XVII", "Louis XVIII"],
+      correct: 2
+    },
+    {
+      text: "Quel avantage avaient les républicains sur les Vendéens ?",
+      answers: ["Ils étaient plus solidaires", "Ils étaient mieux armés", "Ils étaient plus grands", "Ils étaient plus petits"],
+      correct: 1
+    }
+  ],
+
+  "stjeandemonts": [
+    {
+      text: "Quelle distinction Charles Sapinaud a-t-il reçu ?",
+      answers: ["Ordre de Saint-Louis", "La légion d'honneur", "Commandeur", "Tout cela"],
+      correct: 3
+    },
+    {
+      text: "Parmi ces propositions, à quelle bataille Louis de Salgues de Lescure n'a t-il pas participé ?",
+      answers: ["Celle de Cholet", "Celle de Thouars", "Celle de Fontenay", "Celle de Tremblaye"],
+      correct: 0
+    },
+    {
+      text: "Quelle terminaison de nom de famille est fréquente en Vendée ?",
+      answers: ["-eau", "-aut", "-os", "-cot"],
+      correct: 0
+    },
+    {
+      text: "Qui a pris le pouvoir en 1799 ?",
+      answers: ["Maximilien de Robespierre", "Napoléon Bonaparte", "Louis XVIII", "Emmanuel Macron"],
+      correct: 1
+    },
+    {
+      text: "Quel événement déclenche principalement l’insurrection vendéenne ?",
+      answers: ["La mort du Roy", "La levée en masse", "La famine", "La guerre contre l’Angleterre"],
+      correct: 1
+    },
+    {
+      text: "Quand est décédé le généralissime Louis-Marie de Salgues de Lescure ?",
+      answers: ["Dès novembre 1793", "En septembre 1794", "En octobre 1795", "En décembre 1832"],
+      correct: 0
+    },
+    {
+      text: "Quel terrain favorise les Vendéens ?",
+      answers: ["Le désert", "La montagne", "Le bocage", "La mer"],
+      correct: 2
+    },
+    {
+      text: "Qui était principalement visé lors des noyades de Nantes ?",
+      answers: ["Les soldats", "Les civils", "Les nobles", "Les étrangers"],
+      correct: 1
+    },
+    {
+      text: "Quel objectif a la Terreur ?",
+      answers: ["Libérer les paysans", "Contrôler le peuple avec des biotechnologies", "Tuer le plus possible de français", "Terroriser"],
+      correct: 3
+    },
+    {
+      text: "En 1815, quel événement relance la Vendée ?",
+      answers: ["Le retour de Louis Philippe", "Le retour de Napoléon Bonaparte", "Le meurtre d'une famille vendéenne par un républicain", "Le déclenchement d'une nouvelle guerre"],
+      correct: 1
+    }
+  ],
+
+  "leperrier": [
+    {
+      text: "Quel est le nom du château-parc à Avrillé ?",
+      answers: ["Le Château des Aventuriers", "Le château de la Gloire", "Le château des Cinq-Vendée", "Le château d'Haut"],
+      correct: 0
+    },
+    {
+      text: "Quelle commune n’est pas en Vendée ?",
+      answers: ["La Plaine-sur-Mer", "Jard-sur-Mer", "La Tranche-sur-Mer", "Olonne-sur-mer"],
+      correct: 0
+    },
+    {
+      text: "Qu'était avant tout « La Jaunaye » ?",
+      answers: ["Une ville", "Un manoir", "Une bataille", "Un camp"],
+      correct: 1
+    },
+    {
+      text: "Quel général a attaqué Jean-Nicolas Stofflet avec environ 28 000 hommes ?",
+      answers: ["Canclaux", "Turreau", "Kléber", "Hoche"],
+      correct: 0
+    },
+    {
+      text: "Combien de guerres de Vendée y a-t-il eu entre 1793 et 1796 ?",
+      answers: ["1", "2", "3", "4"],
+      correct: 1
+    },
+    {
+      text: "Quelle est la localité principale de l’île d’Yeu ?",
+      answers: ["Fromentine", "Saint-Gilles-Croix-de-Vie", "Port-Gaulois", "Port-Joinville"],
+      correct: 3
+    },
+    {
+      text: "Sur quelle île vendéenne fut exilé Philippe Pétain jusqu’à sa mort ?",
+      answers: ["L’île d’Yeu", "L’île de Ré", "L'île de Noirmoutier", "L’île d’Oléron"],
+      correct: 0
+    },
+    {
+      text: "Quel département est aujourd’hui situé au nord de la Vendée actuelle, et fut autrefois en partie impliqué dans les guerres de Vendée ?",
+      answers: ["La Charente-Maritime", "Le Maine-et-Loire", "La Loire-Atlantique", "Les Deux-Sèvres"],
+      correct: 2
+    },
+    {
+      text: "Quel département est aujourd’hui situé à l’est de la Vendée actuelle, et fut autrefois en partie impliqué dans les guerres de Vendée ?",
+      answers: ["La Loire-Atlantique", "Les Deux-Sèvres", "La Vienne", "La Charente"],
+      correct: 1
+    },
+    {
+      text: "De quel mot latin vient le nom « Vendée » ?",
+      answers: ["De Vindeda", "De Vienlà", "De Royalta", "De Avemaria"],
+      correct: 0
+    }
+  ],
+
+  "challans": [
+    {
+      text: "Il est l’un des fondateurs du Vendée Globe :",
+      answers: ["Dominique de Villoirs", "Philippe Jeantot", "Éric Tabarly", "Olivier de Kersauson"],
+      correct: 1
+    },
+    {
+      text: "Quel mot latin ou celtique ancien est souvent rapproché de l’origine du nom « Vendée » ?",
+      answers: ["Vindos ou vindo", "Vexia ou Vexiar", "Gallia ou Gallioma", "Fidelis"],
+      correct: 0
+    },
+    {
+      text: "Quel est le nom de la grande forêt qui s’étend en Vendée ?",
+      answers: ["La forêt de Brocéliande", "La forêt de Mervent-Vouvant", "La forêt de Chinon-Tampon", "La forêt de Montaigu-Montaigne"],
+      correct: 1
+    },
+    {
+      text: "Quelle célèbre île se trouve au large de Saint-Gilles-Croix-de-Vie ?",
+      answers: ["Ré", "Belle-Île-en-Mer", "Oléron", "Yeu"],
+      correct: 3
+    },
+    {
+      text: "Que symbolise Louis XVII pour les royalistes ?",
+      answers: ["L'anti République", "L’avenir du pays", "La continuité de la monarchie", "La fin de toutes les guerres"],
+      correct: 2
+    },
+    {
+      text: "Quel type de guerre reprend après 1795 ?",
+      answers: ["Une guerre classique", "Une guérilla", "Une guerre navale", "Une guerre mondiale"],
+      correct: 1
+    },
+    {
+      text: "Charles Sapinaud de La Rairie fut récompensé par le Roy Louis XVIII pour sa fidélité. Qu’a-t-il obtenu comme décoration ?",
+      answers: ["Inspecteur des gardes nationales de la Vendée", "Chevalier de la Légion d’honneur", "Lieutenant-général", "Tout cela"],
+      correct: 3
+    },
+    {
+      text: "Comment le généralissime Antoine-Philippe de La Trémoille parvenait-il à maintenir la cohésion des troupes vendéennes ?",
+      answers: ["Grâce à des prières", "Grâce à des spectacles", "Grâce à de la danse", "Grâce à des discours remarquables"],
+      correct: 3
+    },
+    {
+      text: "Que représente le Sacré-Cœur ?",
+      answers: ["La guerre", "La beauté", "La foi", "La richesse"],
+      correct: 2
+    },
+    {
+      text: "Quelle ville est un symbole fort de la Vendée ?",
+      answers: ["Lyon", "Nantes", "Cholet", "Lille"],
+      correct: 2
+    }
+  ],
+
+  "soullans": [
+    {
+      text: "Pourquoi les prêtres réfractaires étaient-ils soutenus par la population vendéenne ?",
+      answers: ["Ils étaient riches", "Ils étaient élus", "Ils refusaient la Révolution", "Ils combattaient"],
+      correct: 2
+    },
+    {
+      text: "Quel type de population composait majoritairement les insurgés vendéens ?",
+      answers: ["Les nobles", "Les bourgeois", "Les paysans", "Les étrangers"],
+      correct: 2
+    },
+    {
+      text: "Quelle était généralement la position des nobles vendéens ?",
+      answers: ["Alliés les paysans", "Contre les paysans", "Absents", "Neutres"],
+      correct: 0
+    },
+    {
+      text: "Quel symbole est souvent cousu sur les vêtements vendéens ?",
+      answers: ["Un aigle tenant une croix", "Une épée et une croix", "L’étoile du berger", "Un cœur sacré"],
+      correct: 3
+    },
+    {
+      text: "Que refusaient les Vendéens au final, bien que pas initialement ?",
+      answers: ["L’impôt", "La République", "La guerre", "La noblesse"],
+      correct: 1
+    },
+    {
+      text: "Quel était le rôle des prêtres dans la guerre ?",
+      answers: ["C'étaient des combattants", "C'étaient des chefs militaires", "C'étaient des guides spirituels", "C'étaient des espions"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi la religion était-elle centrale en Vendée ?",
+      answers: ["Tradition", "Richesse", "Politique", "Commerce"],
+      correct: 0
+    },
+    {
+      text: "Dans quelle partie de la France la Vendée est-elle située ?",
+      answers: ["Au nord", "À l’ouest", "À l’est", "Au centre"],
+      correct: 1
+    },
+    {
+      text: "Quel océan borde la Vendée ?",
+      answers: ["Le Pacifique", "L’Atlantique", "L’Indien", "L’Arctique"],
+      correct: 1
+    },
+    {
+      text: "Quelle est la devise vendéenne ?",
+      answers: ["Utrique Fidelis", "Dieu au-dessus de la République", "À bas la République", "Pater Noster, Ave Maria"],
+      correct: 0
+    }
+  ],
+
+  "palluau": [
+    {
+      text: "Quelle est la première ville dont les Vendéens se sont emparés dès le 11 mars 1793 ?",
+      answers: ["Machecoul", "Saint-Gilles-Croix-de-Vie", "Cholet", "Clisson"],
+      correct: 0
+    },
+    {
+      text: "De quelle île se sont emparés les Vendéens le 19 mars 1793 ?",
+      answers: ["L’île d’Yeu", "L’île de Ré", "L’île de Noirmoutier", "L’île de Mi"],
+      correct: 2
+    },
+    {
+      text: "Quelle grande ville les Vendéens tentent-ils de prendre lors de la Virée de Galerne ?",
+      answers: ["Paris", "Nantes", "Fiys-du-bois", "Granville"],
+      correct: 3
+    },
+    {
+      text: "Pourquoi l’attaque de Granville a-t-elle échouée ?",
+      answers: ["À cause du manque de munitions", "À cause d’une tempête", "À cause d’une trahison des habitants de Granville", "À cause d'une famine"],
+      correct: 0
+    },
+    {
+      text: "Dans quel état se trouvent les Vendéens après l’échec de Granville ?",
+      answers: ["Ils étaient encore plus soudés", "Ils étaient épuisés", "Ils étaient renforcés", "Ils ont été aidés"],
+      correct: 1
+    },
+    {
+      text: "Pour quelle raison était connue Perrine Loiseau ?",
+      answers: ["Elle a trahi les Vendéens", "Elle a tué plusieurs Bleus à Torfou", "Elle a écrit le Manifeste d'une Vendéenne blanche", "Elle a brûlé une colonne infernale"],
+      correct: 1
+    },
+    {
+      text: "Pour quelle raison le Centre vendéen de recherches historiques (CVRH) est-il connu ?",
+      answers: ["Pour une vision exclusivement républicaine", "Pour l’édition de manuels royalistes", "Pour la promotion de la Terreur", "Pour des travaux sur la mémoire et l’histoire vendéenne"],
+      correct: 3
+    },
+    {
+      text: "Aujourd’hui, pour qui la Vendée vote-t-elle majoritairement ?",
+      answers: ["à gauche, par souci de socialisme", "à droite, en héritage de son passé royaliste", "pour les communistes", "pour les anarchistes"],
+      correct: 1
+    },
+    {
+      text: "Quel grand thème revient à la fois dans l’histoire, la mémoire et l’identité vendéennes ?",
+      answers: ["Le bocage", "L’industrialisation suite aux guerres de Vendée", "Le lien entre territoire, foi et fidélité", "L’abandon complet de la tradition pour la république et la laïcité"],
+      correct: 2
+    },
+    {
+      text: "Comment dit-on « qu’est-ce que c’est ? » en poitevin-saintongeais ?",
+      answers: ["Qu’aet qu’ol aet (kétokolé)", "Késsaco", "Qu’est-ce-césa", "Kouyoul"],
+      correct: 0
+    }
+  ],
+
+  "commequiers": [
+    {
+      text: "Sur quelle commune de Vendée est situé le parc à thème du Puy du Fou ?",
+      answers: ["Les Herbiers", "Le Beaurepère", "Les Epesses", "Les Grosses"],
+      correct: 2
+    },
+    {
+      text: "Quelle île vendéenne a accueilli François Rabelais et Agrippa d’Aubigné ?",
+      answers: ["L'île de Noirmoutier", "L’île d’Yeu", "L’île de Ré", "Belle-Île-en-Mer"],
+      correct: 1
+    },
+    {
+      text: "Quel est le nom du site vendéen recueillant plus de 1 500 espèces de plantes ?",
+      answers: ["Le Jardin des Olonnes-mon-Père", "Le Potager extraordinaire", "Le Parc botanique de Mervent-Rivières", "Le Potager de Mamaire"],
+      correct: 1
+    },
+    {
+      text: "Vendéen de cœur et cofondateur du Vendée Globe, il s’est aussi présenté aux élections présidentielles à deux reprises, qui est-ce ?",
+      answers: ["Philippe de Villiers", "Philippe Jeantot", "Bruno Retailleau", "Yannick Moreau"],
+      correct: 0
+    },
+    {
+      text: "Quelle était la célèbre devise d’Henri de La Rochejaquelein ?",
+      answers: ["Si j’avance, suivez-moi ; si je recule, tuez-moi ; si je meurs, vengez-moi", "Si je fuis, liquidez-moi, mais si je tue un républicain, saluez-moi", "La République a mal au cœur, il lui faut un verre de liqueur", "Si j’avance, suivez-moi ; si je tue, faites comme moi ; Dieu vous pardonnera"],
+      correct: 0
+    },
+    {
+      text: "Quand fut tué le généralissime Henri de La Rochejaquelein ?",
+      answers: ["Dès octobre 1793", "En 1794", "En 1795", "En 1799, lors du sursaut vendéen"],
+      correct: 1
+    },
+    {
+      text: "Où est né le généralissime Maurice Gigost d’Elbée ?",
+      answers: ["En Vendée", "En Loire-Atlantique", "A Namur (Belgique)", "En Saxe (Allemagne)"],
+      correct: 3
+    },
+    {
+      text: "Quelle était la fonction du père du généralissime Maurice Gigost d’Elbée ?",
+      answers: ["Il était chef de l’infanterie de Paris", "Il était duc de Carhaix", "Il était conseiller du roi de Pologne", "Il était roi de Sardaigne"],
+      correct: 2
+    },
+    {
+      text: "Le généralissime Maurice Gigost d’Elbée a participé à la prise d’une ville importante le 5 mai 1793. Laquelle ?",
+      answers: ["La ville de Quiberon", "La ville de Cholet", "La ville de Nantes", "La ville de Thouars"],
+      correct: 3
+    },
+    {
+      text: "Quand décéda le généralissime Charles de Bonchamps ?",
+      answers: ["Dès octobre 1793", "En juin 1794", "En mai 1795", "En décembre 1796, aux Mathes"],
+      correct: 0
+    }
+  ],
+
+  "coex": [
+    {
+      text: "De quel endroit était originaire le généralissime Antoine-Philippe de La Trémoille ?",
+      answers: ["D’Anjou", "Du Poitou", "Des Deux-Sèvres", "Du Maine"],
+      correct: 1
+    },
+    {
+      text: "Quelle armée le généralissime Antoine-Philippe de La Trémoille a-t-il aidée en plus de l’armée catholique et royale ?",
+      answers: ["L’armée républicaine", "L’armée des Templiers", "L’armée des émigrés", "Aucune"],
+      correct: 2
+    },
+    {
+      text: "Où le généralissime Antoine-Philippe de La Trémoille a-t-il tenté de recruter des partisans royalistes avant de rejoindre l’Ouest de la France ?",
+      answers: ["À Paris", "À Bruxelles", "À Lyon", "À Marseille"],
+      correct: 0
+    },
+    {
+      text: "Comment le généralissime Antoine-Philippe de La Trémoille parvint-il à traverser plusieurs provinces sans être repéré avant d’atteindre la Vendée ?",
+      answers: ["Grâce à un sosie", "Grâce à un faux passeport", "Grâce à un cheval identique à celui de Robespierre", "Grâce à un avion bricolé"],
+      correct: 1
+    },
+    {
+      text: "Que signifie principalement l’expression « mémoricide » ?",
+      answers: ["Une guerre de mémoire", "L’effacement ou la marginalisation du souvenir vendéen", "Un massacre par le feu", "Une migration forcée"],
+      correct: 1
+    },
+    {
+      text: "Quel chant royaliste détourne l’air de la Marseillaise pour défendre la cause monarchique ?",
+      answers: ["Le Chant de fidélité", "La Marseillaise des Blancs", "La Vendéenne", "Chouans !"],
+      correct: 1
+    },
+    {
+      text: "Quel chant est présenté comme inspiré de l’air de La Carmagnole ?",
+      answers: ["Guerre de Vendée", "Debout les gâs", "La Vendéenne", "La Catholique"],
+      correct: 3
+    },
+    {
+      text: "Quelle association vendéenne contemporaine est réputée pour son travail de mémoire sur les événements liés aux guerres de Vendée ?",
+      answers: ["Le Souvenir vendéen", "La Vendée mémoire", "La Vendée insurgée", "L’Association de Vendée catholique et royale"],
+      correct: 0
+    },
+    {
+      text: "Quand fut exécuté le Roy Louis XVI ?",
+      answers: ["Le 12 février 1792", "Le 21 janvier 1793", "Le 18 mars 1793", "Le 23 décembre 1793"],
+      correct: 1
+    },
+    {
+      text: "Comment appelle-t-on cette période de 1815 ?",
+      answers: ["La Terreur bis", "Les Trois Années", "Les Cent-Jours", "La Putride"],
+      correct: 2
+    }
+  ],
+
+  "lessables": [
+    {
+      text: "Pour qui les Vendéens se battent-ils en 1815 ?",
+      answers: ["Les Napoléon", "Les Bourbons", "Les Burgondes", "La monarchie Capétienne"],
+      correct: 1
+    },
+    {
+      text: "Quel chef vendéen dirige les royalistes en 1815 ?",
+      answers: ["Louis de La Rochejaquelein", "Jean-Nicolas Stofflet", "Louis-Marie de Salgues de Lescure", "Arnaud de Groschastel"],
+      correct: 0
+    },
+    {
+      text: "Quelle bataille met fin à l’épisode de 1815 ?",
+      answers: ["La bataille de Valmy", "La bataille d'Austerlitz", "La bataille de Waterloo", "La bataille de Trafalgar"],
+      correct: 2
+    },
+    {
+      text: "Que désigne « l’armée des émigrés ? »",
+      answers: ["Une armée vendéenne locale", "Une armée de nobles et de paysans exilés", "Une armée de français et d'étrangers", "Une armée chinoise"],
+      correct: 1
+    },
+    {
+      text: "Combien de soldats (environ) comptait l’armée des émigrés ?",
+      answers: ["Au moins 28 000", "Au moins 51 000", "Au moins 107 000", "Au moins 140 000"],
+      correct: 3
+    },
+    {
+      text: "Quel était l’objectif principal de l'armée des émigrés ?",
+      answers: ["Conquérir l’Europe", "Restaurer la monarchie", "Défendre la République", "Coloniser Jérusalem"],
+      correct: 1
+    },
+    {
+      text: "D’où était issu l’officier Jean-Baptiste Joly ?",
+      answers: ["Du Bas-Poitou", "D’Anjou", "Du Maine", "De Loire-Inférieure"],
+      correct: 0
+    },
+    {
+      text: "Quand décéda l’officier Jean-Baptiste Joly ?",
+      answers: ["En janvier 1793", "En juin 1794", "En mars 1795", "En septembre 1799"],
+      correct: 1
+    },
+    {
+      text: "Quelle histoire raconte le spectacle « Le Dernier Panache » au Puy du Fou ?",
+      answers: ["Celle de Cathelineau", "Celle d’Henri de La Rochejaquelein", "Celle de Bonchamps", "Celle de Charette"],
+      correct: 3
+    },
+    {
+      text: "Au Puy du Fou, par qui est joué le célèbre spectacle de la Cinéscénie ?",
+      answers: ["150 acteurs professionnels", "Plus de 2 000 bénévoles", "Des reconstitueurs philosophes, historiens et politiques", "Des touristes"],
+      correct: 1
+    }
+  ],
+
+  "leslucs": [
+    {
+      text: "Le martyrologe des Lucs est surtout important pour quelle raison ?",
+      answers: ["Il raconte la vie des généraux vendéens exclusivement", "Il donne des noms et des âges de victimes de ces guerres", "Il explique le but des colonnes infernales", "Il prouve une alliance avec l’Angleterre"],
+      correct: 1
+    },
+    {
+      text: "Dans la mémoire vendéenne, à quoi la ville de Clisson est-elle souvent associée ?",
+      answers: ["A une grande victoire navale", "A une ville ravagée par le feu", "A une paix durable", "A une capitale royale"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi Avrillé est-il un lieu important de mémoire vendéenne ?",
+      answers: ["Parce qu’un Roy y fut sacré", "Parce que le Puy du Fou y fut fondé", "Parce que Charette y signa la paix", "Parce que de nombreuses exécutions y eurent lieu"],
+      correct: 3
+    },
+    {
+      text: "Avant le Consulat, quel régime était en place en 1799 ?",
+      answers: ["La monarchie", "L'Empire", "Le Directoire", "La royauté"],
+      correct: 2
+    },
+    {
+      text: "En quelle année Napoléon a-t-il mis fin aux premières guerres de Vendée ?",
+      answers: ["En 1799", "En 1800", "En 1802", "En 1805"],
+      correct: 2
+    },
+    {
+      text: "Quel accord religieux Napoléon a-t-il signé ?",
+      answers: ["Le Concordat", "Le Traité de Paris", "L'Edit de Nantes", "La Paix de la foi"],
+      correct: 0
+    },
+    {
+      text: "Parmi ces propositions, comment est qualifiée la guerre menée par François Athanase Charette de La Contrie ?",
+      answers: ["Une guerre monumentale", "Une guerre de mouvement", "Une guerre impitoyable", "Une guerre de bocage"],
+      correct: 1
+    },
+    {
+      text: "Quand fut tué le généralissime François Athanase Charette de La Contrie ?",
+      answers: ["Dès novembre 1793", "En octobre 1794", "En janvier 1795", "En mars 1796"],
+      correct: 3
+    },
+    {
+      text: "Quel était le titre que portaient habituellement les chefs de l’armée catholique et royale ?",
+      answers: ["Généralissime", "Gouverneur", "Amiral", "Connétable"],
+      correct: 0
+    },
+    {
+      text: "En quelle année le cœur vendéen a-t-il été restylisé pour la dernière fois ?",
+      answers: ["En 1812", "En 1895", "En 1917", "En 1988"],
+      correct: 3
+    }
+  ],
+
+  "laroche": [
+    {
+      text: "Pourquoi parle-t-on de guerre civile à propos de la guerre de Vendée ?",
+      answers: ["Parce qu’elle oppose des pays différents", "Parce qu’elle oppose des Français entre eux", "Parce qu’elle repose sur l'Etat", "Parce qu’elle est uniquement religieuse"],
+      correct: 1
+    },
+    {
+      text: "Quel rôle jouait la noblesse vendéenne pendant la guerre ?",
+      answers: ["Un rôle de direction militaire", "Aucun rôle", "Un rôle commercial", "Un rôle uniquement religieux"],
+      correct: 0
+    },
+    {
+      text: "Pourquoi le bocage était-il avantageux pour les Vendéens ?",
+      answers: ["Il est désertique", "Il cache les troupes", "Il est plat", "Il est d’eau glacée"],
+      correct: 1
+    },
+    {
+      text: "Quel est le nom donné aux massacres systématiques des Vendéens ?",
+      answers: ["La purge", "Le nettoyage", "Les colonnes infernales", "Les chenilles de feu"],
+      correct: 2
+    },
+    {
+      text: "Qui a ordonné les colonnes infernales ?",
+      answers: ["Napoléon", "Turreau", "Robespierre", "Wario"],
+      correct: 1
+    },
+    {
+      text: "Quelle célèbre musique est présente lors des mariages traditionnels vendéens ?",
+      answers: ["La danse de la brioche", "La sueur de la mizotte", "La valse du jambon", "La mariée mariée"],
+      correct: 0
+    },
+    {
+      text: "Quel est le nom du célèbre roman qui évoque les guerres de Vendée ?",
+      answers: ["Quatrevingt-treize, de Victor Hugo", "Les Misérables, de Victor Hugo", "Le Colonel Chabert, d’Honoré de Balzac", "Les Chouans, d’Honoré de Balzac"],
+      correct: 3
+    },
+    {
+      text: "Comment Charles de Royrand est-il décrit ?",
+      answers: ["Comme un vieux militaire loyal", "Comme un traître", "Comme un peureux", "Comme un stratège froid"],
+      correct: 0
+    },
+    {
+      text: "A combien de faits d'armes connus Charles Sapinaud de la Rairie a-t-il participé ?",
+      answers: ["5", "50", "70", "150"],
+      correct: 0
+    },
+    {
+      text: "Quel nom la Convention a-t-elle temporairement donné à la Vendée en 1793 ?",
+      answers: ["La Vengé", "La Viandée", "Bien Tenté", "La Brigande"],
+      correct: 0
+    }
+  ],
+
+  "achards": [
+    {
+      text: "Quel est le sens proposé par une explication étymologique du nom « Vendée » ?",
+      answers: ["La Bleue", "La Blanche", "L’Oiseau", "La Colombe"],
+      correct: 1
+    },
+    {
+      text: "En quelle année la Vendée a-t-elle retrouvé son nom après avoir été nommée « Vengé » ?",
+      answers: ["1794", "1795", "1796", "1799"],
+      correct: 1
+    },
+    {
+      text: "Quel fut le premier chef-lieu du département de la Vendée ?",
+      answers: ["La Roche-sur-Yon", "Cholet", "Les Sables-d’Olonne", "Fontenay-le-Comte"],
+      correct: 3
+    },
+    {
+      text: "Quelle ville importante les Vendéens ont-ils échoué à prendre en 1793 ?",
+      answers: ["Nantes", "Paris", "Bordeaux", "Lille"],
+      correct: 0
+    },
+    {
+      text: "A quoi correspond la Virée de Galerne ?",
+      answers: ["A une bataille navale", "A une fuite vers le nord", "A une victoire décisive", "A une alliance"],
+      correct: 1
+    },
+    {
+      text: "Que cherchent (à faire) les vendéens lors de la Virée de Galerne ?",
+      answers: ["À fuir", "À attaquer Paris", "À rejoindre la mer", "À négocier"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi le généralissime Jacques Cathelineau était-il surnommé « le Saint de l’Anjou » ?",
+      answers: ["Il était curé", "Il était prêtre", "Il était cardinal", "Il était sacristain de sa paroisse"],
+      correct: 3
+    },
+    {
+      text: "Quelles villes le généralissime Jacques Cathelineau est-il parvenu à gagner, bien qu’elles n’aient pu être conservées durablement ?",
+      answers: ["Cholet et Paris", "Les Sables-d’Olonne et Olonne-sur-Mer", "L’Herbergement et Saumur", "Cholet et Saumur"],
+      correct: 3
+    },
+    {
+      text: "Le généralissime Jacques Cathelineau fut mortellement blessé lorsqu’il tenta de prendre une ville avec d’autres généralissimes. Quelle était cette ville ?",
+      answers: ["Paris", "Cholet", "Nantes", "La Roche-sur-Yon"],
+      correct: 2
+    },
+    {
+      text: "Quelle grande ville fut occupée par les Vendéens le 18 juin 1793 ?",
+      answers: ["Nantes", "Angers", "Bayonne", "La Roche-sur-Yon"],
+      correct: 1
+    }
+  ],
+
+  "bremsurmer": [
+    {
+      text: "Quels généraux républicains ont remporté la victoire finale à Savenay en décembre 1793 ?",
+      answers: ["Kléber et Marceau", "Turreau et Clemenceau", "Carrier et Kléber", "Hoche et Marsso"],
+      correct: 0
+    },
+    {
+      text: "Que portaient souvent les chefs Vendéens comme signe distinctif ?",
+      answers: ["Un bonnet blanc et un blanc bonnet", "Une « ceinture » blanche", "Une cocarde blanche", "Un drapeau jaune"],
+      correct: 1
+    },
+    {
+      text: "Quelle autre politique de la Révolution fut particulièrement mal acceptée en Vendée ?",
+      answers: ["L’abolition des privilèges", "La vente des biens nationaux et la déchristianisation", "La création des départements", "La fête de la Fédération"],
+      correct: 1
+    },
+    {
+      text: "Quel est le nom de la mythique course à voile en solitaire autour du monde, sans assistance et sans escale ?",
+      answers: ["Le Vendée Va’a", "Le Vendée Tour", "Le Vendée Globe", "Le Vendée Blob Fish"],
+      correct: 2
+    },
+    {
+      text: "Quel régime est en place lors du troisième et dernier sursaut vendéen, en 1832 ?",
+      answers: ["L’Empire", "La Restauration", "La République dite « la gueuse »", "La Monarchie de Juillet"],
+      correct: 3
+    },
+    {
+      text: "Qui la duchesse de Berry souhaitait-elle voir au pouvoir en 1832 ?",
+      answers: ["Son fils Henri V", "Un républicain tiré au sort", "Louis-Philippe Ier", "Elle-même"],
+      correct: 0
+    },
+    {
+      text: "Quel était le vrai nom de Jean Chouan ?",
+      answers: ["Cotteveau", "Cottedeau", "Cottereau", "Côte-Rô"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi le surnom « Chouan » ?",
+      answers: ["Chouan est une référence aux choux", "C’est une référence au cri du chat-huant", "Il mangeait des choux brillants", "Par rapport aux choux de Chateaubriand"],
+      correct: 1
+    },
+    {
+      text: "En quelle année Jean Chouan a-t-il commencé à organiser des guérillas ?",
+      answers: ["Dès 1793", "Avant, en 1792", "Plus tard, en 1798", "En 2018 avec les gilets jaunes"],
+      correct: 1
+    },
+    {
+      text: "En 1795, après Quiberon, l’insurrection vendéenne s’essouffla rapidement, sauf pour une armée, laquelle ?",
+      answers: ["Celle de Cathelineau", "Celle de Celles", "Celle de Bonchamps", "Celle de Charette"],
+      correct: 3
+    }
+  ],
+
+  "brouzils": [
+    {
+      text: "Où est-ce qu'Henri de la Rochejaquelein et Jean-Nicolas Stofflet tentèrent-ils de réorganiser la résistance en 1794 ?",
+      answers: ["A Nantes et Strasbourg", "A Luçon et Montluçon", "A Savenay et Coëx", "A Châtillon et Airvault"],
+      correct: 3
+    },
+    {
+      text: "Quels sont les deux principaux spectacles du Puy du Fou mettant en scène l’épopée vendéenne ?",
+      answers: ["La Cinéscénie et Le Dernier Panache", "L’Orgue de feu et Le Mime et l’Étoile", "Le Secret de la Lance et Richelieu", "Les Trois Mousquetaires et Le Mystère de La Pérouse"],
+      correct: 0
+    },
+    {
+      text: "Dans quoi le général Kléber critiqua-t-il plus tard la violence des Colonnes infernales ?",
+      answers: ["Un discours à la Convention", "Ses mémoires", "Des lettres à Carrier", "Des traités de paix"],
+      correct: 1
+    },
+    {
+      text: "Quand la Constitution civile du clergé, source majeure du conflit, fut-elle votée ?",
+      answers: ["En 1789", "En 1790", "En 1792", "En 1793"],
+      correct: 1
+    },
+    {
+      text: "Quand la levée en masse de 300 000 hommes, élément déclencheur des guerres de Vendée, fut-elle décrétée ?",
+      answers: ["Le 21 janvier 1793", "Le 10 février 1793", "Le 23 février 1793", "En octobre 1793"],
+      correct: 2
+    },
+    {
+      text: "Quel chef vendéen perdit un bras avant la guerre, en 1778 ?",
+      answers: ["Henri de La Rochejaquelein", "Charles de Royrand", "François Athanase Charette de La Contrie", "Jean-Nicolas Stofflet"],
+      correct: 1
+    },
+    {
+      text: "Quel garde-chasse des Mauges devint un chef vendéen tenace et redouté jusqu’en 1796 ?",
+      answers: ["Jacques Cathelineau", "Le prince de Talmont", "Louis de Salgues de Lescure", "Jean-Nicolas Stofflet"],
+      correct: 3
+    },
+    {
+      text: "Quelle bataille du 17 au 18 juillet 1793 vit une nouvelle victoire vendéenne ?",
+      answers: ["La première bataille de Cholet", "La bataille de Vihiers", "La bataille de Torfou", "La guerre de Luçon"],
+      correct: 1
+    },
+    {
+      text: "Les Vendéens furent-ils vainqueurs ou vaincus à la troisième bataille de Luçon en août 1793 ?",
+      answers: ["Vainqueurs décisifs", "Ils ne combattirent pas", "Match nul", "Vaincus"],
+      correct: 3
+    },
+    {
+      text: "Qui fut nommé généralissime vendéen après la mort de Charles de Bonchamps en octobre 1793 ?",
+      answers: ["Jean-Nicolas Stofflet", "Henri de La Rochejaquelein", "François Athanase Charette de la Contrie", "Maurice Gigost D’Elbée"],
+      correct: 1
+    }
+  ],
+
+ "bellevigny": [
+    {
+      text: "Renée Bordereau, fut célèbre pour une raison particulière, laquelle ?",
+      answers: ["Elle était combattante et prêtresse", "Elle était combattante vendéenne déguisée en homme", "C'était une combattante et une espionne irlandaise", "C'était une diplomate"],
+      correct: 1
+    },
+    {
+      text: "Qu’est-ce qui permettait de donner des signaux aux insurgés vendéens concernant les mouvements de l’ennemi ?",
+      answers: ["Des enfants colporteurs", "Des colombes", "Des pigeons voyageurs", "Des moulins"],
+      correct: 3
+    },
+    {
+      text: "Quel évènement important eut lieu autour du 22 avril 1793 ?",
+      answers: ["La bataille des Bleuets", "Le combat de Beaupréau", "La prise de Jules César", "Le massacre des Lucs-sur-Boulogne"],
+      correct: 1
+    },
+    {
+      text: "Qui remporta la bataille de Chantonnay du 5 septembre 1793 ?",
+      answers: ["Les Vendéens", "Les républicains", "Aucun camp", "Les Chouans seuls"],
+      correct: 0
+    },
+    {
+      text: "De quelle région actuelle le département de la Vendée fait-il partie ?",
+      answers: ["L’Aquitaine", "La Bretagne", "Les Pays de la Loire", "La Normandie"],
+      correct: 2
+    },
+    {
+      text: "Quelle région correspond principalement à la Vendée militaire ?",
+      answers: ["Le nord de la France", "L’ouest de la France", "Le sud de la France", "L’est de la France"],
+      correct: 1
+    },
+    {
+      text: "Quel type de guerre pratiquent souvent les Vendéens ?",
+      answers: ["Une guerre navale", "Une guerre de tranchées", "Une guerre aérienne", "Une guerre de guérilla"],
+      correct: 3
+    },
+    {
+      text: "Quel est le but des colonnes infernales ?",
+      answers: ["Convertir à la pensée républicaine", "Négocier avec les prêtres réfractaires", "Exterminer toute la Vendée", "Recruter des républicains"],
+      correct: 2
+    },
+    {
+      text: "Comment sont traités les villages vendéens lors de la répression par les colonnes infernales ?",
+      answers: ["Ils sont incendiés", "Ils sont ignorés", "Ils sont protégés", "Ils sont déplacés"],
+      correct: 0
+    },
+    {
+      text: "Quel terme est souvent utilisé pour qualifier les massacres planifiés sur la population vendéenne civile ?",
+      answers: ["Révolution", "Réforme", "Génocide", "Migration"],
+      correct: 2
+    }
+  ],
+
+  "fougere": [
+    {
+      text: "Qui fut l’un des premiers chefs paysans à organiser la révolte en mars 1793 ?",
+      answers: ["François Charette", "Jacques Cathelineau", "Henri de La Rochejaquelein", "Jean-Nicolas Stofflet"],
+      correct: 1
+    },
+    {
+      text: "Quelle ville fut prise par les Vendéens en juin 1793 avant l’échec de Nantes ?",
+      answers: ["Saumur", "Le Mans", "Savenay", "Fontenay-le-Comte"],
+      correct: 0
+    },
+    {
+      text: "Qui succéda à Jacques Cathelineau comme généralissime de l’armée vendéenne ?",
+      answers: ["Henri de La Rochejaquelein", "Maurice d’Elbée", "François Charette", "Jean-Nicolas Stofflet"],
+      correct: 1
+    },
+    {
+      text: "Quelle région voisine de la Vendée vit une forme de guérilla appelée « chouannerie » ?",
+      answers: ["La Normandie majoritairement", "Taïwan", "L’Aquitaine", "La Bretagne et le Maine"],
+      correct: 3
+    },
+    {
+      text: "En quelle année Napoléon Bonaparte accorda-t-il un tout début d'amnistie et une certaine paix à la Vendée ?",
+      answers: ["En 1795", "En 1796", "En 1800", "En 1815"],
+      correct: 2
+    },
+    {
+      text: "Quel terme désigne la mémoire de ces événements ?",
+      answers: ["La mémoire vendéenne", "La mémoire royale", "La mémoire bleue", "La mémoire révolutionnaire"],
+      correct: 0
+    },
+    {
+      text: "Quel parc met beaucoup en scène l’histoire vendéenne ?",
+      answers: ["Walibi", "Le Futuroscope", "Le Puy du Fou", "Le Parc Astérix"],
+      correct: 2
+    },
+    {
+      text: "Qui est à l’origine du Puy du Fou ?",
+      answers: ["Napoléon Bonmaison", "Philippe De Villiers", "Louis Lechouan", "Princesse Fiona"],
+      correct: 1
+    },
+    {
+      text: "Pour quelle raison la Vendée reste-t-elle marquante aujourd’hui ?",
+      answers: ["Pour ses richesses en diamant et en zinc", "Pour son climat océanique doux", "Pour son industrie et son agriculture de blé", "Pour son histoire"],
+      correct: 3
+    },
+    {
+      text: "Que désigne la \"Jaunaye\" dans l’histoire des guerres de Vendée ?",
+      answers: ["Une bataille", "Un traité de paix", "Une ville détruite", "Une prison libérée par les républicains, comme la Bastille"],
+      correct: 1
+    }
+  ],
+
+  "letablier": [
+    {
+      text: "Quel événement extérieur de 1795 impliqua des émigrés et des Anglais en lien avec la Vendée ?",
+      answers: ["La bataille de Valmy", "L’expédition de Quiberon", "La bataille de Fleurus", "Le coup d’État du 18 Brumaire An III"],
+      correct: 1
+    },
+    {
+      text: "Quel événement du 11 mars 1793 marque le début sanglant de l’insurrection à Machecoul ?",
+      answers: ["Une victoire des républicains", "La prise d’une église constitutionnelle", "Le massacre de plusieurs centaines de républicains", "La signature d’un traité de paix"],
+      correct: 2
+    },
+    {
+      text: "Quelle petite localité vit le premier soulèvement organisé dans les Mauges le 12 mars 1793 ?",
+      answers: ["Saint-Florent-le-Vieil", "Cholet", "Le Tampon-Saint-Denis", "Luçon"],
+      correct: 0
+    },
+    {
+      text: "Quelle bataille du 19 mars 1793 vit la défaite des troupes républicaines du général Louis Henri François de Marcé ?",
+      answers: ["Cholet", "Pont-Charrault", "Torfou", "Savenay"],
+      correct: 1
+    },
+    {
+      text: "Quelle date marque la grande défaite vendéenne à Cholet, qui entraîna la Virée de Galerne ?",
+      answers: ["14 mars 1793", "17 octobre 1793", "23 décembre 1793", "19 septembre 1793"],
+      correct: 1
+    },
+    {
+      text: "Quel est le nom de la course de pirogues polynésiennes en haute mer rassemblant plus de 250 rameurs, qui a lieu chaque année aux Sables-d’Olonne ?",
+      answers: ["Le Vendée Globe", "Le Vendée Tour", "Le Vendée Vas-y", "La Vendée Va’a"],
+      correct: 3
+    },
+    {
+      text: "Quel ancien maire sablais a porté une proposition de loi devant l’Assemblée nationale visant à reconnaître le génocide vendéen ?",
+      answers: ["Yannick Moreau", "Guillaume Tell", "Fabrice Marc de La Rochejaquelein", "Maxence Lay-Sanz"],
+      correct: 0
+    },
+    {
+      text: "Quel est le numéro de département associé à la Vendée actuelle ?",
+      answers: ["14", "29", "85", "92"],
+      correct: 2
+    },
+    {
+      text: "Quel peuple gaulois occupait la région de la Vendée avant la conquête romaine ?",
+      answers: ["Les Pictons", "Les Vénètes", "Les Ambiliates", "Les Carnutes"],
+      correct: 0
+    },
+    {
+      text: "Quel célèbre fondateur est à l’origine de Maillezais au Xe siècle ?",
+      answers: ["Guillaume Fier-à-Bras", "Étienne-Alexandre Jean-Baptiste Marie Bernier", "Gilles de Rais / Retz", "Armand Jean du Plessis de Richelieu / Cardinal de Richelieu"],
+      correct: 0
+    }
+  ],
+
+  "talmont": [
+    {
+      text: "Quand fut exécuté le généralissime Maurice Gigost d’Elbée ?",
+      answers: ["Dès novembre 1793", "En janvier 1794", "En mars 1795", "En décembre 1796"],
+      correct: 1
+    },
+    {
+      text: "De quelle petite noblesse était issu le généralissime Charles-Melchior Artus de Bonchamps ?",
+      answers: ["Une noblesse Poitevine", "Une noblesse Angevine", "Une noblesse Bretonne", "Une noblesse Normande"],
+      correct: 1
+    },
+    {
+      text: "Dans quel château grandit le généralissime Charles-Melchior Artus de Bonchamps ?",
+      answers: ["Le château de Jésus", "Le château des Sœurs Bonnes", "Le château de la Croix-Sainte", "Le château du Crucifix"],
+      correct: 3
+    },
+    {
+      text: "À quel âge le généralissime Charles-Melchior Artus de Bonchamps a-t-il débuté sa carrière militaire ?",
+      answers: ["À 10 ans", "À 12 ans", "À 15 ans", "À 21 ans"],
+      correct: 2
+    },
+    {
+      text: "Deux célèbres généralissimes vendéens ont activement participé à la guerre d’indépendance américaine. De qui s’agit-il ?",
+      answers: ["Charles de Bonchamps et François Athanase Charette de La Contrie", "François Athanase Charette de La Contrie et Henri de La Rochejaquelein", "Henri de La Rochejaquelein et Maurice d’Elbée", "Charles de Bonchamps et Jacques Cathelineau"],
+      correct: 0
+    },
+    {
+      text: "Que devient souvent la distinction entre civils et combattants pendant la répression de 1794 ?",
+      answers: ["Elle disparaît, tout civil est considéré comme contre-révolutionnaire", "Elle devient plus claire", "Elle n’existe que dans les grandes villes", "Elle protège mieux les enfants ainsi que les bébés"],
+      correct: 0
+    },
+    {
+      text: "Dans la logique des colonnes infernales, comment doivent être traitées les récoltes ?",
+      answers: ["Elles doivent être protégées", "Elles doivent être vendues", "Elles doivent être détruites", "Elles doivent être réparties"],
+      correct: 2
+    },
+    {
+      text: "Parmi ces propositions, quelle chanson de Jean-Pax Méfret est consacré directement aux guerres de Vendée ?",
+      answers: ["Les Terres Saintes", "Guerres de Vendée", "Chanson de Monsieur Henri", "Saint Georges"],
+      correct: 1
+    },
+    {
+      text: "Quelle spécialité vendéenne est une brioche riche ou tressée, souvent associée à la région ?",
+      answers: ["Le préfou", "La gâche", "La mizotte", "Le fion"],
+      correct: 1
+    },
+    {
+      text: "Quelle spécialité vendéenne est un pain garni à l’ail que l’on sert souvent chaud ?",
+      answers: ["Le préfou", "Le jambon de Vendée", "La mogette", "Le fion"],
+      correct: 0
+    }
+  ],
+
+  "montaigu": [
+    {
+      text: "Quand est-ce que le général Louis-Marie Turreau fut-il écarté du commandement de l'armée de l'Ouest ?",
+      answers: ["En mai 1794", "En juillet 1794", "En octobre 1794", "En mars 1795"],
+      correct: 0
+    },
+    {
+      text: "Comment les paysans vendéens voyaient-ils souvent les acquéreurs de biens nationaux ?",
+      answers: ["Des alliés", "Des bourgeois urbains profitant de la Révolution", "Des rapaces argentés", "Des colons"],
+      correct: 1
+    },
+    {
+      text: "La conjuration du marquis de La Rouërie, en 1792, concernait surtout quelle province ?",
+      answers: ["La Vendée", "La Bretagne", "Le Poitou uniquement", "Toute la France, l'Espagne, l'Angleterre et la Suède"],
+      correct: 1
+    },
+    {
+      text: "Après la Virée de Galerne, quelle armée rejoignit temporairement Jean Chouan ?",
+      answers: ["Les Vendéens", "Les républicains", "Les émigrés en Angleterre", "Aucun camp"],
+      correct: 0
+    },
+    {
+      text: "En 1792, des heurts eurent lieu à Saint-Christophe-du-Ligneron et dans quelle autre localité ?",
+      answers: ["Cholet", "Angers", "Nantes", "Saint-Jean-de-Monts"],
+      correct: 3
+    },
+    {
+      text: "Combien de prisonniers républicains le généralissime Bonchamps, alors mourant, a-t-il demandé de gracier ?",
+      answers: ["500", "1 000", "2 500", "5 000"],
+      correct: 3
+    },
+    {
+      text: "Quand fut exécuté le généralissime Antoine-Philippe de La Trémoille ?",
+      answers: ["Dès juin 1793", "En décembre 1793", "En janvier 1794", "On n’a jamais su"],
+      correct: 2
+    },
+    {
+      text: "Où fut exposée la tête du généralissime Antoine-Philippe de La Trémoille avant d’être placée dans le caveau familial ?",
+      answers: ["Au château de Versailles", "Au château de Talmont", "Au château de Laval", "Au manoir de l’île de Rémifasoll"],
+      correct: 2
+    },
+    {
+      text: "Comment était surnommé le généralissime Antoine-Philippe de La Trémoille ?",
+      answers: ["Le prince de Talmont", "Le prince angevin", "Le prince Trémoille", "Le prince de Vendée"],
+      correct: 0
+    },
+    {
+      text: "Qu'était le généralissime Louis-Marie de Salgues de Lescure ?",
+      answers: ["Un duc de Bretagne", "Un marquis de Lescure", "Un comte de Lescure", "Un vicomte de Lescure"],
+      correct: 1
+    }
+  ],
+
+  "lesepesses": [
+    {
+      text: "Quelle était l’origine de la famille noble de Louis-Marie de Salgues de Lescure ?",
+      answers: ["De Vendée", "D’Aquitaine", "De Normandie", "Du Languedoc"],
+      correct: 3
+    },
+    {
+      text: "Dans quelle bataille le généralissime Louis-Marie de Salgues de Lescure a-t-il joué un rôle déterminant dans la victoire vendéenne et la libération de chefs ?",
+      answers: ["À la bataille de Noirmoutier", "À la bataille de Cholet", "À la bataille de Fontenay-le-Comte", "À la bataille de La Rocheservière"],
+      correct: 2
+    },
+    {
+      text: "Quand décéda le généralissime Charles Sapinaud de La Rairie ?",
+      answers: ["Dès août 1794", "En mars 1796", "En mai 1799", "En août 1829"],
+      correct: 3
+    },
+    {
+      text: "Quand décéda Jean Chouan ?",
+      answers: ["Dès 1793", "En 1794", "En 1795", "En 1796"],
+      correct: 1
+    },
+    {
+      text: "Quel était le fidèle compagnon d’armes de Pierre-Suzanne Lucas de La Championnière ?",
+      answers: ["Henri de La Rochejaquelein", "Jacques Cathelineau", "Charles de Bonchamps", "François Athanase Charette de La Contrie"],
+      correct: 3
+    },
+    {
+      text: "Qui a permis à la région poitevine de revenir au catholicisme ?",
+      answers: ["Saint Louis-Marie Grignion de Montfort", "Saint-Auguste le Juste", "Saint-André le Chrétien", "Saint-Jean le Benoît de Catoliquae"],
+      correct: 0
+    },
+    {
+      text: "Quelle ville a été traversée par les Vendéens lors de la Virée de Galerne le 12 décembre 1793 ?",
+      answers: ["Angers", "Le Mans", "Granville", "Mayenne"],
+      correct: 1
+    },
+    {
+      text: "Dans quel pays s’est rendu le saint vendéen Pierre-Henri Dorie, où il fut exécuté ?",
+      answers: ["En Italie", "En Espagne", "En Corée", "Aux États-Unis"],
+      correct: 2
+    },
+    {
+      text: "Comment se termine le soulèvement vendéen de 1832 ?",
+      answers: ["Par une victoire royaliste", "Par l’indépendance de la Vendée", "Par un échec et l’arrestation de la duchesse", "Par un coup d’État réussi"],
+      correct: 2
+    },
+    {
+      text: "Comment était aussi appelé le sursaut de 1832 ?",
+      answers: ["Guerre des Deux-Roses", "Insurrection vendéenne", "Insurrection légitimiste", "Révolution Duc Stucru"],
+      correct: 2
+    }
+  ],
+
+  "stfulgent": [
+    {
+      text: "Après La Roche-sur-Yon, quelle ville vendéenne est la plus peuplée ?",
+      answers: ["Les Sables-d’Olonne", "Challans", "Montaigu-Vendée", "Nice-Briss"],
+      correct: 0
+    },
+    {
+      text: "Quel château vendéen est associé à Gilles de Rais, compagnon de Jeanne d’Arc ?",
+      answers: ["Le château de Tiffauges", "Le château d’Apremont", "Le château de Terre-Neuve", "Le Logis de la Chabotterie"],
+      correct: 0
+    },
+    {
+      text: "Quelle est la longueur approximative du littoral vendéen ?",
+      answers: ["120 km", "180 km", "250 km", "400 km"],
+      correct: 2
+    },
+    {
+      text: "Combien y a-t-il de communes en Vendée actuellement ?",
+      answers: ["158", "253", "313", "333"],
+      correct: 1
+    },
+    {
+      text: "Quelle est la différence fondamentale entre les insurrections vendéennes de mars 1793 et les mouvements fédéralistes de la même année dans d’autres régions de France ?",
+      answers: ["Les insurrections vendéennes sont surtout catholiques et royalistes, contrairement aux mouvements fédéralistes", "Les deux mouvements sont exactement identiques", "Les fédéralistes sont les seuls à être ruraux", "Les Vendéens défendent la Chine et l'Indonésie"],
+      correct: 0
+    },
+    {
+      text: "En quelle année décéda Pierre-Suzanne Lucas de La Championnière ?",
+      answers: ["En 1795", "En 1799", "En 1828", "En 1832"],
+      correct: 2
+    },
+    {
+      text: "En quelle année l’officier Pierre-Constant de Suzannet a-t-il été tué ?",
+      answers: ["En 1795", "En 1796", "En 1799", "En 1815"],
+      correct: 3
+    },
+    {
+      text: "Quand fut tué l’officier François de Lyrot de La Patouillère ?",
+      answers: ["En décembre 1793", "En mars 1794", "En juin 1794", "En juillet 1794"],
+      correct: 0
+    },
+    {
+      text: "Contre qui les Vendéens se soulèvent-ils principalement ?",
+      answers: ["Les Anglais", "Les Espagnols", "Les Républicains", "Les Prussiens"],
+      correct: 2
+    },
+    {
+      text: "Quel symbole religieux est très présent chez les insurgés vendéens ?",
+      answers: ["Le croissant", "La croix", "L’étoile", "La colombe tenant une croix"],
+      correct: 1
+    }
+  ],
+
+  "rivesyon": [
+    {
+      text: "Comment appelle-t-on souvent les soldats républicains ?",
+      answers: ["Les blancs", "Les rouges", "Les bleus", "Les noirs"],
+      correct: 2
+    },
+    {
+      text: "Comment appelle-t-on souvent les insurgés vendéens ?",
+      answers: ["Les rouges", "Les blancs", "Les noirs", "Les verts"],
+      correct: 1
+    },
+    {
+      text: "Quelle mer espèrent atteindre les Vendéens ?",
+      answers: ["La Méditerranée", "La mer Noire", "La Manche", "La mer Rouge"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi les vendéens veulent-ils atteindre la mer ?",
+      answers: ["Fuir", "Rejoindre les Anglais", "Pêcher", "Commercer"],
+      correct: 1
+    },
+    {
+      text: "Quel pays soutient indirectement les royalistes ?",
+      answers: ["L’Angleterre", "L'Italie", "La Russie", "L’Espagne"],
+      correct: 0
+    },
+    {
+      text: "Quel élément religieux renforce la colère des Vendéens avant 1793 ?",
+      answers: ["La fermeture des ports", "La Constitution civile du clergé", "La guerre étrangère", "La famine"],
+      correct: 1
+    },
+    {
+      text: "Quel est le sort réservé aux prêtres réfractaires par la Révolution ?",
+      answers: ["Une promotion", "Un commandement militaire", "Une récompense", "L’exil ou la persécution"],
+      correct: 3
+    },
+    {
+      text: "Quel type de serment les prêtres doivent-ils prêter pour être acceptés par la République ?",
+      answers: ["Un serment militaire", "Un serment à la Nation", "Un serment républicain démocratique", "Un serment judiciaire"],
+      correct: 1
+    },
+    {
+      text: "Quel objet religieux personnel accompagnait souvent les combattants vendéens ?",
+      answers: ["Une Bible", "Un chapelet", "Une croix", "Un encensoir"],
+      correct: 1
+    },
+    {
+      text: "Quel type de combat est difficile pour les Vendéens ?",
+      answers: ["Les batailles en terrain ouvert", "Les embuscades", "Les attaques nocturnes", "Les raids"],
+      correct: 0
+    }
+  ],
+
+  "boissierelandes": [
+    {
+      text: "Quel roi est exécuté en 1793 ?",
+      answers: ["Louis XIV", "Louis XV", "Louis XVI", "Louis XVII"],
+      correct: 2
+    },
+    {
+      text: "Quelle reine est exécutée en 1793 ?",
+      answers: ["Marie Curie", "Marie-Antoinette", "Marie Stuart", "Anne d’Autriche"],
+      correct: 1
+    },
+    {
+      text: "Pour quelle raison se battaient les Vendéens principalement ?",
+      answers: ["Ils ne saveient pas trop", "Le Roy et la foi", "L’argent", "La science"],
+      correct: 1
+    },
+    {
+      text: "Quel slogan résume leur combat ?",
+      answers: ["Pour une indépendance de l’Ouest !", "Dieu et le Roy !", "À bas la République !", "Une nation royale et catholique."],
+      correct: 1
+    },
+    {
+      text: "Comment appelle-t-on les prêtres refusant la Constitution civile du clergé ?",
+      answers: ["Assermentés", "Réfractaires", "Élus", "Révolutionnaires"],
+      correct: 1
+    },
+    {
+      text: "Quel grand intellectuel français né vers 1494 était originaire du Poitou ?",
+      answers: ["François Rabelais", "Molière", "Georges Clemenceau", "Victor Hugo"],
+      correct: 0
+    },
+    {
+      text: "Quelle branche royaliste est principalement soutenue par les royalistes de 1832 ?",
+      answers: ["La branche orléaniste", "Aucune des trois", "La branche légitimiste", "La branche louiziste"],
+      correct: 2
+    },
+    {
+      text: "Combien de Français seraient favorables au retour d'une monarchie comme opinion politique théorique ?",
+      answers: ["Moins de 2 %", "Environ 5 à 8 %", "Environ 9 à 12 %", "Environ 13 à 25 %"],
+      correct: 3
+    },
+    {
+      text: "Quel général républicain fut surnommé « le boucher de la Vendée » après Savenay ?",
+      answers: ["Westermann", "Kléber", "Turreau", "Marceau"],
+      correct: 0
+    },
+    {
+      text: "Charette fut capturé et fusillé en mars 1796, près de quel lieu ?",
+      answers: ["Cholet-le-Grand et Nantes", "La Chabotterie et Nantes", "Savenay-le-Château et Cholet", "Nantes-Sabot et La Chevasse"],
+      correct: 1
+    }
+  ],
+
+  "tiffauges": [
+    {
+      text: "Quel chef vendéen du Centre commandait l’armée autour de Châtillon ?",
+      answers: ["François Charette", "Louis-Marie de Lescure", "Jean-Nicolas Stofflet", "Le Prince de Talmont"],
+      correct: 1
+    },
+    {
+      text: "Que précéda immédiatement la bataille de La Tremblaye, le 15 octobre 1793 ?",
+      answers: ["La prise de Saumur", "La défaite de Cholet", "Le traité de La Jaunaye", "Les noyades de Nantes"],
+      correct: 1
+    },
+    {
+      text: "Quelle ville vendéenne fut reprise et saccagée par Westermann en octobre 1793 ?",
+      answers: ["Nantes", "Thouars", "Luçon", "Châtillon-sur-Sèvre"],
+      correct: 3
+    },
+    {
+      text: "Où Henri de La Rochejaquelein fut-il tué en 1794 lors d’un combat ?",
+      answers: ["Nantes", "Cholet", "Nuaillé", "Savenay"],
+      correct: 2
+    },
+    {
+      text: "Par quoi le soulèvement vendéen de 1799 fut-il notamment marqué ?",
+      answers: ["Par un soulèvement rapide mais écrasé", "Par une victoire vendéenne décisive", "Par une alliance avec Napoléon", "Par une intervention anglaise massive"],
+      correct: 0
+    },
+    {
+      text: "Quelle bataille est une grande défaite vendéenne ?",
+      answers: ["Cholet", "Vésuvio", "Blois", "Anémone"],
+      correct: 0
+    },
+    {
+      text: "Après Cholet, qu'ont fait les Vendéens ?",
+      answers: ["La fête, ils ont gagné", "Ils ont fui", "Ils ont entamé des négociations", "Ils se sont alliés aux Chantous"],
+      correct: 1
+    },
+    {
+      text: "A quoi correspond la Terreur ?",
+      answers: ["A une paix incomprise", "A une répression violente", "A une fête républicaine", "A une réforme agricole"],
+      correct: 1
+    },
+    {
+      text: "Quel type de justice est appliqué pendant la Terreur ?",
+      answers: ["Une justice lente", "Une justice religieuse", "Une justice expéditive", "Une justice équitable"],
+      correct: 2
+    },
+    {
+      text: "À Nantes, quel type d’exécution est particulièrement utilisé ?",
+      answers: ["La pendaison", "La décapitation", "La lapidation", "Les noyades"],
+      correct: 3
+    }
+  ],
+
+  "mortagne": [
+    {
+      text: "Qui est responsable des noyades de Nantes ?",
+      answers: ["Robespierre", "Turreau", "Napoléon", "Carrier"],
+      correct: 3
+    },
+    {
+      text: "Combien de morts environ ont causé les guerres de Vendée ?",
+      answers: ["Environ 10 000", "Entre 50 000 et 100 000", "Entre 200 000 et 350 000", "1 million"],
+      correct: 2
+    },
+    {
+      text: "Qu'est-ce qui est principalement touché lors des destructions pendant les guerres de Vendée ?",
+      answers: ["Uniquement les villes", "Uniquement les campagnes", "L’ensemble du territoire", "Pas grand chose"],
+      correct: 2
+    },
+    {
+      text: "Juste après la guerre, comment se porte la Vendée ?",
+      answers: ["Elle devient prospère", "Elle est dévastée", "Elle s'est agrandie", "Elle s'est enrichie"],
+      correct: 1
+    },
+    {
+      text: "En quel année est signé le traité de la Jaunaye ?",
+      answers: ["en 1793", "en 1794", "en 1795", "il n'a jamais été signé"],
+      correct: 2
+    },
+    {
+      text: "Quel est le principal accès maritime historique de la Vendée ?",
+      answers: ["Les Sables-d’Olonne", "La Rochelle", "Nantes", "Brest"],
+      correct: 0
+    },
+    {
+      text: "Quel type de côte caractérise la Vendée ?",
+      answers: ["Une côte rocheuse", "Une côte sableuse", "Une côte volcanique", "Une côte glacée"],
+      correct: 1
+    },
+    {
+      text: "Comment appelle-t-on souvent le littoral vendéen ?",
+      answers: ["La Côte sauvage", "La Côte d’Argent", "La Côte de Lumière", "La Côte blanche"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi la Vendée est-elle favorable à l’agriculture ?",
+      answers: ["Son sol est pauvre", "Il y pleut peu", "Son relief est montagneux", "Son climat est doux"],
+      correct: 3
+    },
+    {
+      text: "Quel peuple antique occupait la région avant les Romains ?",
+      answers: ["Les Gaulois", "Les Vikings", "Les Goths", "Les Arabes"],
+      correct: 0
+    }
+  ],
+
+  "chantonnay": [
+    {
+      text: "Quel chef vendéen signe la paix de la Jaunaye ?",
+      answers: ["François Charette", "Charles de Bonchamps", "Jacques Cathelineau", "Jean-Nicolas Stofflet"],
+      correct: 0
+    },
+    {
+      text: "Que promet notamment la République lors du traité de la Jaunaye ?",
+      answers: ["La richesse", "La liberté religieuse", "La guerre", "La monarchie"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi le traité de la Jaunaye échoue-t-il ?",
+      answers: ["Par manque d’argent", "Par trahison de la République", "Par une invasion étrangère", "Par une nouvelle famine"],
+      correct: 1
+    },
+    {
+      text: "Que devient la guerre après la rupture du traité de la Jaunaye ?",
+      answers: ["Elle s’arrête", "Elle devient navale", "Elle change de pays", "Elle reprend"],
+      correct: 3
+    },
+    {
+      text: "Comment est traité Louis XVII en prison ?",
+      answers: ["Très bien", "Plutôt correctement", "Extrêmement mal", "Comme un roi"],
+      correct: 2
+    },
+    {
+      text: "Quels mots Napoléon Bonaparte aurait-il utilisé pour qualifier la guerre vendéenne ?",
+      answers: ["Une guerre de géants", "Une guerre banale", "Une guerre inutile", "Une guerre terrible"],
+      correct: 0
+    },
+    {
+      text: "Par rapport à la Vendée militaire, comment était plutôt le sud de l’actuelle Vendée ?",
+      answers: ["Plutôt très favorable à la République", "Tout autant royaliste", "Plutôt divisé", "Il était indépendant"],
+      correct: 2
+    },
+    {
+      text: "Que signifie la devise vendéenne actuelle ?",
+      answers: ["Fidèle à la Vendée", "Fidèle à mon Fils", "Fidèle à Dieu et au roi", "Fidèle à la France !"],
+      correct: 2
+    },
+    {
+      text: "Qui, parmi ces chefs, était un chef vendéen ?",
+      answers: ["Gaspard de Bernard de Marigny", "Jean le Santerre de Varsovie", "Jehan Marcé de Boalbigny", "Quentin Beaupuy de Trémintin-sur-mer"],
+      correct: 0
+    },
+    {
+      text: "Combien de grandes villes les Vendéens sont-ils parvenus à prendre durant les guerres de Vendée ?",
+      answers: ["Aucune !", "Une seule", "Trois", "Plus de dix !"],
+      correct: 3
+    }
+  ],
+
+  "thire": [
+    {
+      text: "Quel chanteur contemporain est originaire de Vendée ?",
+      answers: ["Georges Brassens", "Henri Salvador", "Michel Sardou", "Aucun"],
+      correct: 3
+    },
+    {
+      text: "Quelle était la fonction principale du généralissime Jean-Baptiste Joly avant son rôle militaire ?",
+      answers: ["Il était chirurgien", "C'était un paysan", "Il était gendarme", "Il était prêtre puis cardinal du Pays d'Olonne"],
+      correct: 0
+    },
+    {
+      text: "Combien de localités (bourgs, paroisses, villages...) les Vendéens ont-ils occupées ou contrôlées, même temporairement ?",
+      answers: ["Entre 5 et 15", "Environ 20", "Environ 50", "Jusqu'à 500"],
+      correct: 2
+    },
+    {
+      text: "Quelle armée républicaine arrive en renfort à l’automne 1793 ?",
+      answers: ["L'armée de Mayence", "L'armée du Nord", "L'armée d’Italie", "L'armée des Alpes"],
+      correct: 0
+    },
+    {
+      text: "Qui réalise une première synthèse sur les Vendéens exilés ?",
+      answers: ["Émile Gabory", "Jean Michelet", "Patrice Hugo", "Reynald Secher"],
+      correct: 0
+    },
+    {
+      text: "Pourquoi la mort de Louis XVII choque-t-elle ?",
+      answers: ["Il était riche", "Il était jeune", "Il était étranger", "Il était soldat"],
+      correct: 1
+    },
+    {
+      text: "Quel chef vendéen continue la lutte après la paix ?",
+      answers: ["François Charette", "Jacques Cathelineau", "Louis de Lescure", "Louis XVIII"],
+      correct: 0
+    },
+    {
+      text: "Parmi ces chefs, lequel est capturé puis exécuté en 1796 ?",
+      answers: ["Louis de Salgues de Lescure", "Charles de Bonchamps", "Jacques Cathelineau", "Jean-Nicolas Stofflet"],
+      correct: 3
+    },
+    {
+      text: "Comment est mort Louis XVII ?",
+      answers: ["Au combat lorsqu'il était âgé de 17 ans", "Assassiné par un mystèrieux révolutionnaire", "De maladie en prison", "Il a été exilé, puis mouru de faim"],
+      correct: 2
+    },
+    {
+      text: "En quelle année a lieu un nouveau soulèvement vendéen ?",
+      answers: ["en 1797", "en 1798", "en 1799", "en 1800"],
+      correct: 2
+    }
+  ],
+
+  "stehermine": [
+    {
+      text: "Comment est appelé le soulèvement de 1799 ?",
+      answers: ["La révolte blanche", "Le sursaut vendéen", "La guerre finale", "L'insurrection royale"],
+      correct: 1
+    },
+    {
+      text: "Qu'a permis le Concordat ?",
+      answers: ["La guerre", "La paix religieuse", "La monarchie", "La révolution"],
+      correct: 1
+    },
+    {
+      text: "A quoi le sursaut vendéen de 1815 était-il lié ?",
+      answers: ["A Waterloo", "A Paris", "A Rancon", "A Nantes"],
+      correct: 0
+    },
+    {
+      text: "En 1832, qui tente de relancer la guerre en Vendée ?",
+      answers: ["Fabrice de Vermandois (comte de Vermandois)", "Louis Lesûr (paysan insurgé)", "Marie-Caroline de Bourbon-Sicile (duchesse de Berry)", "Henri de la Rochefoucault (officier militaire)"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi le soulèvement de 1832 échoue-t-il ?",
+      answers: ["Par manque d’armes", "Par manque de soutien", "Par une invasion", "A cause d'une nouvelle maladie"],
+      correct: 1
+    },
+    {
+      text: "Quelle est la place actuelle (2026) occupée par la Vendée par rapport au tourisme ?",
+      answers: ["Première place", "Deuxième place", "Troisième place", "Sixième place"],
+      correct: 1
+    },
+    {
+      text: "Après la guerre, que relança le groupe d’entrepreneurs appelés « les Onze associés » ?",
+      answers: ["Les Colonnes de fer", "La chouannerie tranquille", "Les tissus en soie", "L’industrie textile dans le Choletais"],
+      correct: 3
+    },
+    {
+      text: "Qui sont les « puyfolais » ?",
+      answers: ["Les habitants de Puy-Le-Saint", "Les descendants de Jean le Puy-Folois", "Les bénévoles du Puy du Fou", "Les touristes en Vendée"],
+      correct: 2
+    },
+    {
+      text: "Quelle image est souvent associée au Vendéen dans l'historiographie locale ?",
+      answers: ["Volontaire, persévérant, travailleur et débrouillard", "Contestataire et énervé", "Il a une mutation ADN particulière liée aux guerres de Vendée", "Il prépare toujours une nouvelle insurrection"],
+      correct: 0
+    },
+    {
+      text: "Combien d'habitants environ la Vendée compte-t-elle aujourd’hui (2025-2027) ?",
+      answers: ["Environ 100 000 habitants", "Environ 500 000 habitants", "Environ 700 000 habitants", "Environ 1 million d’habitants"],
+      correct: 2
+    }
+  ],
+
+  "jard": [
+    {
+      text: "Qu’était/est placé au centre de la brioche lors des mariages traditionnels vendéens ?",
+      answers: ["Une autre brioche", "La duchesse locale", "Une croix", "La mariée"],
+      correct: 3
+    },
+    {
+      text: "Quel poisson fit la richesse des Sables-d’Olonne au XVIIe siècle ?",
+      answers: ["Le hareng", "La sardine", "La morue", "Le thon"],
+      correct: 2
+    },
+    {
+      text: "Parmi ces propositions, qui a séjourné au château de Terre-Neuve près de Fontenay-le-Comte ?",
+      answers: ["François Ier", "Agrippa d’Aubigné", "Louis XVIII", "Georges Clémenceau"],
+      correct: 1
+    },
+    {
+      text: "Quel est le nom de la route submersible qui relie l’île de Noirmoutier au continent ?",
+      answers: ["Le Passage du Gois", "Le Pont des Marées", "La Route Blanche", "Le Chemin de Noirmoutier-la-mort"],
+      correct: 0
+    },
+    {
+      text: "Quel nom est donné aux habitants de Saint-Gilles-Croix-de-Vie ?",
+      answers: ["Gillois", "Gillocruciens", "Croixiens", "Gillets"],
+      correct: 1
+    },
+    {
+      text: "Quel rôle jouaient les femmes vendéennes durant les guerres de Vendée ?",
+      answers: ["Aucun rôle particulier", "Elles ont toutes fui", "Elles jouaient un rôle actif", "Elles jouaient un rôle politique uniquement"],
+      correct: 2
+    },
+    {
+      text: "Comment sont appelées certaines combattantes vendéennes ?",
+      answers: ["Les louves", "Les amazones", "Les guerrières", "Les saintes"],
+      correct: 1
+    },
+    {
+      text: "Quel type d’armée est l’armée vendéenne ?",
+      answers: ["Professionnelle", "Royale officielle", "Étrangère", "Improvisée"],
+      correct: 3
+    },
+    {
+      text: "Pourquoi les Vendéens manquaient-ils d’armes ?",
+      answers: ["Par manque d’argent", "Par manque d’industrie", "A cause de pertes massives d’armes", "A cause de trahisons internes"],
+      correct: 1
+    },
+    {
+      text: "Qu'est-ce que les vendéens récupéraient souvent comme armes ?",
+      answers: ["Des outils agricoles", "Des fusils modernes", "Des canons", "Des Rhino Tanks"],
+      correct: 0
+    }
+  ],
+
+  "mesmin": [
+    {
+      text: "Quel outil devint fréquemment une arme lors des guerres de Vendée ?",
+      answers: ["La fourche", "Le marteau", "La scie", "Le clou"],
+      correct: 0
+    },
+    {
+      text: "Quel est l’avantage principal des armes improvisées qu'utilisaient les vendéens ?",
+      answers: ["Leur précision à toute épreuve", "Leur disponibilité", "Leur puissance inégalable", "Leur modernité"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi la guérilla était-elle efficace ?",
+      answers: ["Car elle était lente", "Car elle surprenait", "Car elle était invasive", "Car elle était discrète"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi les Vendéens connaissaient-ils bien leur terrain ?",
+      answers: ["Car ils voyagaient beaucoup", "Car ils étaient guidés par des anges", "Car ils avaient des cartes", "Car ils y vivaient"],
+      correct: 3
+    },
+    {
+      text: "Quel fut l'un des objectifs des révolutionnaires durant la Terreur ?",
+      answers: ["Maintenir la monarchie", "Manger plus de fruits", "Détruire la religion", "Protéger les chevaux"],
+      correct: 2
+    },
+    {
+      text: "De quelle grande famille de noblesse poitevine descendait Hugues X, époux d’Isabelle d’Angoulême ?",
+      answers: ["De Lésignan", "De Lusignan", "De Vandignan", "De Vitré"],
+      correct: 1
+    },
+    {
+      text: "Quelle politique Napoléon Bonaparte adopta-t-il envers la Vendée une fois au pouvoir ?",
+      answers: ["Une répression accrue", "L’indifférence", "Une déportation massive", "Une amnistie et une pacification"],
+      correct: 3
+    },
+    {
+      text: "Qui écrivit des mémoires célèbres sur la guerre en tant que veuve d’un chef vendéen ?",
+      answers: ["Victoire de La Rochejaquelein", "Madame de Bonchamps", "Madame de Charette", "Renée Bordereau"],
+      correct: 0
+    },
+    {
+      text: "Quel pourcentage approximatif des prêtres vendéens refusa le serment à la Constitution civile du clergé ?",
+      answers: ["Moins de 20 %", "Environ 75 à 80 %", "50 %", "99 %"],
+      correct: 1
+    },
+    {
+      text: "Combien de temps dura environ la Virée de Galerne ?",
+      answers: ["67 jours", "Un mois", "Six mois", "15 jours"],
+      correct: 0
+    }
+  ],
+
+  "bazauges": [
+    {
+      text: "En 1794, un « chirurgien » sans-culotte à Angers tenta de tanner des peaux de Vendéens.",
+      answers: ["Vrai", "Faux", "Je ne sais pas", "Monnaie courante"],
+      correct: 0
+    },
+    {
+      text: "En 1792, quel événement précurseur à Bressuire et dans le bocage bressuirais annonça les tensions ?",
+      answers: ["La prise de la Bastille locale", "La bataille des Moulins de Cornet et les premières jacqueries contre les patriotes", "L’arrivée des troupes prussiennes dans le bocage vendéen", "La signature d’un concordat local"],
+      correct: 1
+    },
+    {
+      text: "Quelle ville nouvelle fut créée par Napoléon pour « dompter » administrativement la Vendée après 1800 ?",
+      answers: ["Cholet-Vendée", "Les Sables-d’Olonne", "Fontenay-le-Prince-Napoléon", "Napoléon-Vendée"],
+      correct: 3
+    },
+    {
+      text: "Sous Napoléon, quelle mesure économique accompagna la pacification vendéenne ?",
+      answers: ["Des aides à la reconstruction des villages et des exemptions fiscales temporaires", "L’interdiction du commerce côtier", "La nationalisation des terres restantes", "Une imposition massive sur l’agriculture"],
+      correct: 0
+    },
+    {
+      text: "Quel abbé vendéen joua un rôle clé dans les négociations du Concordat de 1801 ?",
+      answers: ["Jean-Corse le Huant", "Étienne-Alexandre Bernier", "Louis-Albert François de Quelen", "Marc Garnier"],
+      correct: 1
+    },
+    {
+      text: "Comment les Vendéens voient-ils les républicains ?",
+      answers: ["Comme des alliés", "Comme des protecteurs", "Comme des opresseurs", "Comme des étrangers"],
+      correct: 2
+    },
+    {
+      text: "Quel sentiment domine chez les Vendéens durant les guerres de Vendée ?",
+      answers: ["L'indifférence", "La résignation", "La résistance", "La joie"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi les républicains étaient-ils appelés les \"bleus\" ?",
+      answers: ["À cause de leur uniforme", "À cause de leur sang", "À cause d’un symbole oriental", "Car ils dessinaient en bleu"],
+      correct: 0
+    },
+    {
+      text: "Pourquoi les Vendéens étaient-ils appelés les \"blancs\" ?",
+      answers: ["C'était la couleur royale", "C'était un peu par hasard", "C'était à cause de la neige présente en Vendée à cette époque", "C'était à cause du drapeau anglais, majoritairement blanc"],
+      correct: 0
+    },
+    {
+      text: "Quel type de mémoire des guerres de Vendée existe encore aujourd’hui ?",
+      answers: ["Une mémoire politique", "Une mémoire religieuse", "Une mémoire historique", "Elle se manifeste par tous cela (ABC)"],
+      correct: 3
+    }
+  ],
+
+  "lucon": [
+    {
+      text: "Quel écrivain a parlé de la Vendée comme d’un génocide ?",
+      answers: ["Victor Hugo", "Alexandre Soljenitsyne", "François-Marie Arouet (Voltaire)", "Jean-Jacques Rousseau"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi les Vendéens traversent-ils la Loire lors de la Virée de Galerne ?",
+      answers: ["Pour trouver plus de nourriture", "Pour rejoindre l’Angleterre", "Pour attaquer Paris", "Pour recruter"],
+      correct: 3
+    },
+    {
+      text: "Quelle bataille met fin à la Virée de Galerne ?",
+      answers: ["Cholet", "Savenay", "Nantes", "Saumur"],
+      correct: 1
+    },
+    {
+      text: "Que se passe-t-il après la bataille de Savenay ?",
+      answers: ["La paix est signée", "Les Vendéens prennent la fuite vers l’Angleterre", "Un massacre a lieu", "Les Vendéens remportent une victoire"],
+      correct: 2
+    },
+    {
+      text: "Quel général républicain mène la répression après Savenay ?",
+      answers: ["Louis-Marie Turreau", "Jean-Baptiste Kléber", "François Diligence", "Jean-Clou Bouthillier"],
+      correct: 0
+    },
+    {
+      text: "Pour quelle raison est connue Antoinette-Charlotte Le Duc de La Bouëre ?",
+      answers: ["son rôle de généralissime", "ses mémoires sur la vie quotidienne des femmes pendant la Virée", "sa trahison envers les Blancs", "son alliance avec Carrier"],
+      correct: 1
+    },
+    {
+      text: "Marie-Renée-Marguerite de Scépeaux de Bonchamps écrivit des mémoires en tant que ?",
+      answers: ["amazone de Charette", "veuve de Bonchamps", "fille de Bonchamps", "tante de Bonchamps"],
+      correct: 1
+    },
+    {
+      text: "Quelle femme combattante vendéenne participa activement aux batailles de Cholet et de Saumur ?",
+      answers: ["Renée Bordereau", "Olympe de Bourges", "Madame de Roland-Barthes", "Théroigne de Méricourt"],
+      correct: 0
+    },
+    {
+      text: "Qui était Henri Forestier parmi les chefs vendéens secondaires ?",
+      answers: ["Un général républicain", "Un officier actif dans l’armée du Centre", "Un prêtre réfractaire", "Un marchand nantais"],
+      correct: 1
+    },
+    {
+      text: "Qui était Jeanne-Ambroise de Sapinaud de Boishuguet ?",
+      answers: ["Une républicaine", "Une générale", "Une mémorialiste vendéenne", "Une espionne"],
+      correct: 2
+    }
+  ],
+
+  "stmichelenlherm": [
+    {
+      text: "Comment est surnommé le marais poitevin ?",
+      answers: ["La Venise verte", "Le Haricot vert", "Le Marais vert", "Le Géant vert"],
+      correct: 0
+    },
+    {
+      text: "Avant 1793, pourquoi les métayers vendéens se sentaient-ils souvent floués par la Révolution malgré l’abolition des droits féodaux ?",
+      answers: ["Ils gagnaient moins d’argent à cause du 1er mai", "Les biens nationaux furent surtout rachetés par des bourgeois des villes, pas par les paysans locaux", "La dîme avait doublé, la taille triplé et la paulette quadruplé", "Ils étaient devenus locataires du jour au lendemain"],
+      correct: 1
+    },
+    {
+      text: "Quel paradoxe étonnant existait dans le bocage vendéen avant la guerre ?",
+      answers: ["Les nobles vivaient loin de leurs terres", "Tous les nobles étaient jacobins", "Il n’y avait presque plus de nobles", "Les nobles habitaient souvent avec les paysans et partageaient une vie proche"],
+      correct: 3
+    },
+    {
+      text: "Quel phénomène d’avant 1793 explique en partie pourquoi les Vendéens se sentaient « abandonnés » par la Révolution ?",
+      answers: ["La suppression totale des impôts", "L’accaparement des pouvoirs locaux par les élites des bourgs", "L’arrivée massive d’immigrants", "La mécanisation de l’agriculture"],
+      correct: 1
+    },
+    {
+      text: "L’historien Claude Langlois parle de « révolution malade de la Vendée » pour quelle raison ?",
+      answers: ["La victoire facile des Bleus", "Le fait que la Révolution n’a pas apporté la modernité espérée dans cette région", "L’absence totale de résistance", "L’industrialisation massive"],
+      correct: 1
+    },
+    {
+      text: "Quel fleuve est souvent utilisé pour les exécutions à Nantes ?",
+      answers: ["La Seine", "Le Rhône", "La Loire", "La Garonne"],
+      correct: 2
+    },
+    {
+      text: "Quel type de victimes les noyades de Nantes incluent-elles aussi ?",
+      answers: ["Des femmes et des enfants", "Des adultes uniquement", "Des soldats en grande partie", "Des étrangers (40%)"],
+      correct: 0
+    },
+    {
+      text: "Que signifie le terme « déportation » durant cette période ?",
+      answers: ["Un exil forcé", "Un voyage volontaire", "Un lieu de dépôt de colis", "Une migration libre"],
+      correct: 0
+    },
+    {
+      text: "Pourquoi certains Vendéens fuient-ils à l’étranger ?",
+      answers: ["Pour le commerce", "Pour le plaisir de voyager", "Pour la richesse", "Par peur"],
+      correct: 3
+    },
+    {
+      text: "Parmi ces propositions, quel pays accueille un certain nombre d'exilés vendéens ?",
+      answers: ["L’Espagne", "La Russie", "L’Italie", "L’Allemagne"],
+      correct: 0
+    }
+  ],
+
+  "longville": [
+    {
+      text: "Quel Roy soutient les royalistes depuis l’étranger ?",
+      answers: ["Louis XVI", "Louis XVII", "Louis XVIII", "Louis XIV"],
+      correct: 2
+    },
+    {
+      text: "Sur quelle partie du corps le Sacré-Cœur était-il souvent porté par les insurgés vendéens ?",
+      answers: ["Sur le casque", "Sur la poitrine", "Sur le pantalon", "Sur les chaussures"],
+      correct: 1
+    },
+    {
+      text: "Quel événement marque la fin des grandes armées vendéennes ?",
+      answers: ["Savenay", "Cholet", "Nantes", "Saumur"],
+      correct: 0
+    },
+    {
+      text: "Après 1794, que devient surtout la guerre de Vendée ?",
+      answers: ["Une guerre navale", "Une guerre clandestine", "Une guerre internationale", "Une guerre commerciale"],
+      correct: 1
+    },
+    {
+      text: "Quel type d’actions sont surtout menées après 1794 ?",
+      answers: ["De grandes batailles", "Une guerre nucléaire", "Des négociations permanentes", "De petites attaques"],
+      correct: 3
+    },
+    {
+      text: "Quel conflit religieux touche aussi la Vendée avant la Révolution ?",
+      answers: ["Les Croisades", "Les Guerres de Religion", "La Guerre de Cent Ans", "La Guerre de Succession"],
+      correct: 1
+    },
+    {
+      text: "Quel courant religieux autre que le catholicisme est assez présent en Vendée avant la Révolution ?",
+      answers: ["Le bouddhisme", "Le protestantisme", "L’orthodoxie", "Le paganisme"],
+      correct: 1
+    },
+    {
+      text: "Quelle activité économique est importante en Vendée avant 1793 ?",
+      answers: ["La pêche à la baleine avec les Basques", "Les mines de fer", "L’agriculture", "Le pétrole jaune"],
+      correct: 2
+    },
+    {
+      text: "Quelle production agricole est typique de la région ?",
+      answers: ["Le blé", "Le riz", "Le café", "Le thé"],
+      correct: 0
+    },
+    {
+      text: "Quel élevage est courant en Vendée ?",
+      answers: ["Les bovins", "Les brebis", "Les moutons", "Les chèvres"],
+      correct: 0
+    }
+  ],
+
+  "angles": [
+    {
+      text: "Quel événement local déclenche immédiatement les premières violences en mars 1793 ?",
+      answers: ["Le refus du tirage au sort", "Une attaque anglaise", "La mort d’un général", "L’incendie d’une église"],
+      correct: 0
+    },
+    {
+      text: "Quel type de population se mobilise en premier en mars 1793 ?",
+      answers: ["Les bourgeois", "Les paysans", "Les soldats", "Les nobles uniquement"],
+      correct: 1
+    },
+    {
+      text: "Après les Romains, qui contrôle la région (Vendée) ?",
+      answers: ["L’Empire byzantin", "L’Empire Russo-ottoman", "L’Empire Greco-gaulois", "Le royaume des Francs"],
+      correct: 2
+    },
+    {
+      text: "Quel type de construction romaine peut encore marquer le territoire vendéen ?",
+      answers: ["Des maisons", "Des routes", "Des temples", "Des pagodes"],
+      correct: 1
+    },
+    {
+      text: "Quelle ville fut attaquée à deux reprises par les Vendéens avec l’officier Jean-Baptiste Joly, sans succès ?",
+      answers: ["Olonne-sur-Mer", "Le Château-d’Olonne", "L’Île-d’Olonne", "Les Sables-d’Olonne"],
+      correct: 3
+    },
+    {
+      text: "Dans la guerre de Vendée, à quoi servent souvent les bois ?",
+      answers: ["À faire sécher les armes", "À se cacher", "À nourrir les chevaux", "À installer les tribunaux"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi les forêts sont-elles utiles aux insurgés vendéens ?",
+      answers: ["Elles permettent de se regrouper ou de se disperser rapidement", "Elles servent de ports militaires", "Elles abritent des manufactures", "Elles empêchent la pluie"],
+      correct: 0
+    },
+    {
+      text: "Quel auteur révolutionnaire publie en 1794 un ouvrage intitulé Guerre de la Vendée et des chouans ?",
+      answers: ["Jean-Baptiste Carrier", "Joseph-Marie Lequinio", "Louis-Marie Turreau", "François Barère"],
+      correct: 1
+    },
+    {
+      text: "Quel ouvrage est présenté comme une référence incontournable parmi les témoignages vendéens ?",
+      answers: ["La Vendée-Vengé", "La mémoire des guerres", "Vendée 1793", "Les Mémoires de la marquise de La Rochejaquelein"],
+      correct: 3
+    },
+    {
+      text: "Victoire de Donnissan de La Rochejaquelein fut l’épouse de Louis de Lescure et puis de ?",
+      answers: ["Jean Chouan", "Henri de La Rochejaquelein", "Charles de Bonchamps", "Jean-Nicolas Stofflet"],
+      correct: 1
+    }
+  ],
+
+  "aiguillon": [
+    {
+      text: "Par qui a été écrit le roman « historique Les Mouchoirs rouges de Cholet » ?",
+      answers: ["Michel Ragon", "Alain Gérard", "Reynald Secher", "Nicolas Delahaye"],
+      correct: 0
+    },
+    {
+      text: "Dans le livre « Les Mouchoirs rouges de Cholet », à quoi servent surtout les mouchoirs rouges ?",
+      answers: ["À soigner les blessés", "À reconnaître certains combattants", "À signer la paix", "À porter les munitions"],
+      correct: 1
+    },
+    {
+      text: "Quel historien publie en 1986 « La Vendée-Vengé : le génocide franco-français ? »",
+      answers: ["Jacques Villemain", "Reynald Secher", "Michel Perraudeau", "Kilian Jonet"],
+      correct: 1
+    },
+    {
+      text: "Quel ouvrage de 2017 aborde la Vendée sous l’angle du droit international et du droit pénal moderne ?",
+      answers: ["Vendée 1793", "Génocide en Vendée", "Vendée (1793-1794) - Crime de guerre ? Crime contre l’humanité ? Génocide ?", "La mémoire des guerres"],
+      correct: 2
+    },
+    {
+      text: "Quel film de 2023 produit par Puy du Fou Films raconte l’histoire de Charette ?",
+      answers: ["Vent de galerne", "Le Général du Roy", "Vaincre ou mourir", "Chouans !"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi les Lucs-sur-Boulogne occupent-ils une place si forte dans la mémoire vendéenne ?",
+      answers: ["Parce qu’il s’agit d’une grande victoire vendéenne", "Parce qu’il s’agit d’un massacre de civils très symbolique", "Parce que Napoléon y est né", "Parce que le traité de la Jaunaye y fut signé"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi les chants vendéens occupent-ils une place importante dans cette mémoire ?",
+      answers: ["Parce qu’ils transmettent l’esprit du combat", "Parce qu’ils remplacent les archives", "Parce qu’ils ont tous été écrits au XXe siècle", "Parce qu’ils sont obligatoires à l’école"],
+      correct: 0
+    },
+    {
+      text: "Pourquoi la gastronomie peut-elle aussi faire partie de l’identité vendéenne ?",
+      answers: ["Parce qu’elle n’a aucun lien avec la mémoire", "Parce qu’elle remplace l’histoire", "Parce qu’elle vient uniquement de Paris", "Parce qu’elle rappelle la culture locale"],
+      correct: 3
+    },
+    {
+      text: "Pourquoi la mémoire vendéenne mêle-t-elle souvent histoire, foi et transmission familiale ?",
+      answers: ["Parce que ces trois dimensions sont liées dans le souvenir du conflit", "Parce que la République l’a imposé", "Parce que seule la religion compte", "Parce que les archives n’existent plus"],
+      correct: 0
+    },
+    {
+      text: "Dans le langage révolutionnaire, à quoi servait de qualifier un ennemi de « brigand » ?",
+      answers: ["Le rendre ennemi", "Le moquer", "Le déshumaniser", "L’énerver"],
+      correct: 2
+    }
+  ],
+
+  "puyravault": [
+    {
+      text: "Combien d’hommes la levée en masse de 1793 exige-t-elle environ ?",
+      answers: ["100 000", "200 000", "300 000", "500 000"],
+      correct: 2
+    },
+    {
+      text: "Quel type de tirage désigne les hommes envoyés à la guerre en 1793 ?",
+      answers: ["Sélection militaire", "Désignation royale", "Volontariat", "Tirage au sort"],
+      correct: 3
+    },
+    {
+      text: "Quel problème crée une injustice lors du tirage au sort pour la levée en masse de 300 000 hommes ?",
+      answers: ["Les riches peuvent éviter le service", "Les pauvres refusent", "Les nobles sont obligés", "Les prêtres décident"],
+      correct: 0
+    },
+    {
+      text: "A qui les paysans vendéens ont-ils fait appel ?",
+      answers: ["Aux bourgeois", "Aux franc-maçons", "Aux nobles", "À eux-mêmes"],
+      correct: 2
+    },
+    {
+      text: "Combien d’hommes comptait l’armée du Bas-Poitou et du Pays de Retz en 1793 ?",
+      answers: ["moins de 5 000 hommes", "maximum 10 000 hommes", "environ 15 000 hommes", "beaucoup, environ 100 000 hommes"],
+      correct: 2
+    },
+    {
+      text: "Quel film de 1988 réalisé par Philippe de Broca se déroule pendant la chouannerie ?",
+      answers: ["Chouans !", "The War of the Vendée", "Vent de galerne", "La Rébellion cachée"],
+      correct: 0
+    },
+    {
+      text: "Par qui a été réalisée la sculpture « Grâce aux prisonniers ! » ?",
+      answers: ["David d’Angers", "Lux Fournier", "Jules Girardet", "Daphné du Barry"],
+      correct: 0
+    },
+    {
+      text: "Pourquoi l’œuvre de David d’Angers sur Bonchamps est-elle particulièrement marquante ?",
+      answers: ["Elle fut sculptée par un Vendéen", "L’artiste était fils d’un républicain gracié par Bonchamps", "Elle a été commandée par Charette", "Elle date de 1793"],
+      correct: 1
+    },
+    {
+      text: "Quand débutent les émeutes liées aux réfractaires, souvent évoquées dans la mémoire vendéenne ?",
+      answers: ["Janvier 1792", "Mars 1793", "Juin 1794", "Octobre 1795"],
+      correct: 1
+    },
+    {
+      text: "À Avrillé, quel est l'âge approximatif des victimes injustement exécutées ?",
+      answers: ["5 à 40 ans", "10 à 60 ans", "14 à 84 ans", "20 à 70 ans"],
+      correct: 2
+    }
+  ],
+
+  "chailles": [
+    {
+      text: "Quel ordre de grandeur est donné pour les victimes exécutées à Avrillé ?",
+      answers: ["200", "800", "1 000", "2 000"],
+      correct: 3
+    },
+    {
+      text: "Dans les Lucs-sur-Boulogne, combien de victimes identifiées le martyrologe mentionne-t-il ?",
+      answers: ["264", "364", "564", "764"],
+      correct: 2
+    },
+    {
+      text: "Combien d’enfants de moins de 7 ans auraient été massacrés aux Lucs-sur-Boulogne ?",
+      answers: ["Plus de 30", "Plus de 60", "Plus de 110", "Plus de 200"],
+      correct: 2
+    },
+    {
+      text: "Quel prêtre a rédigé le martyrologe des Lucs ?",
+      answers: ["Pierre-François Robin", "L’abbé Voyneau", "Pierre Barbedette", "Jean-Marie Lequinio"],
+      correct: 0
+    },
+    {
+      text: "Quel général est associé à la colonne républicaine qui frappe les Lucs-sur-Boulogne ?",
+      answers: ["Carrier", "Cordellier", "Kléber", "Marceau"],
+      correct: 1
+    },
+    {
+      text: "Quel est le nom d'un célèbre parc aquatique vendéen ?",
+      answers: ["O’Gliss Park", "O’Fun", "O’Vendée", "O’Park"],
+      correct: 0
+    },
+    {
+      text: "Quel spectacle du Puy du Fou met en scène Romains et Gaulois ?",
+      answers: ["Le Signe du Triomphe", "La Cinéscénie", "Le Dernier Panache", "Les Vikings"],
+      correct: 0
+    },
+    {
+      text: "Quel est le nom de famille le plus porté en Vendée ?",
+      answers: ["Moreau/Lhommeau", "Martin/L'herbreteau", "Martineau/Charrier", "Rousseau/Jomeau"],
+      correct: 2
+    },
+    {
+      text: "Quel est le nom du journal vendéen actuel ?",
+      answers: ["Le Journal de la Vendée", "Ouest-France", "Vendée Presse", "Le Courrier"],
+      correct: 0
+    },
+    {
+      text: "Qui arrête effectivement François Athanase Charette de la Contrie ?",
+      answers: ["Hoche", "Travot", "Kléber", "Turreau"],
+      correct: 1
+    }
+  ],
+
+  "montreuil": [
+    {
+      text: "Quelle île est réputée pour ses pommes de terre ?",
+      answers: ["L'île de Noirmoutier", "L'île de Ré", "L'île d'Oléron", "L'île d'Yeu"],
+      correct: 0
+    },
+    {
+      text: "Quel monument n’est pas en Vendée ?",
+      answers: ["Le Mont-Saint-Michel", "Le château de Tiffauges", "Le château d'Apremont", "Le logis de la Chabotterie"],
+      correct: 0
+    },
+    {
+      text: "Où soigne-t-on François Charette ?",
+      answers: ["Dans une cuisine", "Dans un salon", "Dans une chambre", "Dehors"],
+      correct: 0
+    },
+    {
+      text: "Qui est épargné pendant la guerre ?",
+      answers: ["Enfants", "Femmes", "Personne", "Vieillards"],
+      correct: 2
+    },
+    {
+      text: "Quel courant religieux est aujourd'hui majoritaire en Vendée ?",
+      answers: ["Le protestantisme", "Le catholicisme", "L'anglicanisme", "Le calvinisme"],
+      correct: 1
+    },
+    {
+      text: "Où se termine le « Chemin de la Mémoire » du site des Lucs ?",
+      answers: ["À la cathédrale de Luçon", "Au château de Tiffauges", "À l’abbaye de Maillezais", "À la chapelle du Petit-Luc"],
+      correct: 3
+    },
+    {
+      text: "Quel chef vendéen est enterré à La Gaubretière ?",
+      answers: ["Louis de Lescure", "Jean Chouan", "Maurice d’Elbée", "Charles Sapinaud de La Rairie"],
+      correct: 3
+    },
+    {
+      text: "Comment les Vendéens communiquent-ils souvent entre eux dans le bocage ?",
+      answers: ["Par télégraphe", "Par signaux et messagers", "Par journaux", "Par cloches uniquement"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi les armées vendéennes sont-elles difficiles à poursuivre ?",
+      answers: ["Elles sont invisibles", "Elles se dispersent rapidement", "Elles volent", "Elles sont étrangères"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi les cloches d’église peuvent-elles être importantes dans la guerre de Vendée ?",
+      answers: ["Pour signaler un danger", "Pour faire comprendre aux vendéens que c'est le moment d'attaquer", "Pour annoncer l'heure de manger", "Pour faire des signaux en morse"],
+      correct: 0
+    }
+  ],
+
+  "maille": [
+    {
+      text: "Quel lien unit souvent les combattants vendéens ?",
+      answers: ["L’argent", "La famille et le voisinage", "L’armée professionnelle", "L’étranger"],
+      correct: 1
+    },
+    {
+      text: "Quel sentiment renforce la violence d’une guerre civile, comme celle de 1789-96 ?",
+      answers: ["L’indifférence", "La peur du climat", "La richesse", "La proximité"],
+      correct: 3
+    },
+    {
+      text: "Quel élément religieux est rejeté par une partie de la population vendéenne pendant la Révolution ?",
+      answers: ["Les messes", "Les prêtres assermentés", "Les églises", "Les croix"],
+      correct: 1
+    },
+    {
+      text: "Quand a été voté le décret sur la « destruction de la Vendée » ?",
+      answers: ["Le 1er août 1793", "Le 2 septembre 1793", "Le 3 octobre 1793", "Le 1er janvier 1794"],
+      correct: 0
+    },
+    {
+      text: "Quand a été votée la loi sur l’extermination des habitants de la Vendée ?",
+      answers: ["Le 2 août 1793", "Le 1er septembre 1793", "Le 1er octobre 1793", "Le 1er septembre 1794"],
+      correct: 2
+    },
+    {
+      text: "Dans quel lieu sacré du Petit-Luc des habitants espéraient-ils trouver refuge ?",
+      answers: ["Une abbaye", "Une église", "Un monastère", "Une chapelle troglodyte"],
+      correct: 1
+    },
+    {
+      text: "Par qui a été réalisé, en 1941, le vitrail des Lucs-sur-Boulogne ?",
+      answers: ["Lux Fournier", "Daphné du Barry", "Julien Le Blant", "Nicolas Delahaye"],
+      correct: 0
+    },
+    {
+      text: "Quel lieu de mémoire porte aujourd’hui les noms des victimes des Lucs sur des plaques de marbre ?",
+      answers: ["Le fort Saint-Pierre", "Le château des Lucs", "La mairie du bourg", "La chapelle du Petit-Luc"],
+      correct: 3
+    },
+    {
+      text: "Quel général républicain est présenté comme l’auteur d’atrocités de Savenay à Clisson ?",
+      answers: ["Carrier", "Westermann", "Turreau", "Hoche"],
+      correct: 1
+    },
+    {
+      text: "Après le passage des troupes républicaines, qu'est devenue la ville de Clisson selon certains récits ?",
+      answers: ["Un camp retranché", "Un bourg fantôme", "Une capitale vendéenne", "Un port militaire"],
+      correct: 1
+    }
+  ],
+
+  "benet": [
+    {
+      text: "Quel lieu commémoratif a été inauguré à La Gaubretière ?",
+      answers: ["Le Panthéon de la Vendée militaire", "Le Temple des Braves", "Le Mémorial bleu", "La Tour des Martyrs"],
+      correct: 0
+    },
+    {
+      text: "Selon certains historiens, que pourrait-on retrouver dans chaque famille  contemporaine ayant une ascendance vendéenne durant la période des guerres de Vendée ?",
+      answers: ["Au moins un ancêtre tué", "Au moins un noble", "Au moins un prêtre", "Au moins un exilé en Angleterre"],
+      correct: 0
+    },
+    {
+      text: "D'où vient principalement le nom du département de la Vendée ?",
+      answers: ["D’un ancien Roy vendéen", "D’une rivière", "D’une bataille", "D’une forêt"],
+      correct: 1
+    },
+    {
+      text: "En quelle année la Vendée est-elle devenue un département français ?",
+      answers: ["1789", "1790", "1791", "1792"],
+      correct: 1
+    },
+    {
+      text: "Avant la création du département, à qui appartenait surtout la majeure partie de la future Vendée ?",
+      answers: ["À la Normandie", "À la Bretagne", "Au Poitou", "À l’Anjou uniquement"],
+      correct: 2
+    },
+    {
+      text: "À quel empire appartenait la Vendée en 843 ?",
+      answers: ["Francie occidentale", "Francie orientale", "Empire romain", "Empire carolingien"],
+      correct: 0
+    },
+    {
+      text: "Quelle rivalité a connu la Vendée bien avant les guerres de Vendée ?",
+      answers: ["Entre Bretons et Normands", "Entre Romains et Gaulois", "Entre Francs et Wisigoths", "Entre Pictons et Vénètes"],
+      correct: 3
+    },
+    {
+      text: "À quelle province a été rattachée la Vendée des Ambilatres ?",
+      answers: ["Narbonnaise", "Bretagne", "Gaule Belgique", "Aquitaine"],
+      correct: 3
+    },
+    {
+      text: "Quel saint fut martyrisé à Avrillé un millénaire avant les guerres de Vendée ?",
+      answers: ["Saint Domnin", "Saint Louis", "Saint Martin", "Saint Malbeau"],
+      correct: 0
+    },
+    {
+      text: "Par qui la Vendée passe-t-elle sous domination franque à Vouillé en 507 ?",
+      answers: ["Charlemagne", "Clovis", "Pépin le Bref", "Dagobert"],
+      correct: 1
+    }
+  ],
+
+  "fraigneau": [
+    {
+      text: "À quel empire la Vendée appartenait-elle vers l’an 800 ?",
+      answers: ["Empire germanique", "Empire romain", "Empire byzantin", "Empire carolingien"],
+      correct: 3
+    },
+    {
+      text: "À quel comté appartenait la Vendée vers l’an 1000 ?",
+      answers: ["Comté de Bretagne", "Comté de Poitiers", "Comté d’Anjou", "Comté de Nantes"],
+      correct: 1
+    },
+    {
+      text: "À quel empire la Vendée appartenait-elle vers l’an 1200 ?",
+      answers: ["Empire capétien", "Empire carolingien", "Empire Plantagenêt", "Empire romain"],
+      correct: 2
+    },
+    {
+      text: "Quel peuple arabe aurait fait souche en Vendée après 732 ?",
+      answers: ["Les Sarrasins", "Les Omeyyades", "Les Abbassides", "Les Maures"],
+      correct: 0
+    },
+    {
+      text: "Quel célèbre comté recouvrait le Bas-Poitou ?",
+      answers: ["Herbauges", "Anjou", "Bretagne", "Poitiers"],
+      correct: 0
+    },
+    {
+      text: "Que sont les mogettes vendéennes ?",
+      answers: ["Des poissons", "Des haricots blancs", "Des pâtisseries", "Des fromages"],
+      correct: 1
+    },
+    {
+      text: "Qu'est-ce que le « fion » vendéen ?",
+      answers: ["Une boisson froide", "Une tartelette", "Une sorte de flan", "Une charcuterie"],
+      correct: 2
+    },
+    {
+      text: "Qu'est-ce que la mizotte dans la gastronomie vendéenne ?",
+      answers: ["Un fromage", "Un poisson", "Une soupe", "Une brioche"],
+      correct: 0
+    },
+    {
+      text: "A quel alcool est aussi associée la Vendée ?",
+      answers: ["Aucune boisson particulière", "Du whisky", "Du cidre breton", "Des vins"],
+      correct: 3
+    },
+    {
+      text: "Pourquoi Soljenitsyne est-il parfois évoqué dans cette mémoire vendéenne ?",
+      answers: ["Pour une bataille", "Pour ses prises de position sur la Vendée", "Parce qu’il a vécu aux Lucs", "Parce qu’il a écrit un chant vendéen"],
+      correct: 1
+    }
+  ],
+
+  "autise": [
+    {
+      text: "Quel chef-lieu vendéen ne le devient qu’en 1804 ?",
+      answers: ["Fontenay-le-Comte", "La Roche-sur-Yon", "Luçon", "Challans"],
+      correct: 1
+    },
+    {
+      text: "Quelle ville vendéenne est aujourd’hui associée au « Mémorial de la Vendée » ?",
+      answers: ["Les Lucs-sur-Boulogne", "Les Herbiers", "Montaigu", "Noirmoutier"],
+      correct: 0
+    },
+    {
+      text: "Quel massacre est particulièrement commémoré au Mémorial de la Vendée ?",
+      answers: ["Le massacre de Saumur", "Le massacre de Nantes", "Le massacre de Cholet", "Le massacre des Lucs-sur-Boulogne"],
+      correct: 3
+    },
+    {
+      text: "En quelle année le Mémorial de la Vendée a-t-il été inauguré ?",
+      answers: ["1989", "1993", "2006", "2014"],
+      correct: 1
+    },
+    {
+      text: "Qui inaugure le Mémorial de la Vendée, en 1993, aux côtés de Philippe de Villiers ?",
+      answers: ["Alexandre Soljenitsyne", "René Chapus", "François de Painville", "Dominique de Villepin"],
+      correct: 0
+    },
+    {
+      text: "Quelle femme vendéenne laissa des mémoires célèbres sous le titre de « la Belle Vendéenne » ?",
+      answers: ["Renée Bordereau", "Victoire de La Rochejaquelein", "Sophie de Sapinaud", "Antoinette de La Bouëre"],
+      correct: 2
+    },
+    {
+      text: "Quelle thèse l’historien Reynald Secher a-t-il défendue ?",
+      answers: ["Celle d’une victoire pacifique des Bleus", "Celle du « génocide franco-français » en Vendée", "Celle d’une simple révolte fiscale", "Celle d’une guerre sans victimes civiles"],
+      correct: 1
+    },
+    {
+      text: "Qu’emploie chaque année le Puy du Fou par milliers ?",
+      answers: ["Des acteurs professionnels uniquement", "Des bénévoles passionnés qui transmettent la mémoire", "Des historiens jacobins", "Des politiciens"],
+      correct: 1
+    },
+    {
+      text: "Comment s’appelle la tempête ayant dévasté le sud de la Vendée en 2010 ?",
+      answers: ["Xynthia", "Klaus", "Lothar", "Alex"],
+      correct: 0
+    },
+    {
+      text: "Dans quel diocèse vendéen exerça le cardinal de Richelieu ?",
+      answers: ["Luçon", "Poitiers", "Nantes", "La Rochelle-Vendée"],
+      correct: 0
+    }
+  ],
+
+  "sthilaireloges": [
+    {
+      text: "Parmi ces propositions, d’où venaient de nombreux seigneurs accompagnant Sainte Jeanne d’Arc ?",
+      answers: ["Du Bas-Poitou", "D'Alsace", "D’Île-de-France", "De Normandie"],
+      correct: 0
+    },
+    {
+      text: "Qui ordonne le développement du port des Sables en 1472 ?",
+      answers: ["Henri IV", "François Ier", "Charles VII", "Louis XI"],
+      correct: 3
+    },
+    {
+      text: "Quelles villes les protestants reprennent en Vendée en 1622 ?",
+      answers: ["Les Sables-d’Olonne et Talmont", "Nantes et Cholet", "Luçon et Fontenay", "La Roche et Noirmoutier"],
+      correct: 0
+    },
+    {
+      text: "Quel Roy a combattu les protestants en Vendée en 1622 ?",
+      answers: ["Louis XII", "Louis XIII", "Henri IV", "Louis XV"],
+      correct: 1
+    },
+    {
+      text: "Quel historien a le plus travaillé sur l’exil vendéen ?",
+      answers: ["Michelet Dord", "Reynald Secher", "Guy-Marie Lenne", "Jean Ikour-Furet"],
+      correct: 2
+    },
+    {
+      text: "Que permettait la loi des suspects ?",
+      answers: ["Arrêter facilement", "Libérer", "Juger équitablement", "Amnistier"],
+      correct: 0
+    },
+    {
+      text: "Comment les révolutionnaires déchristianisaient-ils la France ?",
+      answers: ["Ils renommaient les villages contenant le mot \"saint\" ", "Ils pillaient les églises", "Ils ont supprimé le calendrier grégorien", "Toutes les réponses sont correctes"],
+      correct: 3
+    },
+    {
+      text: "Quel âge avait Georges Cadoudal à sa mort ?",
+      answers: ["35 ans", "33 ans", "20 ans", "10 ans seulement"],
+      correct: 1
+    },
+    {
+      text: "À quelle bataille Royrand ne participe pas ?",
+      answers: ["Cholet", "Thouars", "Fougères", "Luçon"],
+      correct: 1
+    },
+    {
+      text: "Quelle distinction Charles de Royrand a-t-il reçue ?",
+      answers: ["La Légion d’honneur", "Chevalier de Saint-Louis", "Médaille royale", "Sainte-Croix"],
+      correct: 1
+    }
+  ],
+
+  "montournais": [
+    {
+      text: "Qu'a provoqué la déchristianisation lors de la Révolution Française ?",
+      answers: ["La destruction des symboles religieux", "La paix", "La croissance", "L'indifférence générale de la population"],
+      correct: 0
+    },
+    {
+      text: "Combien d'hommes armés ont escorté le Roy Louis XVI lors de son exécution à Paris ?",
+      answers: ["environ 1 500", "environ 5 000", "environ 20 000", "environ 80 000"],
+      correct: 3
+    },
+    {
+      text: "Quel était le rôle des sans-culottes durant la Révolution Française ?",
+      answers: ["Ils détenaient un rôle exclusivement militaire", "Ils avaient un rôle de pression politique", "Ils étaient passifs", "Ils n'avaient aucun rôle"],
+      correct: 1
+    },
+    {
+      text: "Pourquoi d’autres régions ont elles aussi refusé la Révolution ?",
+      answers: ["Pour des raisons économiques", "Pour des motifs religieux et politiques", "Un peu par hasard", "Ils voulaient l'indépendance de leur région respective (Corse, Pays-Basque...)"],
+      correct: 1
+    },
+    {
+      text: "Qu'étaient les assignats ?",
+      answers: ["Une monnaie papier", "Une taxe", "Une loi", "Une armée"],
+      correct: 0
+    },
+    {
+      text: "À quel royaume appartenait l’actuelle Vendée en 475 ?",
+      answers: ["Le royaume de Syagrius", "L’Empire romain", "Le royaume des Wisigoths", "Les Bretons"],
+      correct: 2
+    },
+    {
+      text: "Dans quelle ville se trouvait l’évêché de l’actuelle Vendée en 475 ?",
+      answers: ["Aux Sables-d’Olonne", "À La Roche-sur-Yon", "À Fontenay-le-Comte", "Il n’y en avait pas"],
+      correct: 3
+    },
+    {
+      text: "Quelle figure importante a contribué à la christianisation du Bas-Poitou ?",
+      answers: ["Saint Philibert de Noirmoutier", "Jean le Crucifix", "Sainte Mathilde de Ringelem", "Saint Benoît le Breton"],
+      correct: 0
+    },
+    {
+      text: "Quelle langue (patois) était parlée en Vendée ?",
+      answers: ["Le poitevin-saintongeais", "Le vendéen", "Le breton", "Le celte"],
+      correct: 0
+    },
+    {
+      text: "Quel était le type de langue parlée en Vendée ?",
+      answers: ["Une langue d’oc", "Une langue d’ouille", "Une langue d’oïl", "Une langue d’oie"],
+      correct: 2
+    }
+  ],
+
+  "lachat": [
+    {
+      text: "Quel est l’élément fondateur du port des Sables-d’Olonne ?",
+      answers: ["Le château d’Olonne", "Le Saint-Suaire d’Olonne", "Le manoir et la chapelle d’Olonne", "Le prieuré Saint-Nicolas"],
+      correct: 3
+    },
+    {
+      text: "Après 1800, de quoi Napoléon exempta-t-il les Vendéens afin de favoriser la pacification ?",
+      answers: ["Du paiement des impôts directs", "Du service militaire obligatoire pendant plusieurs années", "De la participation aux fêtes révolutionnaires", "De l’obligation scolaire"],
+      correct: 1
+    },
+    {
+      text: "En 1808-1809, quelle dépense importante fut engagée pour développer la Vendée napoléonienne ?",
+      answers: ["La construction d’une flotte de guerre", "Des routes et l’urbanisation, dont l’achèvement de La Roche-sur-Yon", "La création d’universités", "Des subventions aux Chouans"],
+      correct: 1
+    },
+    {
+      text: "Après 1815, sous la Restauration, que retrouva la Vendée ?",
+      answers: ["une laïcisation forcée", "Une industrialisation jacobine", "Une prédominance catholique et conservatrice", "Une alliance avec les républicains modérés"],
+      correct: 2
+    },
+    {
+      text: "Quel impact à long terme la guerre eut-elle sur la démographie vendéenne au XIXe siècle ?",
+      answers: ["Une croissance explosive", "Une reconstruction lente mais une forte natalité catholique traditionnelle", "Un dépeuplement pratiquement définitif et un recours massif à l’immigration", "Une immigration protestante massive et la destruction des derniers Vendéens"],
+      correct: 1
+    },
+    {
+      text: "Quand a débuté la Révolution française ?",
+      answers: ["en 1789", "en 1790", "en 1792", "en 1793"],
+      correct: 0
+    },
+    {
+      text: "Quel était l'objectif principal de la Constitution civile du clergé ?",
+      answers: ["Soumettre l’Église à l’État", "Supprimer la religion", "Renforcer le pape", "Créer une armée"],
+      correct: 0
+    },
+    {
+      text: "Quel serment a divisé les Français ?",
+      answers: ["Un serment civique", "Un serment militaire", "Un serment royal", "Un serment judiciaire"],
+      correct: 0
+    },
+    {
+      text: "Quel groupe a incarné le régime de la Terreur ?",
+      answers: ["Les Cordeliers", "Les Girondins", "Les Feuillants", "Les Montagnards"],
+      correct: 3
+    },
+    {
+      text: "Quel événement a radicalisé la Révolution ?",
+      answers: ["Le meurtre de Valmy", "La prise de la Bastille", "La fuite du Roy à Varennes", "Le Thermidor"],
+      correct: 2
+    }
+  ],
+
+  "fontenay": [
+    {
+      text: "Pour quelle raison n'avons nous pas entendu parler de ce qu'il s'est passé en Vendée durant la Révolution pendant presque 200 ans ?",
+      answers: ["Parce que l'on pensait que c'était faux", "Car cela a été oublié", "Pour des raisons politiques et idéologiques liées au récit officiel de la Révolution Française", "Car cela risquait de déclencher une nouvelle guerre mondiale puisqu'il restait encore de nombreuses monarchies"],
+      correct: 2
+    },
+    {
+      text: "Quel instrument de musique est en partie originaire de Vendée ?",
+      answers: ["La flûte à bec", "La veuze", "Le violon", "Le xylophone"],
+      correct: 1
+    },
+    {
+      text: "Quel est le nom donné aux maisons traditionnelles vendéennes ?",
+      answers: ["La Poichiche", "La Ventrachoux", "La Bourrine", "La Paillée"],
+      correct: 2
+    },
+    {
+      text: "Comment étaient surnommés les vendéens, surnom qui demeure encore aujourd'hui ?",
+      answers: ["Ventrachoux", "Ventrêches", "Puyfolais", "Débrouillards"],
+      correct: 0
+    },
+    {
+      text: "Quelle historienne angevine a publié une étude en 2013 sur le tannage de peau de Vendéens durant les guerres de Vendée ?",
+      answers: ["Marie La Rivière-Agneau", "Anne-Sophie Mercideau", "Marie-Sophie Cognac", "Anne Rolland-Boulestreau"],
+      correct: 3
+    },
+    {
+      text: "Quelle était la population de la Vendée militaire durant les guerres et le génocide vendéen ?",
+      answers: ["300 000 à 400 000", "400 000 à 500 000", "550 000 à 600 000", "650 000 à 850 000"],
+      correct: 2
+    },
+    {
+      text: "Le coeur Vendéen a-t-il été menacé de disparaître ?",
+      answers: ["Oui", "Non", "Il a disparu au nom de la laïcité", "Il n'a jamais été officiellement reconnu"],
+      correct: 0
+    },
+    {
+      text: "Qui est aujourd'hui (2026) le PDG (Président-Directeur-Général) du Puy du Fou ?",
+      answers: ["Philippe le Jolis de Villiers de Saintignon", "Nicolas le Jolis de Villiers de Saintignon", "Dominique du Buor de Villeneuve", "A l'Etat français"],
+      correct: 1
+    },
+    {
+      text: "Combien de personnes ont été guillotinées pendant la Révolution ?",
+      answers: ["500", "environ 1500", "au moins 17 000", "Plus de 35 000"],
+      correct: 2
+    },
+    {
+      text: "Quel fut le score obtenu en Vendée par Philippe de Villiers lors des élections présidentielles de 1995 ?",
+      answers: ["6%", "15%", "22%", "Il ne s'est jamais présenté"],
+      correct: 2
+    }
+  ],
+
+  "terval": [
+    {
+      text: "Combien de Vendéens ont fuit durant la Révolution (environ) ?",
+      answers: ["1000 à 10 000", "20 000 à 30 000", "55 000 à 100 000", "170 000 à 300 000"],
+      correct: 2
+    },
+    {
+      text: "Parmi ces choix, quelle commune n’est pas en Vendée ?",
+      answers: ["La Flotte (île de Ré)", "Noirmoutier-en-l’Île (Noirmoutier)", "Pouzauges", "L’Aiguillon"],
+      correct: 0
+    },
+    {
+      text: "Quel était le nom de la politique extrême de 1793-1794 ?",
+      answers: ["La Grande Réforme", "La République", "La Guerre", "La Terreur"],
+      correct: 3
+    },
+    {
+      text: "Comment la Terreur a-t-elle pris fin ?",
+      answers: ["Par la chute de Robespierre", "Par la bataille de Waterloo", "Par le Concordat", "Par le Directoire"],
+      correct: 0
+    },
+    {
+      text: "Qui était jugé trop modéré sous le régime de la Terreur ?",
+      answers: ["Les Girondins", "Les Montagnards", "Les Cordeliers", "Les Jacobins"],
+      correct: 0
+    },
+    {
+      text: "Quel chef secondaire vendéen, ancien officier, participa à l’insurrection de 1792 à Châtillon tandis que son frère était républicain ?",
+      answers: ["Jehan Cathelineau", "Gabriel Baudry d’Asson", "Esprit Baudry d’Asson", "Lou Iscèze"],
+      correct: 1
+    },
+    {
+      text: "Dans quelle ville environ 1 000 familles vendéennes s’exilent-elles en mai 1793 ?",
+      answers: ["A Paris", "A Nantes", "A Angers", "A Bordeaux"],
+      correct: 1
+    },
+    {
+      text: "Quelle ville est fuie par environ 10 % de sa population durant les guerres de Vendée ?",
+      answers: ["Nantes", "Cholet", "La Roche-sur-Yon", "Luçon"],
+      correct: 2
+    },
+    {
+      text: "Que devaient faire les Vendéens selon l’arrêté de 1793 ?",
+      answers: ["Combattre auprès des républicains", "S’engager dans l'armée de Mayence", "Payer une taxe exclusive", "S’éloigner à plus de 80 km de la zone insurgée"],
+      correct: 3
+    },
+    {
+      text: "Les hommes ont-ils massivement fui la Vendée durant 1793-1796 ?",
+      answers: ["Non, très peu", "Oui", "Moitié-moitié", "On ne sait pas"],
+      correct: 0
+    }
+  ],
+
+  "marillet": [
+    {
+      text: "Pourquoi les Vendéens rentraient-ils parfois chez eux durant les guerre de Vendée ?",
+      answers: ["À cause de la fatigue", "Pour faire des croisades", "Par peur", "Pour l’agriculture"],
+      correct: 3
+    },
+    {
+      text: "Lorsque les vendéens rentraient chez eux pour l'agriculture durant les guerres de Vendée, quel effet cela produisait ?",
+      answers: ["Cela renforçait l’armée", "Cela affaiblissait l’armée", "Cela stabilisait l'armée", "Cela la rendait plus vive"],
+      correct: 1
+    },
+    {
+      text: "Quel type d’armée possédaient les républicains face aux Vendéens ?",
+      answers: ["Une armée improvisée", "Une armée faible", "Une armée religieuse", "Une armée organisée"],
+      correct: 3
+    },
+    {
+      text: "Quel rôle jouait le peuple vendéen pendant la guerre ?",
+      answers: ["Aucun", "Une opposition constante", "Un soutien actif", "Une fuite générale"],
+      correct: 2
+    },
+    {
+      text: "Pourquoi la guerre de Vendée est-elle souvent présentée comme unique ?",
+      answers: ["Pour sa durée", "Pour sa violence", "Pour sa dimension religieuse", "Pour tout cela à la fois"],
+      correct: 3
+    },
+    {
+      text: "Jean-Nicolas Stofflet se distinguait d’autres chefs. Pourquoi ?",
+      answers: ["Il était paysan", "Il sentait très bon", "Il refusait de tuer les républicains", "Il ne combattait que la nuit"],
+      correct: 0
+    },
+    {
+      text: "Au sein de quel régiment Jean-Nicolas Stofflet s’est-il engagé à l’âge de 17 ans ?",
+      answers: ["Le régiment de Lorraine-Infanterie", "Le régiment Vendée-Bataille", "Le régiment Anjou-Poitou", "Le régiment Paris-Louis"],
+      correct: 0
+    },
+    {
+      text: "Quand Jean-Nicolas Stofflet fut-il tué ?",
+      answers: ["Dès octobre 1793", "En mars 1794", "En mai 1795", "En février 1796"],
+      correct: 3
+    },
+    {
+      text: "Durant quelle bataille le généralissime Maurice Gigost d’Elbée a-t-il été grièvement blessé ?",
+      answers: ["Lors de la bataille de Thouars", "Lors de la bataille de Cholet", "Lors de la bataille des Sables-d’Olonne", "Lors de la bataille de Jérusalem"],
+      correct: 1
+    },
+    {
+      text: "Sur quelle île fut fusillé le généralissime Maurice Gigost d’Elbée ?",
+      answers: ["Sur l’île d’Yeu", "Sur l’île de Ré", "Sur l’île de Noirmoutier", "Sur l’île aux chevaux"],
+      correct: 2
+    }
+  ]
+};
+
+
+
+
+    const els = {
+      introScreen: document.getElementById("introScreen"),
+      introMapRed: document.getElementById("introMapRed"),
+      levyPaper: document.getElementById("levyPaper"),
+      introInsurgents: document.getElementById("introInsurgents"),
+      introTitle: document.getElementById("introTitle"),
+      introSubtitle: document.getElementById("introSubtitle"),
+      introCard: document.getElementById("introCard"),
+      introNote: document.getElementById("introNote"),
+      launchIntroBtn: document.getElementById("launchIntroBtn"),
+      introNextBtn: document.getElementById("introNextBtn"),
+
+      nameScreen: document.getElementById("nameScreen"),
+      playerNameInput: document.getElementById("playerNameInput"),
+      confirmNameBtn: document.getElementById("confirmNameBtn"),
+      nameError: document.getElementById("nameError"),
+
+      mapScreen: document.getElementById("mapScreen"),
+      mapViewport: document.getElementById("mapViewport"),
+      mapWorld: document.getElementById("mapWorld"),
+      cityLayer: document.getElementById("cityLayer"),
+      backToMenuBtn: document.getElementById("backToMenuBtn"),
+
+      viesCount: document.getElementById("viesCount"),
+      piecesCount: document.getElementById("piecesCount"),
+      selCount: document.getElementById("selCount"),
+      lifeTimerText: document.getElementById("lifeTimerText"),
+      quizLifeTimerText: document.getElementById("quizLifeTimerText"),
+      mapHelp: document.getElementById("mapHelp"),
+
+
+      profileAvatar: document.getElementById("profileAvatar"),
+      profileCrown: document.getElementById("profileCrown"),
+      profileDecoration: document.getElementById("profileDecoration"),
+      profileName: document.getElementById("profileName"),
+      profileLysCount: document.getElementById("profileLysCount"),
+      profileRank: document.getElementById("profileRank"),
+
+      questionScreen: document.getElementById("questionScreen"),
+      backToMapBtn: document.getElementById("backToMapBtn"),
+
+      quizViesCount: document.getElementById("quizViesCount"),
+      quizPiecesCount: document.getElementById("quizPiecesCount"),
+      quizSelCount: document.getElementById("quizSelCount"),
+
+      quizProfileAvatar: document.getElementById("quizProfileAvatar"),
+      quizProfileCrown: document.getElementById("quizProfileCrown"),
+      quizProfileDecoration: document.getElementById("quizProfileDecoration"),
+      quizProfileName: document.getElementById("quizProfileName"),
+      quizProfileLysCount: document.getElementById("quizProfileLysCount"),
+      quizProfileRank: document.getElementById("quizProfileRank"),
+
+      qProgress: document.getElementById("qProgress"),
+      qLives: document.getElementById("qLives"),
+      qCityMeta: document.getElementById("qCityMeta"),
+      qCityTitle: document.getElementById("qCityTitle"),
+      qText: document.getElementById("qText"),
+      answersBox: document.getElementById("answersBox"),
+
+      rewardOverlay: document.getElementById("rewardOverlay"),
+      rewardCityName: document.getElementById("rewardCityName"),
+      rewardLysRow: document.getElementById("rewardLysRow"),
+      rewardScoreText: document.getElementById("rewardScoreText"),
+      rewardCoinsText: document.getElementById("rewardCoinsText"),
+      rewardCompletionText: document.getElementById("rewardCompletionText"),
+      rewardContinueBtn: document.getElementById("rewardContinueBtn"),
+
+      audioMouettes: document.getElementById("audioMouettes"),
+      audioIntro: document.getElementById("audioIntro"),
+      audioGameMusic: document.getElementById("audioGameMusic")
+    };
+
+
+    const state = {
+      introLaunched: false,
+      currentCityKey: null,
+      currentQuestionIndex: 0,
+      correctAnswers: 0,
+      dragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      originX: 0,
+      originY: 0,
+      transform: { x: 0, y: 0, scale: 1 },
+      introTimers: [],
+      flashInterval: null
+    };
+
+
+ function ensureDefaults(){
+  if(localStorage.getItem(STORAGE.vies) === null) localStorage.setItem(STORAGE.vies, "5");
+  if(localStorage.getItem(STORAGE.pieces) === null) localStorage.setItem(STORAGE.pieces, "0");
+  if(localStorage.getItem(STORAGE.sel) === null) localStorage.setItem(STORAGE.sel, "0");
+  if(localStorage.getItem(STORAGE.avatar) === null) localStorage.setItem(STORAGE.avatar, "images/unchouanphotoprofildefautpvjeu.png");
+  if(localStorage.getItem(STORAGE.crown) === null) localStorage.setItem(STORAGE.crown, "");
+  if(localStorage.getItem(STORAGE.lys) === null) localStorage.setItem(STORAGE.lys, "0");
+  if(localStorage.getItem(STORAGE.grade) === null) localStorage.setItem(STORAGE.grade, "Pacifiste");
+  if(localStorage.getItem(STORAGE.pseudo) === null) localStorage.setItem(STORAGE.pseudo, "");
+
+  if(localStorage.getItem(STORAGE.introSeen) === null){
+    localStorage.setItem(STORAGE.introSeen, "false");
+  }
+
+  if(localStorage.getItem(STORAGE.historyUnlocked) === null){
+    localStorage.setItem(STORAGE.historyUnlocked, JSON.stringify(["yeu"]));
+  }
+
+
+
+  if(localStorage.getItem(STORAGE.historyDone) === null){
+    localStorage.setItem(STORAGE.historyDone, JSON.stringify([]));
+  }
+
+  if(localStorage.getItem(STORAGE.historyRewards) === null){
+    localStorage.setItem(STORAGE.historyRewards, JSON.stringify({}));
+  }
+
+  if(localStorage.getItem(STORAGE.historyCurrentCity) === null) localStorage.setItem(STORAGE.historyCurrentCity, "");
+  if(localStorage.getItem(STORAGE.historyCurrentQuestion) === null) localStorage.setItem(STORAGE.historyCurrentQuestion, "0");
+  if(localStorage.getItem(UNLIMITED_LIVES_KEY) === null) localStorage.setItem(UNLIMITED_LIVES_KEY, "");
+  if(localStorage.getItem(LIFE_REGEN_ANCHOR_KEY) === null) localStorage.setItem(LIFE_REGEN_ANCHOR_KEY, "");
+
+  // Compteurs globaux
+if(localStorage.getItem("pvj_total_answers") === null) localStorage.setItem("pvj_total_answers", "0");
+if(localStorage.getItem("pvj_total_good_answers") === null) localStorage.setItem("pvj_total_good_answers", "0");
+
+
+}
+
+
+
+function checkAllLysBonus(){
+  const rewards = getCityRewards();
+  let totalBestLys = 0;
+
+  Object.values(rewards).forEach(r => {
+    totalBestLys += r.bestLys || 0;
+  });
+
+  const maxTotalLys = CITY_DATA.length * 3;
+  const alreadyClaimed = localStorage.getItem(STORAGE.allLysBonusClaimed) === "1";
+
+  if(totalBestLys >= maxTotalLys && !alreadyClaimed){
+
+    // 🎁 bonus
+    localStorage.setItem(STORAGE.pieces, String(getPieces() + 500));
+
+    const currentSel = parseInt(localStorage.getItem(STORAGE.sel), 10) || 0;
+    localStorage.setItem(STORAGE.sel, String(currentSel + 3));
+
+    localStorage.setItem(STORAGE.allLysBonusClaimed, "1");
+
+    refreshResources();
+
+    showAllLysPopup();
+  }
+}
+
+
+
+
+function showAllLysPopup(){
+  const overlay = document.getElementById("provinceOverlay");
+  const title = document.getElementById("provincePopupTitle");
+  const gradeText = document.getElementById("provincePopupGrade");
+  const saltText = document.getElementById("provincePopupSalt");
+
+  title.textContent = "Bravo à vous !";
+  gradeText.textContent = "Vous avez ramené l'intégralité des fleurs de lys en Vendée !";
+  saltText.textContent = "Le Roy vous offre 500 pièces et 3 sels";
+
+  overlay.classList.remove("hidden");
+}
+
+
+
+
+    function getLives(){
+      return parseInt(localStorage.getItem(STORAGE.vies), 10) || 0;
+    }
+   
+
+    function isUnlimitedLivesActive(){
+      const until = localStorage.getItem(STORAGE.unlimitedLivesUntil);
+      if(!until) return false;
+      return Date.now() < new Date(until).getTime();
+    }
+
+    function formatRemainingTime(ms){
+      const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function updateLifeRegeneration(){
+      if(isUnlimitedLivesActive()){
+        if(els.lifeTimerText) els.lifeTimerText.textContent = "Vies illimitées actives";
+        if(els.quizLifeTimerText) els.quizLifeTimerText.textContent = "Vies illimitées actives";
+        return;
+      }
+
+      let lives = getLives();
+      let anchor = localStorage.getItem(STORAGE.lifeRegenAnchor);
+
+      if(lives >= MAX_BASE_LIVES){
+        localStorage.setItem(STORAGE.lifeRegenAnchor, "");
+        if(els.lifeTimerText) els.lifeTimerText.textContent = "Vies au maximum";
+        if(els.quizLifeTimerText) els.quizLifeTimerText.textContent = "Vies au maximum";
+        return;
+      }
+
+      if(!anchor){
+        anchor = new Date().toISOString();
+        localStorage.setItem(STORAGE.lifeRegenAnchor, anchor);
+      }
+
+      let anchorTime = new Date(anchor).getTime();
+      const now = Date.now();
+
+      if(Number.isNaN(anchorTime)){
+        anchorTime = now;
+        localStorage.setItem(STORAGE.lifeRegenAnchor, new Date(now).toISOString());
+      }
+
+      let elapsed = now - anchorTime;
+
+      while(elapsed >= LIFE_REGEN_MS && lives < MAX_BASE_LIVES){
+        lives += 1;
+        anchorTime += LIFE_REGEN_MS;
+        elapsed = now - anchorTime;
+      }
+
+      localStorage.setItem(STORAGE.vies, String(Math.min(MAX_BASE_LIVES, lives)));
+
+      if(lives >= MAX_BASE_LIVES){
+        localStorage.setItem(STORAGE.lifeRegenAnchor, "");
+        if(els.lifeTimerText) els.lifeTimerText.textContent = "Vies au maximum";
+        if(els.quizLifeTimerText) els.quizLifeTimerText.textContent = "Vies au maximum";
+      } else {
+        localStorage.setItem(STORAGE.lifeRegenAnchor, new Date(anchorTime).toISOString());
+        const remaining = LIFE_REGEN_MS - (now - anchorTime);
+        const text = `Prochaine vie dans ${formatRemainingTime(remaining)}`;
+        if(els.lifeTimerText) els.lifeTimerText.textContent = text;
+        if(els.quizLifeTimerText) els.quizLifeTimerText.textContent = text;
+      }
+    }
+
+
+    function setLives(v){
+      const safe = Math.max(0, Math.min(MAX_BASE_LIVES, v));
+      localStorage.setItem(STORAGE.vies, String(safe));
+
+      if(safe < MAX_BASE_LIVES && !isUnlimitedLivesActive()){
+        const anchor = localStorage.getItem(STORAGE.lifeRegenAnchor);
+        if(!anchor){
+          localStorage.setItem(STORAGE.lifeRegenAnchor, new Date().toISOString());
+        }
+      }
+
+      if(safe >= MAX_BASE_LIVES){
+        localStorage.setItem(STORAGE.lifeRegenAnchor, "");
+      }
+
+      refreshResources();
+      updateLifeRegeneration();
+      els.qLives.textContent = `Vies : ${safe}`;
+    }
+
+
+    function getPieces(){
+      return parseInt(localStorage.getItem(STORAGE.pieces), 10) || 0;
+    }
+
+    function getSel(){
+      return parseInt(localStorage.getItem(STORAGE.sel), 10) || 0;
+    }
+
+
+    function getPseudo(){
+      return (localStorage.getItem(STORAGE.pseudo) || "").trim();
+    }
+
+    function setPseudo(name){
+      localStorage.setItem(STORAGE.pseudo, name.trim());
+      refreshProfile();
+    }
+
+    function getUnlockedCities(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE.historyUnlocked)) || ["yeu"]; }
+      catch{ return ["yeu"]; }
+    }
+
+    function setUnlockedCities(arr){
+      localStorage.setItem(STORAGE.historyUnlocked, JSON.stringify(arr));
+    }
+
+    function getDoneCities(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE.historyDone)) || []; }
+      catch{ return []; }
+    }
+
+    function setDoneCities(arr){
+      localStorage.setItem(STORAGE.historyDone, JSON.stringify(arr));
+    }
+
+function getProvinceRewardsClaimed(){
+  try{
+    return JSON.parse(localStorage.getItem("pvj_province_rewards_claimed")) || [];
+  }catch{
+    return [];
+  }
+}
+
+function setProvinceRewardsClaimed(arr){
+  localStorage.setItem("pvj_province_rewards_claimed", JSON.stringify(arr));
+}
+
+function updateProgressionFromDoneCities(){
+  const doneCities = getDoneCities();
+  const doneCount = doneCities.length;
+
+  let newGrade = "Pacifiste";
+  let rewardSalt = 0;
+  let provinceKey = null;
+  let provinceMessage = "";
+
+ if(doneCount >= 40){
+  newGrade = "Généralissime";
+  rewardSalt = 3;
+  provinceKey = "province4";
+  provinceMessage = "Vous avez conquis le Bas-Poitou intérieur !";
+} else if(doneCount >= 30){
+  newGrade = "Insurgé Vaillant";
+  rewardSalt = 2;
+  provinceKey = "province3";
+  provinceMessage = "Vous avez conquis le Haut-Bocage vendéen !";
+} else if(doneCount >= 20){
+  newGrade = "Courageux";
+  rewardSalt = 2;
+  provinceKey = "province2";
+  provinceMessage = "Vous avez conquis le Centre-Vendée !";
+} else if(doneCount >= 10){
+  newGrade = "Révolté";
+  rewardSalt = 2;
+  provinceKey = "province1";
+  provinceMessage = "Vous avez conquis le Marais breton et le littoral nord !";
+}
+
+
+  const currentGrade = localStorage.getItem(STORAGE.grade) || "Pacifiste";
+  let claimed = getProvinceRewardsClaimed();
+
+  if(provinceKey && !claimed.includes(provinceKey)){
+    const currentSel = parseInt(localStorage.getItem(STORAGE.sel), 10) || 0;
+    localStorage.setItem(STORAGE.sel, String(currentSel + rewardSalt));
+
+    claimed.push(provinceKey);
+    setProvinceRewardsClaimed(claimed);
+
+    localStorage.setItem(STORAGE.grade, newGrade);
+
+
+showProvincePopup(provinceMessage, newGrade, rewardSalt);
+
+
+    refreshResources();
+    refreshProfile();
+
+
+
+  }
+
+  if(currentGrade !== newGrade){
+    localStorage.setItem(STORAGE.grade, newGrade);
+    refreshProfile();
+  }
+}
+
+function showProvincePopup(message, grade, salt){
+  const overlay = document.getElementById("provinceOverlay");
+  const title = document.getElementById("provincePopupTitle");
+  const gradeText = document.getElementById("provincePopupGrade");
+  const saltText = document.getElementById("provincePopupSalt");
+
+  title.textContent = message;
+  gradeText.textContent = "Nouveau grade : " + grade;
+  saltText.textContent = "+" + salt + " sel";
+
+  overlay.classList.remove("hidden");
+}
+
+
+    function saveCurrentQuizProgress(cityKey, questionIndex){
+      // Reprise en cours désactivée : 
+      // si on quitte un quiz, on ne le reprend pas.
+    }
+
+    function clearCurrentQuizProgress(){
+      localStorage.removeItem(STORAGE.historyCurrentCity);
+      
+    localStorage.removeItem(STORAGE.historyCurrentQuestion);
+  }
+
+    function getCurrentQuizProgress(){
+      return {
+        cityKey: localStorage.getItem(STORAGE.historyCurrentCity) || "", 
+        questionIndex: parseInt(localStorage.getItem(STORAGE.historyCurrentQuestion), 10) || 0
+      };
+    }
+
+function getCityRewards(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE.historyRewards)) || {};
+  }catch{
+    return {};
+  }
+}
+
+function setCityRewards(obj){
+  localStorage.setItem(STORAGE.historyRewards, JSON.stringify(obj));
+}
+
+
+    function getRewardTier(correctCount){
+      if(correctCount === 10){
+        return { lys: 3, coins: 100 };
+      }
+      if(correctCount === 9){
+        return { lys: 2, coins: 50 };
+      }
+      if(correctCount === 8){
+        return { lys: 1, coins: 30 };
+      }
+      return { lys: 0, coins: 10 };
+    }
+
+    function applyCityReward(cityKey, correctCount){
+      const rewards = getCityRewards();
+      const previous = rewards[cityKey] || { bestCoins: 0, bestLys: 0, bestScore: 0 };
+      const current = getRewardTier(correctCount);
+
+      const coinGain = Math.max(0, current.coins - previous.bestCoins);
+      const lysGain = Math.max(0, current.lys - previous.bestLys);
+
+      if(coinGain > 0){
+        localStorage.setItem(STORAGE.pieces, String(getPieces() + coinGain));
+      }
+
+      if(lysGain > 0){
+        const currentLys = parseInt(localStorage.getItem(STORAGE.lys), 10) || 0;
+        localStorage.setItem(STORAGE.lys, String(currentLys + lysGain));
+      }
+
+      rewards[cityKey] = {
+        bestCoins: Math.max(previous.bestCoins, current.coins),
+        bestLys: Math.max(previous.bestLys, current.lys),
+        bestScore: Math.max(previous.bestScore, correctCount)
+      };
+
+
+     
+      setCityRewards(rewards);
+
+       checkAllLysBonus();
+
+      return {
+        coinGain,
+        lysGain,
+        totalCoinsAwarded: current.coins,
+        totalLysAwarded: current.lys,
+        previousBestCoins: previous.bestCoins,
+        previousBestLys: previous.bestLys,
+        bestScore: Math.max(previous.bestScore, correctCount)
+      };
+    }
+
+    function getCityLysImage(lysCount){
+  if(lysCount >= 3) return "images/lysdeniveaupvjeu3.png";
+  if(lysCount === 2) return "images/lysdeniveaupvjeu2.png";
+  if(lysCount === 1) return "images/lysdeniveaupvjeu.png";
+  return "";
+}
+
+    function showRewardPopup(cityName, correctCount, rewardResult){
+      els.rewardCityName.textContent = cityName;
+      els.rewardScoreText.textContent = `Score : ${correctCount} / 10`;
+      els.rewardCoinsText.textContent = `+${rewardResult.coinGain} pièce${rewardResult.coinGain > 1 ? "s" : ""}`;
+
+      if(rewardResult.coinGain === 0 && rewardResult.lysGain === 0){
+        els.rewardCompletionText.textContent = "Vous aviez déjà obtenu cette récompense maximale pour cette commune.";
+      } else if(rewardResult.coinGain > 0 || rewardResult.lysGain > 0){
+        els.rewardCompletionText.textContent =
+          `Complétion gagnée : ${rewardResult.lysGain} lys et ${rewardResult.coinGain} pièce${rewardResult.coinGain > 1 ? "s" : ""}.`;
+      } else {
+        els.rewardCompletionText.textContent = "";
+      }
+
+     els.rewardLysRow.innerHTML = "";
+
+const totalLys = getRewardTier(correctCount).lys;
+
+for(let i = 0; i < totalLys; i++){
+    const img = document.createElement("img");
+    img.src = "images/lysdeniveaupvjeu.png";
+    img.alt = "lys";
+
+    if(totalLys === 3 && i === 1) img.classList.add("big");
+
+    els.rewardLysRow.appendChild(img);
+
+    // 💥 apparition avec délai (cling cling cling)
+    setTimeout(() => {
+        img.classList.add("fly-in");
+    }, i * 180);
+}
+
+
+      els.rewardOverlay.classList.remove("hidden");
+    }
+
+    function hideRewardPopup(){
+      els.rewardOverlay.classList.add("hidden");
+    }
+
+    function unlockCity(cityKey){
+      const unlocked = getUnlockedCities();
+      if(!unlocked.includes(cityKey)){
+        unlocked.push(cityKey);
+        setUnlockedCities(unlocked);
+      }
+    }
+
+    function markCityDone(cityKey){
+      const done = getDoneCities();
+      if(!done.includes(cityKey)){
+        done.push(cityKey);
+        setDoneCities(done);
+      }
+    }
+
+function refreshResources(){
+  const livesText = `${getLives()}/${MAX_BASE_LIVES}`;
+  const piecesText = String(getPieces());
+  const selText = String(getSel());
+
+  if(els.viesCount) els.viesCount.textContent = livesText;
+  if(els.piecesCount) els.piecesCount.textContent = piecesText;
+  if(els.selCount) els.selCount.textContent = selText;
+
+  if(els.quizViesCount) els.quizViesCount.textContent = livesText;
+  if(els.quizPiecesCount) els.quizPiecesCount.textContent = piecesText;
+  if(els.quizSelCount) els.quizSelCount.textContent = selText;
+}
+
+
+
+
+
+   function refreshProfile(){
+      const pseudo = getPseudo();
+      const avatar = localStorage.getItem(STORAGE.avatar) || "images/unchouanphotoprofildefautpvjeu.png";
+      const crown = localStorage.getItem(STORAGE.crown) || "";
+      const decoration = localStorage.getItem("pvj_selected_decoration") || "";
+      const lys = localStorage.getItem(STORAGE.lys) || "0";
+      const grade = localStorage.getItem(STORAGE.grade) || "Pacifiste";
+      const shownName = pseudo || "Profil à créer";
+
+      els.profileAvatar.src = avatar;
+      els.profileName.textContent = shownName;
+      els.profileLysCount.textContent = lys;
+      els.profileRank.textContent = grade;
+
+      if(crown){
+        els.profileCrown.src = crown;
+        els.profileCrown.style.display = "block";
+      } else {
+        els.profileCrown.src = "";
+        els.profileCrown.style.display = "none";
+      }
+
+if (decoration) {
+  els.profileDecoration.src = decoration;
+  els.profileDecoration.style.display = "block";
+} else {
+  els.profileDecoration.src = "";
+  els.profileDecoration.style.display = "none";
+}
+
+if (els.quizProfileDecoration) {
+  if (decoration) {
+    els.quizProfileDecoration.src = decoration;
+    els.quizProfileDecoration.style.display = "block";
+  } else {
+    els.quizProfileDecoration.src = "";
+    els.quizProfileDecoration.style.display = "none";
+  }
+}
+
+
+
+      if(els.quizProfileAvatar) els.quizProfileAvatar.src = avatar;
+      if(els.quizProfileName) els.quizProfileName.textContent = shownName;
+      if(els.quizProfileLysCount) els.quizProfileLysCount.textContent = lys;
+      if(els.quizProfileRank) els.quizProfileRank.textContent = grade;
+
+      if(els.quizProfileCrown){
+        if(crown){
+          els.quizProfileCrown.src = crown;
+          els.quizProfileCrown.style.display = "block";
+        } else {
+          els.quizProfileCrown.src = "";
+          els.quizProfileCrown.style.display = "none";
+        }
+      }
+    }
+
+
+    function schedule(fn, delay){
+      const t = setTimeout(fn, delay);
+      state.introTimers.push(t);
+    }
+
+    function clearIntroTimers(){
+      state.introTimers.forEach(clearTimeout);
+      state.introTimers = [];
+      if(state.flashInterval){
+        clearInterval(state.flashInterval);
+        state.flashInterval = null;
+      }
+    }
+
+    async function safePlay(audio, loop=false, volume=1){
+      try{
+        audio.pause();
+        audio.currentTime = 0;
+        audio.loop = loop;
+        audio.volume = volume;
+        await audio.play();
+      }catch(err){
+        console.warn("Lecture audio bloquée :", err);
+      }
+    }
+
+    function startIntroFlash(){
+      let red = false;
+      state.flashInterval = setInterval(() => {
+        red = !red;
+        els.introMapRed.style.opacity = red ? "1" : "0";
+      }, 420);
+    }
+
+    function stopIntroFlash(forceRed=true){
+      if(state.flashInterval){
+        clearInterval(state.flashInterval);
+        state.flashInterval = null;
+      }
+      els.introMapRed.style.opacity = forceRed ? "1" : "0";
+    }
+
+    function launchIntro(){
+      if(state.introLaunched) return;
+      state.introLaunched = true;
+      els.launchIntroBtn.classList.add("hidden");
+      els.introNextBtn.classList.add("hidden");
+      els.introNextBtn.style.pointerEvents = "none";
+
+      safePlay(els.audioMouettes, true, 0.64);
+
+    schedule(() => {
+  els.levyPaper.classList.add("visible");
+
+  safePlay(els.audioIntro, false, 0.96);
+  startIntroFlash();
+}, 2100);
+
+schedule(() => {
+  els.audioMouettes.pause();
+  els.audioMouettes.currentTime = 0;
+}, 2600);
+
+      schedule(() => {
+        els.introTitle.classList.add("visible");
+        els.introSubtitle.classList.add("visible");
+      }, 5000);
+
+      schedule(() => {
+        els.introNote.classList.add("visible");
+      }, 6900);
+
+      schedule(() => {
+        els.introNote.classList.remove("visible");
+      }, 10400);
+
+      schedule(() => {
+        stopIntroFlash(true);
+        els.levyPaper.classList.remove("visible");
+      }, 8600);
+
+      schedule(() => {
+        els.introInsurgents.classList.add("visible");
+      }, 9000);
+
+      schedule(() => {
+        els.introCard.classList.add("visible");
+        els.audioMouettes.pause()
+        ;
+      }, 10600);
+     
+      schedule(() => {
+        els.introNextBtn.classList.remove("hidden");
+        els.introNextBtn.style.pointerEvents = "auto";
+      }, 11200)
+
+    }
+
+    function openNameScreen(){
+      clearIntroTimers();
+      els.audioMouettes.pause();
+      els.audioIntro.pause();
+      els.introScreen.classList.add("hidden");
+      els.nameScreen.classList.add("active");
+      setTimeout(() => els.playerNameInput.focus(), 80);
+    }
+
+    function openMapScreen(){
+      els.nameScreen.classList.remove("active");
+      els.questionScreen.classList.remove("active");
+      els.mapScreen.classList.add("active");
+      refreshResources();
+      refreshProfile();
+      renderCities();
+      centerMapInitial();
+    }
+
+
+    function centerMapInitial(){
+      state.transform.scale = 1;
+      state.transform.x = 0;
+      state.transform.y = 0;
+      applyMapTransform();
+    }
+
+    function applyMapTransform(){
+      els.mapWorld.style.transform =
+        `translate(calc(-50% + ${state.transform.x}px), calc(-50% + ${state.transform.y}px)) scale(${state.transform.scale})`;
+    }
+
+   function renderCities(){
+    updateMapHelpVisibility();
+  const unlocked = getUnlockedCities();
+  const rewards = getCityRewards();
+  els.cityLayer.innerHTML = "";
+
+  CITY_DATA.forEach(city => {
+    const cityEl = document.createElement("div");
+    cityEl.className = "city";
+    cityEl.style.left = `${city.x}%`;
+    cityEl.style.top = `${city.y}%`;
+
+    const rewardData = rewards[city.key] || { bestCoins: 0, bestLys: 0, bestScore: 0 };
+    const bestLys = rewardData.bestLys || 0;
+    const isUnlocked = unlocked.includes(city.key);
+
+    if(isUnlocked){
+      if(bestLys > 0) cityEl.classList.add("done");
+      else cityEl.classList.add("available");
+    } else {
+      cityEl.classList.add("locked");
+    }
+
+    cityEl.dataset.key = city.key;
+
+    const label = document.createElement("div");
+    label.className = "city-label";
+    label.textContent = city.name;
+
+    const point = document.createElement("button");
+    point.className = "city-point";
+    point.type = "button";
+    point.setAttribute("aria-label", city.name);
+
+    if(isUnlocked){
+      point.addEventListener("click", (e) => {
+        e.stopPropagation();
+        startCityQuiz(city.key);
+      });
+    }
+
+    const lys = document.createElement("img");
+    lys.className = "city-lys";
+    lys.alt = "";
+
+    const lysImage = getCityLysImage(bestLys);
+    if(lysImage){
+      lys.src = lysImage;
+      lys.style.display = "block";
+    } else {
+      lys.style.display = "none";
+    }
+
+    cityEl.appendChild(label);
+    cityEl.appendChild(point);
+    cityEl.appendChild(lys);
+    els.cityLayer.appendChild(cityEl);
+  });
+}
+
+function startGameMusic(){
+  if (!els.audioGameMusic) return;
+
+  // Si déjà en train de jouer → on fait rien
+  if (!els.audioGameMusic.paused) return;
+
+  els.audioGameMusic.currentTime = 0;
+  els.audioGameMusic.play().catch(() => {});
+}
+
+
+function updateMapHelpVisibility(){
+  const doneCities = getDoneCities();
+
+  if(doneCities.includes("yeu")){
+    els.mapHelp.style.display = "none";
+  }
+}
+
+
+
+   function startCityQuiz(cityKey){
+
+    startGameMusic(); 
+
+      const city = CITY_DATA.find(c => c.key === cityKey);
+      if(!city) return;
+
+      const saved = getCurrentQuizProgress();
+
+      state.currentCityKey = cityKey;
+      state.currentQuestionIndex = (saved.cityKey === cityKey) ? Math.max(0, saved.questionIndex) : 0;
+      state.correctAnswers = state.currentQuestionIndex;
+
+      saveCurrentQuizProgress(state.currentCityKey, state.currentQuestionIndex);
+
+      refreshResources();
+      refreshProfile();
+
+      els.mapScreen.classList.remove("active");
+      els.questionScreen.classList.add("active");
+
+      renderQuestion();
+    }
+
+
+
+    function getCurrentQuestionSet(){
+      return QUESTIONS_BY_CITY[state.currentCityKey] || QUESTIONS_BY_CITY["yeu"];
+    }
+
+    function renderQuestion(){
+      const city = CITY_DATA.find(c => c.key === state.currentCityKey);
+      const questions = getCurrentQuestionSet();
+      const q = questions[state.currentQuestionIndex];
+
+      els.qProgress.textContent = `Question ${state.currentQuestionIndex + 1} / ${questions.length}`;
+      els.qLives.textContent = `Vies : ${getLives()}`;
+      els.qCityMeta.textContent = `Commune : ${city ? city.name : ""}`;
+      els.qCityTitle.textContent = city ? city.name : "";
+      els.qText.textContent = q.text;
+      els.answersBox.innerHTML = "";
+
+      q.answers.forEach((answer, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "answer";
+        btn.type = "button";
+        btn.textContent = `${String.fromCharCode(65 + idx)}) ${answer}`;
+        btn.addEventListener("click", () => answerQuestion(idx, btn));
+        els.answersBox.appendChild(btn);
+      });
+    }
+
+function unlockItem(item){
+  let owned = JSON.parse(localStorage.getItem("pvj_owned_items") || "[]");
+
+  if(!owned.includes(item)){
+    owned.push(item);
+    localStorage.setItem("pvj_owned_items", JSON.stringify(owned));
+
+    alert("Nouvel objet débloqué !");
+  }
+}
+
+function checkUnlocks(){
+  const total = parseInt(localStorage.getItem("pvj_total_answers"), 10);
+  const good = parseInt(localStorage.getItem("pvj_total_good_answers"), 10);
+
+  if(total >= 100){
+    unlockItem("fusil2");
+  }
+
+  if(good >= 200){
+    unlockItem("faux");
+  }
+}
+
+function answerQuestion(choice, clickedButton){
+
+  let total = parseInt(localStorage.getItem("pvj_total_answers"), 10);
+  localStorage.setItem("pvj_total_answers", total + 1);
+
+  const questions = getCurrentQuestionSet();
+  const q = questions[state.currentQuestionIndex];
+  const buttons = [...els.answersBox.querySelectorAll(".answer")];
+
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    if(idx === q.correct) btn.classList.add("good");
+  });
+
+  if(choice === q.correct){
+    state.correctAnswers += 1;
+
+    let good = parseInt(localStorage.getItem("pvj_total_good_answers"), 10);
+    localStorage.setItem("pvj_total_good_answers", good + 1);
+
+  } else {
+    clickedButton.classList.add("bad");
+    setLives(getLives() - 1);
+  }
+
+  setTimeout(() => {
+    if(getLives() <= 0){
+      finishQuiz(false);
+      return;
+    }
+
+    state.currentQuestionIndex += 1;
+    saveCurrentQuizProgress(state.currentCityKey, state.currentQuestionIndex);
+
+    if(state.currentQuestionIndex >= questions.length){
+      finishQuiz(true);
+    } else {
+      renderQuestion();
+    }
+
+    checkUnlocks();
+
+  }, 850);
+}
+
+function finishQuiz(success){
+  clearCurrentQuizProgress();
+  const city = CITY_DATA.find(c => c.key === state.currentCityKey);
+  const cityName = city ? city.name : "Commune";
+  const correctCount = state.correctAnswers;
+
+  els.questionScreen.classList.remove("active");
+  els.mapScreen.classList.add("active");
+
+  if(success){
+    markCityDone(state.currentCityKey);
+
+   if(state.currentCityKey === "yeu"){
+  unlockCity("noirmoutier");
+}
+
+if(state.currentCityKey === "noirmoutier"){
+  unlockCity("beauvoir");
+  unlockCity("stjeandemonts");
+}
+
+if(state.currentCityKey === "beauvoir"){
+  unlockCity("leperrier");
+}
+
+if(state.currentCityKey === "stjeandemonts"){
+  unlockCity("challans");
+  unlockCity("soullans");
+}
+
+if(state.currentCityKey === "leperrier"){
+  unlockCity("palluau");
+}
+
+if(state.currentCityKey === "challans"){
+  unlockCity("commequiers");
+}
+
+if(state.currentCityKey === "soullans"){
+  unlockCity("coex");
+  unlockCity("lessables");
+}
+
+if(state.currentCityKey === "palluau"){
+  unlockCity("leslucs");
+}
+
+if(state.currentCityKey === "commequiers"){
+  unlockCity("laroche");
+}
+
+if(state.currentCityKey === "coex"){
+  unlockCity("achards");
+}
+
+if(state.currentCityKey === "lessables"){
+  unlockCity("bremsurmer");
+}
+
+if(state.currentCityKey === "leslucs"){
+  unlockCity("brouzils");
+  unlockCity("bellevigny");
+}
+
+if(state.currentCityKey === "laroche"){
+  unlockCity("fougere");
+  unlockCity("letablier");
+}
+
+if(state.currentCityKey === "bremsurmer"){
+  unlockCity("talmont");
+}
+
+if(state.currentCityKey === "brouzils"){
+  unlockCity("montaigu");
+  unlockCity("lesepesses");
+}
+
+if(state.currentCityKey === "bellevigny"){
+  unlockCity("stfulgent");
+}
+
+if(state.currentCityKey === "fougere"){
+  unlockCity("rivesyon");
+}
+
+if(state.currentCityKey === "letablier"){
+  unlockCity("boissierelandes");
+}
+
+if(state.currentCityKey === "talmont"){
+  unlockCity("jard");
+}
+
+if(state.currentCityKey === "lesepesses"){
+  unlockCity("tiffauges");
+  unlockCity("mortagne");
+}
+
+if(state.currentCityKey === "stfulgent"){
+  unlockCity("chantonnay");
+  unlockCity("thire");
+}
+
+if(state.currentCityKey === "rivesyon"){
+  unlockCity("stehermine");
+}
+
+if(state.currentCityKey === "boissierelandes"){
+  unlockCity("stmichelenlherm");
+}
+
+if(state.currentCityKey === "jard"){
+  unlockCity("longville");
+}
+
+if(state.currentCityKey === "mortagne"){
+  unlockCity("mesmin");
+}
+
+if(state.currentCityKey === "chantonnay"){
+  unlockCity("bazauges");
+}
+
+if(state.currentCityKey === "stehermine"){
+  unlockCity("lucon");
+}
+
+if(state.currentCityKey === "stmichelenlherm"){
+  unlockCity("puyravault");
+}
+
+if(state.currentCityKey === "longville"){
+  unlockCity("angles");
+}
+
+if(state.currentCityKey === "angles"){
+  unlockCity("aiguillon");
+}
+
+if(state.currentCityKey === "puyravault"){
+  unlockCity("chailles");
+}
+
+if(state.currentCityKey === "lucon"){
+  unlockCity("montreuil");
+}
+
+if(state.currentCityKey === "montreuil"){
+  unlockCity("maille");
+  unlockCity("fontenay");
+}
+
+if(state.currentCityKey === "maille"){
+  unlockCity("benet");
+}
+
+if(state.currentCityKey === "benet"){
+  unlockCity("fraigneau");
+}
+
+if(state.currentCityKey === "fraigneau"){
+  unlockCity("autise");
+  unlockCity("sthilaireloges");
+}
+
+if(state.currentCityKey === "mesmin"){
+  unlockCity("montournais");
+}
+
+if(state.currentCityKey === "bazauges"){
+  unlockCity("lachat");
+}
+
+if(state.currentCityKey === "lachat"){
+  unlockCity("terval");
+}
+
+if(state.currentCityKey === "terval"){
+  unlockCity("marillet");
+}
+
+
+
+
+    const rewardResult = applyCityReward(state.currentCityKey, correctCount);
+    updateProgressionFromDoneCities();
+    refreshResources();
+    refreshProfile();
+    renderCities();
+    showRewardPopup(cityName, correctCount, rewardResult);
+  } else {
+    refreshResources();
+    refreshProfile();
+    renderCities();
+  }
+}
+
+
+
+ function validateAndSaveName(){
+  const name = (els.playerNameInput.value || "").trim();
+  if(!name){
+    els.nameError.textContent = "Vous devez entrer un nom.";
+    return;
+  }
+  els.nameError.textContent = "";
+  localStorage.setItem(STORAGE.introSeen, "true");
+  setPseudo(name);
+  document.getElementById("insurgeContainer").style.display = "none";
+  openMapScreen();
+}
+
+
+  function maybeSkipIntro(){
+  const introSeen = localStorage.getItem(STORAGE.introSeen) === "true";
+  const pseudo = getPseudo();
+
+  els.introScreen.classList.add("hidden");
+  els.nameScreen.classList.remove("active");
+  els.mapScreen.classList.remove("active");
+  els.questionScreen.classList.remove("active");
+
+  if(!introSeen){
+    els.introScreen.classList.remove("hidden");
+    return;
+  }
+
+  if(!pseudo){
+    els.nameScreen.classList.add("active");
+    return;
+  }
+
+  openMapScreen();
+}
+
+
+
+    /* ---------------- DRAG MAP ---------------- */
+
+    els.mapViewport.addEventListener("pointerdown", (e) => {
+      if(e.target.closest(".city-point")) return;
+      state.dragging = true;
+      els.mapViewport.classList.add("dragging");
+      state.dragStartX = e.clientX;
+      state.dragStartY = e.clientY;
+      state.originX = state.transform.x;
+      state.originY = state.transform.y;
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if(!state.dragging) return;
+      state.transform.x = state.originX + (e.clientX - state.dragStartX);
+      state.transform.y = state.originY + (e.clientY - state.dragStartY);
+      applyMapTransform();
+    });
+
+    window.addEventListener("pointerup", () => {
+      state.dragging = false;
+      els.mapViewport.classList.remove("dragging");
+    });
+
+    /* ---------------- EVENTS ---------------- */
+
+    els.launchIntroBtn.addEventListener("click", launchIntro);
+    els.introNextBtn.addEventListener("click", () => {
+      localStorage.setItem(STORAGE.introSeen, "true");
+      openNameScreen();
+    });
+
+    els.confirmNameBtn.addEventListener("click", validateAndSaveName);
+
+    els.playerNameInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") validateAndSaveName();
+    });
+
+els.backToMapBtn.addEventListener("click", () => {
+  els.questionScreen.classList.remove("active");
+  els.mapScreen.classList.add("active");
+  refreshResources();
+  refreshProfile();
+  renderCities();
+});
+
+
+    els.backToMenuBtn.addEventListener("click", () => {
+      window.location.href = "menujeu.html";
+    });
+
+    els.rewardContinueBtn.addEventListener("click", () => {
+
+      hideRewardPopup();
+      refreshResources();
+      refreshProfile();
+      renderCities();
+    });
+
+    document.getElementById("provinceContinueBtn").addEventListener("click", () => {
+  document.getElementById("provinceOverlay").classList.add("hidden");
+});
+
+
+    /* ---------------- INIT ---------------- */
+
+  ensureDefaults();
+  updateProgressionFromDoneCities();
+    updateLifeRegeneration();
+    refreshProfile();
+els.introNextBtn.classList.add("hidden");
+els.introNextBtn.style.pointerEvents = "none";
+    maybeSkipIntro();
+
+    setInterval(() => {
+      updateLifeRegeneration();
+    }, 1000);
+
+
+  </script>
+
+
+
+
+</body>
+</html>
